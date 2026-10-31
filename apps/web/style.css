@@ -1,0 +1,999 @@
+/* ============================================================================
+ * SELENE — 70mm Archival Lunar Far-Side Mission Control (Concept Panels 02–08)
+ * ============================================================================ */
+
+:root {
+  --bg: #050608;
+  --fg: #eef2f6;
+  --fg-dim: #9aa2ad;
+  --fg-mute: #656d78;
+  --line: rgba(255, 255, 255, 0.22);
+  --line-strong: rgba(255, 255, 255, 0.72);
+  --panel-bg: rgba(7, 9, 12, 0.82);
+  --panel-bg-solid: rgba(7, 9, 12, 0.94);
+  --green: #3ddc84;
+  --red: #ff4d4d;
+  --amber: #f5b942;
+  --cyan: #58c7f3;
+  --paper: #f3f0e6;
+  --paper-ink: #111317;
+  --mono: "JetBrains Mono", "SF Mono", "Menlo", "Consolas", monospace;
+  --serif: "Editorial New", "Instrument Serif", "Times New Roman", Georgia, serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  overflow: hidden;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input {
+  font-family: var(--mono);
+  color: inherit;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* 3D WebGL Canvas */
+#viewport {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1;
+  background: radial-gradient(circle at 50% 50%, #0d1016 0%, #040507 100%);
+}
+
+#viewport canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* ============================================================================
+ * 70mm Archival Frame (Matches Concept Images panel02-b .. panel08-a)
+ * ============================================================================ */
+.archival-frame {
+  position: fixed;
+  inset: 22px;
+  border: 1px solid var(--line);
+  pointer-events: none;
+  z-index: 15;
+}
+
+.archival-frame .corner {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  color: var(--fg);
+  font-size: 13px;
+  line-height: 12px;
+  text-align: center;
+  font-weight: 400;
+  opacity: 0.85;
+}
+.archival-frame .corner.tl { top: -7px; left: -7px; }
+.archival-frame .corner.tr { top: -7px; right: -7px; }
+.archival-frame .corner.bl { bottom: -7px; left: -7px; }
+.archival-frame .corner.br { bottom: -7px; right: -7px; }
+
+/* Film edge ticks */
+.archival-frame .tick-top,
+.archival-frame .tick-bottom {
+  position: absolute;
+  left: 50%;
+  width: 1px;
+  height: 6px;
+  background: var(--line);
+}
+.archival-frame .tick-top { top: 0; }
+.archival-frame .tick-bottom { bottom: 0; }
+
+.stamp-tl {
+  position: fixed;
+  top: 32px;
+  left: 36px;
+  z-index: 20;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--fg-dim);
+  pointer-events: none;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
+}
+
+.stamp-tr {
+  position: fixed;
+  top: 32px;
+  right: 36px;
+  z-index: 20;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--fg-dim);
+  pointer-events: none;
+  text-align: right;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
+}
+
+/* Bottom-center SELENE signature (panel02-b .. panel07-c) */
+.brand-signature {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  z-index: 16;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.brand-signature .title {
+  font-family: var(--serif);
+  font-size: 17px;
+  letter-spacing: 0.36em;
+  color: var(--fg);
+  font-weight: 400;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.95);
+}
+
+.brand-signature .sub {
+  margin-top: 3px;
+  font-size: 8.5px;
+  letter-spacing: 0.24em;
+  color: var(--fg-dim);
+}
+
+/* ============================================================================
+ * Bracket / Hairline Buttons ([DATA], [INIT SIM], [EXECUTE], etc.)
+ * ============================================================================ */
+.archival-btn {
+  appearance: none;
+  background: rgba(8, 10, 14, 0.84);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  color: var(--fg);
+  padding: 9px 16px;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.65);
+}
+
+.archival-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.archival-btn.primary {
+  border-color: var(--green);
+  color: var(--green);
+  background: rgba(14, 34, 24, 0.82);
+}
+
+.archival-btn.primary:hover {
+  background: rgba(61, 220, 132, 0.22);
+  color: #ffffff;
+}
+
+.archival-btn.danger {
+  border-color: var(--red);
+  color: var(--red);
+  background: rgba(38, 12, 14, 0.85);
+}
+
+.archival-btn.danger:hover {
+  background: rgba(255, 77, 77, 0.25);
+  color: #ffffff;
+}
+
+.archival-btn.amber {
+  border-color: var(--amber);
+  color: var(--amber);
+  background: rgba(38, 28, 10, 0.85);
+}
+
+/* ============================================================================
+ * STAGE 1 & 2: HOME GLOBE + S-BAND TELEMETRY CALLOUTS (panel02-b.jpg)
+ * ============================================================================ */
+#stage-home-overlay {
+  position: fixed;
+  inset: 22px;
+  z-index: 22;
+  pointer-events: none;
+}
+
+.orbital-callout {
+  position: absolute;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--fg);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.95);
+  line-height: 1.5;
+}
+
+.orbital-callout .dim {
+  color: var(--fg-dim);
+  font-size: 9px;
+}
+
+.orbital-callout.daedalus-target {
+  top: 41%;
+  left: 34%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.target-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--red);
+  box-shadow: 0 0 12px var(--red);
+  animation: pulseDot 1.8s infinite ease-in-out;
+}
+
+@keyframes pulseDot {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.35); opacity: 0.7; }
+}
+
+.orbital-callout.sband-lock {
+  top: 32%;
+  right: 7%;
+  text-align: right;
+}
+
+.orbital-callout.perilune {
+  bottom: 24%;
+  left: 8%;
+}
+
+/* Drag & drop mission .txt bar on Home screen */
+.home-drop-dock {
+  position: absolute;
+  bottom: 78px;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  background: rgba(7, 9, 13, 0.84);
+  border: 1px dashed rgba(255, 255, 255, 0.42);
+  padding: 14px 26px;
+  min-width: 480px;
+  backdrop-filter: blur(8px);
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.home-drop-dock.dragover {
+  border-color: var(--green);
+  background: rgba(20, 48, 34, 0.88);
+}
+
+.home-drop-prompt {
+  font-size: 10.5px;
+  letter-spacing: 0.22em;
+  color: var(--fg);
+  text-align: center;
+}
+
+.home-drop-sub {
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  color: var(--fg-dim);
+  text-align: center;
+}
+
+.home-drop-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+/* ============================================================================
+ * TOP-LEFT NON-INTERACTIVE MINI MOON / ISOMETRIC ORIENTATION LOCATOR
+ * (Matches panel03-a, panel04-b, panel05-d + user instructions)
+ * ============================================================================ */
+.mini-moon-widget {
+  position: fixed;
+  top: 56px;
+  left: 36px;
+  z-index: 24;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: rgba(7, 9, 13, 0.82);
+  border: 1px solid var(--line);
+  pointer-events: none;
+  backdrop-filter: blur(6px);
+}
+
+#mini-moon-canvas {
+  width: 44px;
+  height: 44px;
+  display: block;
+}
+
+.mini-moon-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+}
+
+.mini-moon-title {
+  color: var(--fg);
+  font-weight: 600;
+}
+
+.mini-moon-line {
+  color: var(--fg-dim);
+}
+
+/* Quick Camera Reset / Stage Switcher in top-right below stamp */
+.top-right-tools {
+  position: fixed;
+  top: 56px;
+  right: 36px;
+  z-index: 25;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mini-tool-btn {
+  appearance: none;
+  background: rgba(7, 9, 13, 0.82);
+  border: 1px solid var(--line);
+  color: var(--fg-dim);
+  padding: 6px 10px;
+  font-size: 9.5px;
+  letter-spacing: 0.15em;
+  cursor: pointer;
+}
+
+.mini-tool-btn:hover {
+  color: var(--fg);
+  border-color: var(--fg);
+}
+
+/* ============================================================================
+ * STAGE 3: TOP-DOWN MAP VIEW (panel03-a.jpg)
+ * ============================================================================ */
+#stage-map-bar {
+  position: fixed;
+  left: 36px;
+  right: 36px;
+  bottom: 36px;
+  z-index: 25;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+#stage-map-bar > * {
+  pointer-events: auto;
+}
+
+.map-center-caption {
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  color: var(--fg-dim);
+  padding-bottom: 6px;
+  pointer-events: none;
+}
+
+/* Collapsible [DATA] Drawer (panel03-a.jpg) */
+.data-drawer {
+  position: fixed;
+  left: 36px;
+  bottom: 84px;
+  width: 350px;
+  background: var(--panel-bg-solid);
+  border: 1px solid var(--line-strong);
+  padding: 14px 16px;
+  z-index: 28;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.78);
+}
+
+.drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 8px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid var(--line);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--fg);
+}
+
+.drawer-close {
+  background: none;
+  border: none;
+  color: var(--fg-dim);
+  cursor: pointer;
+  font-size: 11px;
+}
+
+.data-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.data-row .k {
+  color: var(--fg-dim);
+}
+
+.data-row .v {
+  color: var(--fg);
+  text-align: right;
+}
+
+.data-row .v.green { color: var(--green); }
+.data-row .v.amber { color: var(--amber); }
+
+/* ============================================================================
+ * STAGE 4 & 5: MULTI-HOP PATHING + HORIZONTAL TRAINING ITERATION SCRUBBER
+ * (Matches panel04-b.jpg, panel05-d.jpg + User's Horizontal Scrollbar Spec)
+ * ============================================================================ */
+
+/* Off-white high-contrast Violation Callout Box (panel04-b.jpg) */
+.violation-callout-box {
+  position: fixed;
+  top: 26%;
+  right: 52px;
+  z-index: 26;
+  background: var(--paper);
+  color: var(--paper-ink);
+  padding: 12px 16px;
+  border: 1px solid #ffffff;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.75);
+  min-width: 248px;
+  transition: all 0.25s ease;
+}
+
+.violation-callout-box.converged {
+  background: rgba(14, 34, 24, 0.94);
+  color: var(--fg);
+  border-color: var(--green);
+}
+
+.violation-callout-box .v-title {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  margin-bottom: 4px;
+}
+
+.violation-callout-box.converged .v-title {
+  color: var(--green);
+}
+
+.violation-callout-box .v-sub {
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  line-height: 1.45;
+}
+
+/* Bottom Horizontal Training Scrubber Dock */
+#stage-sim-dock {
+  position: fixed;
+  left: 36px;
+  right: 36px;
+  bottom: 32px;
+  z-index: 26;
+  background: rgba(6, 8, 12, 0.90);
+  border: 1px solid rgba(255, 255, 255, 0.36);
+  padding: 12px 18px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.85);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sim-dock-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.hopper-selector-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hopper-selector-label {
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+  color: var(--fg-dim);
+  margin-right: 4px;
+}
+
+.hopper-tab {
+  appearance: none;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--line);
+  color: var(--fg-dim);
+  padding: 5px 10px;
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.hopper-tab:hover,
+.hopper-tab.active {
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+  border-color: #ffffff;
+}
+
+.sim-metrics-strip {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 9.5px;
+  letter-spacing: 0.13em;
+}
+
+.sim-metric-pill span.k {
+  color: var(--fg-dim);
+}
+
+.sim-metric-pill span.v {
+  color: var(--fg);
+  font-weight: 600;
+  margin-left: 4px;
+}
+
+.sim-metric-pill span.v.red { color: var(--red); }
+.sim-metric-pill span.v.green { color: var(--green); }
+.sim-metric-pill span.v.amber { color: var(--amber); }
+
+/* Horizontal Scrubber Track */
+.scrubber-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 16px;
+  padding-top: 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.scrubber-title-block {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 215px;
+}
+
+.scrubber-title {
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+  color: var(--fg);
+}
+
+.scrubber-stage-desc {
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  color: var(--amber);
+}
+
+.scrubber-slider-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+#training-scrubber {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 8px;
+  background: linear-gradient(90deg, #ff4d4d 0%, #f5b942 48%, #3ddc84 100%);
+  outline: none;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  cursor: ew-resize;
+}
+
+#training-scrubber::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 20px;
+  background: #ffffff;
+  border: 2px solid #050608;
+  cursor: ew-resize;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.9);
+}
+
+.scrubber-ticks {
+  display: flex;
+  justify-content: space-between;
+  font-size: 8.5px;
+  letter-spacing: 0.12em;
+  color: var(--fg-dim);
+}
+
+.scrubber-tick-btn {
+  background: none;
+  border: none;
+  color: var(--fg-dim);
+  cursor: pointer;
+  font-size: 8.5px;
+  letter-spacing: 0.12em;
+  padding: 2px 4px;
+}
+
+.scrubber-tick-btn:hover,
+.scrubber-tick-btn.active {
+  color: #ffffff;
+  text-decoration: underline;
+}
+
+.sim-dock-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ============================================================================
+ * STAGE 6 & 7: FOLLOW CAMERA + UNCONSTRAINED 6-DOF MANUAL OVERRIDE
+ * (Matches panel07-b.jpg & panel07-c.jpg)
+ * ============================================================================ */
+#stage-flight-hud {
+  position: fixed;
+  inset: 22px;
+  z-index: 24;
+  pointer-events: none;
+}
+
+#stage-flight-hud .interactive {
+  pointer-events: auto;
+}
+
+/* Top-right [LOCAL SIM OVERRIDE] button & gravity callout (panel07-b.jpg) */
+.flight-top-right {
+  position: absolute;
+  top: 48px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.gravity-callout {
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  color: var(--fg);
+  padding: 6px 10px;
+  background: rgba(7, 9, 13, 0.72);
+  border: 1px solid var(--line);
+}
+
+/* Left Telemetry & Thruster Vectors Card */
+.flight-telemetry-card {
+  position: absolute;
+  top: 108px;
+  left: 24px;
+  width: 280px;
+  background: rgba(7, 9, 13, 0.84);
+  border: 1px solid var(--line);
+  padding: 12px 14px;
+  backdrop-filter: blur(8px);
+}
+
+.telemetry-header {
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--fg);
+  padding-bottom: 6px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+}
+
+.telemetry-bar-wrap {
+  margin: 6px 0;
+}
+
+.telemetry-bar-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  color: var(--fg-dim);
+  margin-bottom: 3px;
+}
+
+.telemetry-bar {
+  height: 5px;
+  background: rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+}
+
+.telemetry-bar-fill {
+  height: 100%;
+  background: var(--green);
+  width: 78%;
+  transition: width 0.15s ease;
+}
+
+/* Bottom-left Keyboard Control Guide (panel07-c.jpg: WASD / SPACE thrust / SHIFT cut) */
+.flight-controls-footer {
+  position: absolute;
+  left: 24px;
+  bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: rgba(7, 9, 13, 0.86);
+  border: 1px solid var(--line);
+  padding: 10px 14px;
+}
+
+.key-cluster {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.keycap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 22px;
+  padding: 0 6px;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 9.5px;
+  color: var(--fg);
+}
+
+.keycap.active {
+  background: var(--fg);
+  color: #050608;
+  border-color: #ffffff;
+}
+
+.controls-caption {
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+  color: var(--fg-dim);
+}
+
+/* Bottom-right Flight Actions */
+.flight-actions-footer {
+  position: absolute;
+  right: 24px;
+  bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Manual Crash Alert Banner + Respawn Button */
+.crash-banner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(28, 8, 10, 0.94);
+  border: 1px solid var(--red);
+  padding: 20px 28px;
+  text-align: center;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.9);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.crash-banner-title {
+  font-size: 13px;
+  letter-spacing: 0.22em;
+  color: var(--red);
+  font-weight: 700;
+}
+
+.crash-banner-sub {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--fg-dim);
+  max-width: 340px;
+  line-height: 1.5;
+}
+
+/* ============================================================================
+ * STAGE 8: 3-PANE MISSION SUMMARY & EXPORT MODAL (Matches panel08-a.jpg)
+ * ============================================================================ */
+#stage-summary-modal {
+  position: fixed;
+  inset: 22px;
+  z-index: 32;
+  background: rgba(5, 6, 8, 0.96);
+  display: grid;
+  grid-template-columns: 1.55fr 1fr;
+  grid-template-rows: 1.35fr 1fr;
+  border: 1px solid var(--line-strong);
+}
+
+.summary-pane-overview {
+  grid-column: 1 / 2;
+  grid-row: 1 / 2;
+  position: relative;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  overflow: hidden;
+  background: #07090c;
+}
+
+#summary-overview-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.pane-label {
+  position: absolute;
+  top: 16px;
+  left: 20px;
+  font-size: 10.5px;
+  letter-spacing: 0.22em;
+  color: var(--fg);
+  z-index: 2;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.95);
+}
+
+.summary-pane-metrics {
+  grid-column: 1 / 2;
+  grid-row: 2 / 3;
+  position: relative;
+  border-right: 1px solid var(--line);
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.summary-headline {
+  margin-top: 24px;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  color: var(--fg);
+  line-height: 1.7;
+}
+
+.summary-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin: 14px 0;
+}
+
+.summary-kpi {
+  border: 1px solid var(--line);
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.summary-kpi .k {
+  font-size: 8.5px;
+  color: var(--fg-dim);
+  letter-spacing: 0.14em;
+}
+
+.summary-kpi .v {
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--green);
+  font-weight: 600;
+}
+
+.summary-export-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.export-status-text {
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  color: var(--green);
+}
+
+.summary-pane-logs {
+  grid-column: 2 / 3;
+  grid-row: 1 / 3;
+  position: relative;
+  padding: 52px 22px 22px 22px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow-y: auto;
+}
+
+.logs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  line-height: 1.5;
+}
+
+.log-entry {
+  color: var(--fg-dim);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  padding-bottom: 6px;
+}
+
+.log-entry .ts {
+  color: var(--fg);
+  margin-right: 8px;
+}
+
+.log-entry.pass { color: var(--green); }
+.log-entry.warn { color: var(--amber); }
+.log-entry.err { color: var(--red); }
+
+/* Toast Notification */
+.archival-toast {
+  position: fixed;
+  top: 62px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+  background: rgba(10, 14, 18, 0.94);
+  border: 1px solid var(--fg);
+  padding: 8px 18px;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--fg);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.archival-toast.visible {
+  opacity: 1;
+}
