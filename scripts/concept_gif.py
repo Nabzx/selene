@@ -1,8 +1,8 @@
 """Render the README concept GIF.
 
-A labelled concept render, not live output: synthetic cratered terrain under a
-low sun, a trajectory cloud with a red failure cluster at hop 3, Argon's
-revision turning the cloud green, then the approved flight and the ice scan.
+A labelled concept render, not live output: synthetic far-side terrain at
+lunar night, a trajectory cloud with a red failure cluster at hop 3, Argon's
+revision turning the cloud green, then the approved flight and a crater scan.
 
 Run from the repo root:
     uv run --with numpy --with matplotlib --with pillow scripts/concept_gif.py
@@ -16,7 +16,10 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.colors import LinearSegmentedColormap
 from PIL import Image
+
+NIGHT = LinearSegmentedColormap.from_list("night", ["#05030a", "#1c1030", "#4a2a63", "#b07a5a", "#f2c49b"])
 
 OUT = Path(__file__).resolve().parent.parent / "docs" / "images" / "demo.gif"
 W, H = 320, 180
@@ -92,7 +95,8 @@ for p, ok in bad:
     if not ok:
         p[3] += (7, -9)
 good = [(p, True) for p, _ in good]
-ice = np.exp(-(((x - 228) ** 2) / 90 + ((y - 102) ** 2) / 60)) * psr
+stars_x, stars_y = rng.uniform(0, W, 120), rng.uniform(0, H, 120)
+ice = np.exp(-(((x - 228) ** 2) / 90 + ((y - 102) ** 2) / 60)) * (np.hypot(x - 220, y - 95) < 44)
 
 frames = []
 
@@ -100,9 +104,9 @@ frames = []
 def frame(cloud, shown, verdict, button, hop_t=None, scan=0.0, banner=None):
     fig = plt.figure(figsize=(8, 4.5), dpi=90, facecolor="#05060a")
     ax = fig.add_axes([0, 0, 1, 1])
-    ax.imshow(light, cmap="gray", vmin=0, vmax=1.1, interpolation="bilinear")
+    ax.imshow(light, cmap=NIGHT, vmin=0, vmax=1.05, interpolation="bilinear")
     if scan:
-        ax.imshow(np.ma.masked_less(ice * scan, 0.05), cmap="cool", alpha=0.75, vmin=0, vmax=1)
+        ax.imshow(np.ma.masked_less(ice * scan, 0.05), cmap="autumn", alpha=0.7, vmin=0, vmax=1)
     for p, ok in cloud[:shown]:
         for a, b in zip(p[:-1], p[1:]):
             q = arc(a, b, 1)
@@ -111,14 +115,14 @@ def frame(cloud, shown, verdict, button, hop_t=None, scan=0.0, banner=None):
     if hop_t is not None:
         path = np.vstack([arc(a, b, 1) for a, b in zip(plan_good[:-1], plan_good[1:])])
         k = int(hop_t * (len(path) - 1))
-        ax.plot(path[: k + 1, 0], path[: k + 1, 1], color="#ffd166", lw=1.6)
-        ax.scatter(*path[k], s=40, color="#ffd166", zorder=5)
+        ax.plot(path[: k + 1, 0], path[: k + 1, 1], color="#ff8c2a", lw=1.6)
+        ax.scatter(*path[k], s=40, color="#ff8c2a", zorder=5)
     ax.scatter(*start, s=22, color="#ffd166", marker="^", zorder=5)
-    ax.text(6, 10, "SELENE  ·  Shackleton crater approach", color="#c9d1e0", fontsize=10,
+    ax.text(6, 10, "SELENE  ·  far side, lunar night  ·  Daedalus", color="#c9d1e0", fontsize=10,
             family="monospace", weight="bold")
     ax.text(6, 21, "concept render, not live output", color="#c9d1e0", fontsize=7,
             family="monospace", bbox=dict(facecolor="#05060a", edgecolor="none", alpha=0.7, pad=2))
-    ax.text(206, 84, "PSR", color="#5a6a8a", fontsize=8, family="monospace")
+    ax.scatter(stars_x, stars_y, s=0.6, color="#e8dff5", alpha=0.5)
     if verdict:
         colour = "#3ddc84" if "PASS" in verdict else "#ff4d4d" if "FAIL" in verdict else "#c9d1e0"
         ax.text(6, 168, verdict, color=colour, fontsize=9, family="monospace", weight="bold")
@@ -154,9 +158,9 @@ for _ in range(6):
 for i in range(16):
     frame(good[:40], 40, "PASS  ·  uplink approved", "sent", hop_t=i / 15)
 for i in range(1, 11):
-    frame(good[:40], 40, "scanning PSR  ·  ice field (simulated)", "sent", hop_t=1.0, scan=i / 10)
+    frame(good[:40], 40, "scanning Hollow 3  ·  payload (simulated)", "sent", hop_t=1.0, scan=i / 10)
 for _ in range(8):
-    frame(good[:40], 40, "scanning PSR  ·  ice field (simulated)", "sent", hop_t=1.0, scan=1.0)
+    frame(good[:40], 40, "scanning Hollow 3  ·  payload (simulated)", "sent", hop_t=1.0, scan=1.0)
 
 OUT.parent.mkdir(parents=True, exist_ok=True)
 frames[0].save(OUT, save_all=True, append_images=frames[1:], duration=110, loop=0, optimize=False)
