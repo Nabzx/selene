@@ -1,0 +1,996 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SELENE · Mission Control</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&family=Jost:wght@200;300;400&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/cesium@1.123.0/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+<script>window.CESIUM_BASE_URL = 'https://cdn.jsdelivr.net/npm/cesium@1.123.0/Build/Cesium/';</script>
+<script src="https://cdn.jsdelivr.net/npm/cesium@1.123.0/Build/Cesium/Cesium.js"></script>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<style>
+:root{--fg:#ececec;--dim:rgba(236,236,236,.58);--faint:rgba(236,236,236,.22);--line:rgba(236,236,236,.3);--red:#ff4d4d;--green:#3ddc84;--cyan:#a6ecff;--mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;--sans:'Jost','Helvetica Neue',Arial,sans-serif}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#000;color:var(--fg);overflow:hidden;font-family:var(--mono);-webkit-font-smoothing:antialiased}
+#cesium{position:fixed;inset:0}
+.cesium-viewer-bottom{opacity:.28;transform:scale(.85);transform-origin:left bottom;left:34px!important;bottom:6px!important}
+.cesium-widget-credits{font-size:9px}
+#hud{position:fixed;inset:0;pointer-events:none;z-index:5;user-select:none}
+[data-states]{opacity:0;visibility:hidden;transition:opacity .7s ease,visibility .7s}
+[data-states].on{opacity:1;visibility:visible}
+.frame{position:absolute;inset:28px;border:1px solid rgba(255,255,255,.13)}
+.cross{position:absolute;width:23px;height:23px}
+.cross:before,.cross:after{content:'';position:absolute;background:rgba(255,255,255,.6)}
+.cross:before{left:11px;top:0;width:1px;height:23px}.cross:after{top:11px;left:0;height:1px;width:23px}
+.meta{position:absolute;top:42px;font-size:9.5px;letter-spacing:.22em;color:var(--dim);text-transform:uppercase;line-height:1.7}
+.meta b{font-weight:400;color:var(--fg)}
+#brand{position:absolute;left:50%;bottom:42px;transform:translateX(-50%);text-align:center;white-space:nowrap}
+#brand .t{font-family:var(--sans);font-weight:300;font-size:30px;letter-spacing:.62em;display:flex;align-items:center;justify-content:center;gap:22px}
+#brand .t:before,#brand .t:after{content:'';width:26px;height:1px;background:var(--fg)}
+#brand .t span{margin-right:-.62em}
+#brand .s{font-size:9.5px;letter-spacing:.32em;color:var(--dim);margin-top:9px}
+.btn{pointer-events:auto;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.8);color:var(--fg);font:500 13px var(--mono);letter-spacing:.1em;padding:9px 14px;cursor:pointer;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);text-transform:uppercase;transition:background .2s,color .2s,opacity .3s}
+.btn:hover{background:#fff;color:#000}
+.btn[disabled]{opacity:.32;cursor:not-allowed;background:rgba(0,0,0,.5);color:var(--fg)}
+.btn.big{font-size:17px;padding:12px 18px;letter-spacing:.08em}
+.btn.go{border-color:var(--green);color:var(--green);box-shadow:0 0 18px rgba(61,220,132,.25)}
+.btn.go:hover{background:var(--green);color:#000}
+.btn.warn{border-color:var(--red);color:var(--red)}.btn.warn:hover{background:var(--red);color:#000}
+.btn.sm{font-size:10.5px;padding:6px 10px}
+.panel{background:rgba(5,6,7,.66);border:1px solid rgba(255,255,255,.2);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.hit{pointer-events:auto}
+.bl{position:absolute;left:58px;bottom:52px}.br{position:absolute;right:58px;bottom:52px}
+.pulse{animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 6px rgba(255,255,255,.08),0 0 26px rgba(61,220,132,.45)}}
+/* home */
+#drop{position:absolute;left:50%;bottom:150px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:16px}
+#drop .p{font-size:10px;letter-spacing:.26em;color:var(--dim);display:flex;align-items:center;gap:14px}
+#drop .p:before,#drop .p:after{content:'';width:60px;height:1px;background:var(--faint)}
+#dropRing{position:absolute;left:50%;top:46%;width:46vmin;height:46vmin;transform:translate(-50%,-50%);border:1px dashed rgba(255,255,255,.0);border-radius:50%;transition:.3s}
+body.dragging #dropRing{border-color:rgba(255,255,255,.7);box-shadow:0 0 60px rgba(255,255,255,.12) inset}
+#parse{position:absolute;left:60px;top:110px;font-size:11px;letter-spacing:.12em;line-height:1.85;color:var(--dim);max-width:480px}
+#parse .k{color:var(--fg)}
+#toast{position:absolute;left:50%;top:84px;transform:translateX(-50%);font-size:10.5px;letter-spacing:.28em;color:var(--fg);text-transform:uppercase;padding:7px 14px;white-space:nowrap}
+#toast.blink:after{content:'_';animation:bl 1s steps(1) infinite}@keyframes bl{50%{opacity:0}}
+/* view cube */
+#vc{position:absolute;left:62px;top:84px;display:flex;align-items:flex-start;gap:18px;pointer-events:auto}
+#cubeWrap{width:96px;height:96px;perspective:420px}
+#cube{position:relative;width:52px;height:52px;margin:22px;transform-style:preserve-3d;transition:transform .08s linear}
+#cube .f{position:absolute;inset:0;border:1px solid rgba(255,255,255,.85);background:rgba(10,10,10,.35);display:grid;grid-template-columns:24% 52% 24%;grid-template-rows:24% 52% 24%}
+#cube .f i{display:block;cursor:pointer;transition:background .15s}
+#cube .f i:hover{background:rgba(255,255,255,.55)}
+#cube .top{background:rgba(255,255,255,.12)}
+#cube .top{transform:rotateX(90deg) translateZ(26px)}#cube .bot{transform:rotateX(-90deg) translateZ(26px)}
+#cube .fr{transform:translateZ(26px)}#cube .bk{transform:rotateY(180deg) translateZ(26px)}
+#cube .ri{transform:rotateY(90deg) translateZ(26px)}#cube .le{transform:rotateY(-90deg) translateZ(26px)}
+#vcl{display:flex;flex-direction:column;gap:7px;margin-top:6px}
+#vcl button{all:unset;cursor:pointer;font-size:10.5px;letter-spacing:.2em;color:var(--dim);display:flex;align-items:center;gap:8px}
+#vcl button:before{content:'';width:22px;height:1px;background:var(--faint)}
+#vcl button:hover,#vcl button.act{color:var(--fg)}#vcl button.act:before{background:var(--fg)}
+/* data drawer */
+#drawer{position:absolute;left:58px;bottom:104px;width:340px;padding:16px 18px;font-size:11px;letter-spacing:.08em;line-height:1.75;transform:translateY(12px);transition:opacity .4s,transform .4s,visibility .4s}
+#drawer.on{transform:none}
+#drawer h4{margin:0 0 8px;font-weight:500;font-size:10px;letter-spacing:.28em;color:var(--dim)}
+.row{display:flex;justify-content:space-between;gap:12px}.row span:first-child{color:var(--dim)}
+.rule{display:grid;grid-template-columns:28px 1fr;gap:6px;color:var(--fg)}.rule i{font-style:normal;color:var(--dim)}
+hr{border:0;border-top:1px solid var(--faint);margin:10px 0}
+/* training bar */
+#train{position:absolute;left:50%;bottom:112px;transform:translateX(-50%);width:min(880px,calc(100vw - 420px));padding:14px 20px 12px;pointer-events:auto}
+#train .hd{display:flex;justify-content:space-between;align-items:center;font-size:10px;letter-spacing:.24em;color:var(--dim);margin-bottom:10px}
+#train .hd b{color:var(--fg);font-weight:500;font-size:13px;letter-spacing:.12em}
+#slider{-webkit-appearance:none;appearance:none;width:100%;height:22px;background:transparent;cursor:pointer;margin:0}
+#slider::-webkit-slider-runnable-track{height:2px;background:linear-gradient(90deg,var(--red),#ffb36b 38%,var(--green) 78%)}
+#slider::-moz-range-track{height:2px;background:linear-gradient(90deg,var(--red),#ffb36b 38%,var(--green) 78%)}
+#slider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;margin-top:-6px;background:#000;border:2px solid #fff;transform:rotate(45deg)}
+#slider::-moz-range-thumb{width:12px;height:12px;background:#000;border:2px solid #fff;border-radius:0}
+#ticks{position:relative;height:16px;font-size:9.5px;color:var(--dim);letter-spacing:.12em}
+#ticks span{position:absolute;transform:translateX(-50%);cursor:pointer}#ticks span:hover{color:var(--fg)}
+#ticks span:before{content:'';position:absolute;left:50%;top:-9px;width:1px;height:5px;background:var(--line)}
+#stats{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-top:8px;font-size:9px;letter-spacing:.18em;color:var(--dim)}
+#stats div b{display:block;font-size:14px;color:var(--fg);font-weight:400;letter-spacing:.04em;margin-top:3px}
+#stats .g b{color:var(--green)}#stats .r b{color:var(--red)}
+/* fleet */
+#fleet{position:absolute;right:58px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:8px;width:230px}
+.hc{padding:10px 12px;font-size:10.5px;letter-spacing:.1em;cursor:pointer;pointer-events:auto;transition:border-color .2s}
+.hc:hover{border-color:#fff}
+.hc .n{display:flex;justify-content:space-between;font-size:12px;color:var(--fg);margin-bottom:4px}
+.hc .n em{font-style:normal;font-size:9.5px;letter-spacing:.2em}
+.hc .d{color:var(--dim);font-size:9.5px;letter-spacing:.12em}
+/* popup */
+#pop{position:absolute;padding:10px 14px;background:rgba(255,255,255,.96);color:#000;border:1px solid #fff;outline:1px solid rgba(255,255,255,.6);outline-offset:4px;font-size:12px;letter-spacing:.08em;transition:opacity .25s;min-width:250px}
+#pop b{display:block;font-weight:500;font-size:13px;margin-bottom:3px}
+#pop.pass{background:rgba(0,0,0,.85);color:var(--green);border-color:var(--green)}
+/* selected card */
+#card{position:absolute;right:58px;top:96px;width:300px;padding:16px 18px;font-size:11px;letter-spacing:.08em;line-height:1.8}
+#card h3{margin:0 0 6px;font-weight:400;font-size:15px;letter-spacing:.2em}
+.ok{color:var(--green)}
+#relay{position:absolute;right:58px;bottom:112px;font-size:10px;letter-spacing:.22em;text-align:right;color:var(--dim)}
+#relay b{color:var(--green);font-weight:400}
+#back{position:absolute;left:58px;bottom:52px}
+/* flight */
+#tele{position:absolute;right:58px;top:96px;width:292px;padding:14px 18px;font-size:11px;letter-spacing:.08em;line-height:1.95}
+#tele h4{margin:0 0 6px;font-weight:500;font-size:10px;letter-spacing:.28em;color:var(--dim);display:flex;justify-content:space-between}
+.bar{height:3px;background:var(--faint);margin:-2px 0 6px;position:relative}.bar i{position:absolute;left:0;top:0;bottom:0;background:var(--fg)}
+#tele .wm{color:var(--cyan)}
+#topR{position:absolute;right:58px;top:46px;display:flex;gap:10px}
+#ticker{position:absolute;left:58px;bottom:106px;font-size:10.5px;letter-spacing:.14em;line-height:1.9;color:var(--dim);width:520px}
+#ticker div:last-child{color:var(--fg)}
+#banner{position:absolute;left:50%;top:34%;transform:translate(-50%,-50%);text-align:center;font-size:12px;letter-spacing:.3em}
+#banner b{display:block;font-family:var(--sans);font-weight:300;font-size:30px;letter-spacing:.32em;margin-bottom:10px}
+/* override */
+#ovrBadge{position:absolute;right:58px;top:46px;padding:8px 14px;border:1px solid #fff;background:#fff;color:#000;font-size:13px;letter-spacing:.14em}
+#gTag{position:absolute;left:58px;top:50%;font-size:13px;letter-spacing:.06em;border-bottom:1px solid var(--green);padding-bottom:3px}
+#keys{position:absolute;left:58px;bottom:104px;font-size:11px;letter-spacing:.12em;line-height:1.85}
+#keys kbd{font-family:var(--mono);border:1px solid var(--line);padding:0 5px;margin-right:6px;color:#fff}
+#crash{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);text-align:center;padding:24px 34px;border-color:var(--red)}
+#crash b{display:block;color:var(--red);font-family:var(--sans);font-weight:300;font-size:28px;letter-spacing:.3em;margin-bottom:8px}
+#crash p{font-size:11px;letter-spacing:.16em;color:var(--dim);margin:0 0 16px}
+/* summary */
+#sum{position:absolute;inset:0;background:#000;pointer-events:auto}
+#sum .grid{position:absolute;left:64px;right:64px;top:86px;bottom:86px;display:grid;grid-template-columns:1fr 1fr;gap:28px}
+#sum .pane{border:1px solid rgba(255,255,255,.75);padding:18px 18px;display:flex;flex-direction:column;min-height:0}
+#sum h5{margin:0 0 12px;font-weight:400;font-size:13px;letter-spacing:.26em}
+#ovImg{flex:1;min-height:0;background:#111 center/cover no-repeat;border:1px solid var(--faint)}
+#sumLine{font-size:12px;letter-spacing:.14em;margin:6px 0 16px;line-height:1.8}
+#logs{flex:1;overflow:auto;font-size:13px;letter-spacing:.12em;line-height:2.1}
+#logs div span{color:var(--dim);margin-right:12px;font-size:11px}
+#logs .s1{color:#fff}#logs .s2{color:var(--green)}#logs .s3{color:var(--cyan)}#logs .s4{color:var(--red)}
+#logs::-webkit-scrollbar{width:4px}#logs::-webkit-scrollbar-thumb{background:var(--line)}
+#flash{position:absolute;inset:0;background:#fff;opacity:0;transition:opacity .5s}
+#tokenBox{position:absolute;left:58px;bottom:52px;display:flex;gap:6px;align-items:center;font-size:9.5px;letter-spacing:.16em;color:var(--dim)}
+#tokenBox input{pointer-events:auto;background:rgba(0,0,0,.5);border:1px solid var(--faint);color:var(--fg);font:10px var(--mono);padding:5px 8px;width:220px}
+</style>
+</head>
+<body>
+<div id="cesium"></div>
+<div id="hud">
+  <div id="dropRing"></div>
+  <div class="frame"></div>
+  <div class="cross" style="left:17px;top:17px"></div><div class="cross" style="right:17px;top:17px"></div>
+  <div class="cross" style="left:17px;bottom:17px"></div><div class="cross" style="right:17px;bottom:17px"></div>
+  <div class="meta" style="left:62px" data-states="HOME ZOOM MAP_TOP MAP_TILT SELECTED FLIGHT OVERRIDE">MAG 44 // FRAME <b id="frameNo">6642</b> · 70MM RAW ARCHIVAL<br><span id="srcTag">TERRAIN · CESIUM MOON (LOLA / LROC)</span></div>
+  <div class="meta" style="right:62px;text-align:right" data-states="HOME ZOOM MAP_TOP MAP_TILT SELECTED"><span id="trLabel">LUNAR FAR SIDE · 5.9°S 179.4°E</span><br><span id="trSub">PLAYBACK · NASA_EXTENDED RUN · SEED 42</span></div>
+
+  <div id="brand" data-states="HOME ZOOM MAP_TOP MAP_TILT SELECTED FLIGHT OVERRIDE"><div class="t"><span>SELENE</span></div><div class="s">FAR SIDE AUTONOMOUS HOPPER MISSION CONTROL</div></div>
+  <div id="toast" data-states=""></div>
+
+  <!-- PANEL 1 -->
+  <div id="drop" data-states="HOME">
+    <div class="p">DRAG &amp; DROP MISSION .TXT ON LUNAR DISC</div>
+    <div style="display:flex;gap:10px"><button class="btn sm" id="btnLoad">LOAD DAEDALUS MISSION</button><button class="btn sm" id="btnPick">BROWSE…</button></div>
+    <input type="file" id="filePick" accept=".txt,.json,.md" hidden>
+  </div>
+  <div id="parse" data-states=""></div>
+
+  <!-- PANEL 3+ -->
+  <div id="vc" data-states="MAP_TOP MAP_TILT SELECTED">
+    <div id="cubeWrap"><div id="cube"><div class="f top" data-face="top"></div><div class="f bot"></div><div class="f fr" data-face="0"></div><div class="f bk" data-face="180"></div><div class="f ri" data-face="90"></div><div class="f le" data-face="270"></div></div></div>
+  </div>
+  <button class="btn bl" id="btnData" data-states="MAP_TOP MAP_TILT">[DATA]</button>
+  <div id="drawer" class="panel" data-states="">
+    <h4>MISSION DATA · DAEDALUS</h4>
+    <div class="row"><span>SURFACE TEMP</span><span>-173.0 °C</span></div>
+    <div class="row"><span>LOCAL TIME</span><span>LUNAR NIGHT · DAY 6 / 14</span></div>
+    <div class="row"><span>RELAY WINDOW</span><span id="dRelay">OPEN · 00:40</span></div>
+    <div class="row"><span>EARTH LOS</span><span>NONE (FAR SIDE)</span></div>
+    <div class="row"><span>TERRAIN</span><span>LOLA SLDEM2015 · 100 M</span></div>
+    <div class="row"><span>FLEET</span><span id="dFleet">4 HOPPERS · 12 CRATERS</span></div>
+    <hr><h4>ARGON SAFETY SPEC</h4>
+    <div class="rule"><i>R1</i>FUEL RESERVE ≥ 10% (1.5 KG)</div>
+    <div class="rule"><i>R2</i>BATTERY RESERVE ≥ 20%</div>
+    <div class="rule"><i>R3</i>LANDING SLOPE ≤ 15.0°</div>
+    <div class="rule"><i>R4</i>FLEET SEPARATION ≥ 100 M</div>
+    <div class="rule"><i>R5</i>SINGLE-HOPPER RELAY UPLINK</div>
+    <div class="rule"><i>R6</i>SINGLE-HOP RANGE ≤ 3,000 M</div>
+  </div>
+  <button class="btn br big" id="btnInit" data-states="MAP_TOP">[INIT SIM]</button>
+
+  <!-- PANEL 4 -->
+  <div id="train" class="panel" data-states="MAP_TILT">
+    <div class="hd"><span>MAPPO + WORLD MODEL · TRAINING EPISODES</span><b id="epBig">0</b><button class="btn sm" id="btnPlay">▶ RUN TRAINING</button></div>
+    <input id="slider" type="range" min="0" max="1000" value="0">
+    <div id="ticks"></div>
+    <div id="stats">
+      <div>ENV STEPS<b id="sSteps">0</b></div>
+      <div>PPO UPDATES<b id="sUpd">0</b></div>
+      <div>MEAN REWARD<b id="sRew">0</b></div>
+      <div>WM ERROR (MSE)<b id="sWm">0</b></div>
+      <div class="g">VERIFIER PASS<b id="sVer">0</b></div>
+      <div id="sValidBox" class="r">VALID PATHS<b id="sValid">0</b></div>
+    </div>
+  </div>
+  <div id="fleet" data-states="MAP_TILT"></div>
+  <div id="pop" data-states=""></div>
+
+  <!-- PANEL 5 -->
+  <div id="card" class="panel" data-states="SELECTED"></div>
+  <div id="relay" data-states="SELECTED">RELAY ORBITER · <b id="los">LOS 04:12</b><br>S-BAND TELEMETRY LOCK · INCL 16.4°</div>
+  <button class="btn sm" id="back" data-states="SELECTED">← FLEET</button>
+  <button class="btn br big go pulse" id="btnExec" data-states="SELECTED">[EXECUTE / AUTHORISE UPLINK]</button>
+
+  <!-- PANEL 6/7 -->
+  <div id="topR" data-states="FLIGHT"><button class="btn" id="btnOvr">[MANUAL OVERRIDE]</button></div>
+  <div id="tele" class="panel" data-states="FLIGHT OVERRIDE"></div>
+  <div id="ticker" data-states="FLIGHT"></div>
+  <div id="banner" data-states=""><b>TOUCHDOWN</b>END COORDINATE REACHED · SPEC PASS</div>
+  <button class="btn br big warn" id="btnTerm" data-states="FLIGHT OVERRIDE">[TERMINATE]</button>
+  <div id="ovrBadge" data-states="OVERRIDE">LOCAL SIM OVERRIDE</div>
+  <div id="gTag" data-states="OVERRIDE">1.62 m/s²</div>
+  <div id="keys" data-states="OVERRIDE"><div><kbd>W</kbd><kbd>S</kbd>PITCH</div><div><kbd>A</kbd><kbd>D</kbd>ROLL &nbsp; <kbd>Q</kbd><kbd>E</kbd>YAW</div><div><kbd>SPACE</kbd>DESCENT ENGINE</div><div><kbd>SHIFT</kbd>CUT THRUST &nbsp; <kbd>R</kbd>RESPAWN</div><div style="margin-top:8px"><button class="btn sm" id="btnResume">← RESUME AUTONOMY</button></div></div>
+  <div id="crash" class="panel" data-states=""><b>VEHICLE LOST</b><p id="crashWhy">IMPACT</p><button class="btn" id="btnRespawn">[RESET / RESPAWN]</button></div>
+
+  <!-- PANEL 8 -->
+  <div id="sum" data-states="SUMMARY">
+    <div class="frame"></div>
+    <div class="cross" style="left:17px;top:17px"></div><div class="cross" style="right:17px;top:17px"></div>
+    <div class="cross" style="left:17px;bottom:17px"></div><div class="cross" style="right:17px;bottom:17px"></div>
+    <div class="meta" style="left:62px">MAG 44 // FRAME 6842 // 70MM RAW ARCHIVAL</div>
+    <div class="meta" style="right:62px;text-align:right">LUNAR FAR SIDE / 5.9°S 179.4°E</div>
+    <div class="grid">
+      <div class="pane"><h5>OVERVIEW</h5><div id="ovImg"></div>
+        <h5 style="margin-top:18px">SUMMARY</h5><div id="sumLine"></div>
+        <div style="display:flex;gap:10px"><button class="btn" id="btnExport">[EXPORT]</button><button class="btn" id="btnUplink">[UPLINK PACKAGE .JSON]</button><button class="btn" id="btnNew" style="margin-left:auto">NEW MISSION</button></div></div>
+      <div class="pane"><h5>LOGS</h5><div id="logs"></div></div>
+    </div>
+    <div class="meta" style="left:50%;transform:translateX(-50%);top:auto;bottom:42px">FAR SIDE AUTONOMOUS HOPPER MISSION CONTROL</div>
+  </div>
+  <div id="flash"></div>
+</div>
+
+<script type="module">
+const C = window.Cesium;
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+
+/* ---------------- config ---------------- */
+// Paste a Cesium ion token here (or use ?token=… / the box on the home screen).
+const ION_TOKEN_DEFAULT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJub25jZSI6InI3aTB0MGdIdGl6Y3ktOXoiLCJqdGkiOiJkYWU3NTcxNi1mNWEzLTQ3MjYtYTc3ZC1mMzUzZTEwZmU1YTAiLCJpZCI6NTM5NjYxLCJpc3MiOiJodHRwczovL2FwaS5jZXNpdW0uY29tIiwiYXVkIjoidW5kZWZpbmVkX2RlZmF1bHQiLCJpYXQiOjE3OTM0NjE5MjF9.kNlDFhhhTKaW7vH_3ev2026svaSPTNNQLnox0dUenIU';
+let tok = new URLSearchParams(location.search).get('token') || '';
+tok = tok || ION_TOKEN_DEFAULT;
+try { tok = tok || localStorage.getItem('selene_ion') || ''; } catch (e) {}
+if (tok) C.Ion.defaultAccessToken = tok;
+
+const MOON_R = 1737400;
+const SITE = { lat: -5.9, lon: 179.4 };
+const SCALE = 3;        // crop ENU metres -> display metres
+const HOP_VIS = 55;     // hopper model display scale
+const MOON_TEX = 'https://cdn.jsdelivr.net/gh/mrdoob/three.js@r160/examples/textures/planets/moon_1024.jpg';
+// Real numbers from data/training_log_nasa_extended_30min.csv (episodes, reward, wm_error, relay_conflicts)
+const CURVE = [[128,101.1,1.3599],[256,78.8,1.3599],[384,214.2,1.3599],[512,195.3,1.3599],[768,269.1,.4836],[1152,302.2,.4836],[1664,309,.2956],[2432,413.9,.1953],[3584,470.3,.0939],[5248,448.9,.0587],[7808,476.4,.025],[11648,514.7,.025],[17408,512,.0163],[25728,517.1,.0163],[38528,512,.0163],[57728,484.8,.0153],[89728,522.1,.0153],[128128,450.2,.0153],[192128,448.6,.0153],[281728,527.2,.0153],[384128,533.8,.0145],[460928,540.4,.0145],[526336,540.7,.0137]];
+const EP_MAX = 526336, EP_MIN = 100, STEPS_PER_EP = 30, ENVS = 128;
+
+if (C.Ellipsoid.MOON) C.Ellipsoid.default = C.Ellipsoid.MOON;
+const ELL = C.Ellipsoid.MOON || C.Ellipsoid.WGS84;
+
+/* ---------------- viewer ---------------- */
+const viewer = new C.Viewer('cesium', {
+  baseLayer: false, baseLayerPicker: false, geocoder: false, homeButton: false, sceneModePicker: false,
+  navigationHelpButton: false, animation: false, timeline: false, fullscreenButton: false, infoBox: false,
+  selectionIndicator: false, skyAtmosphere: false, globe: new C.Globe(ELL), msaaSamples: 4,
+  contextOptions: { webgl: { preserveDrawingBuffer: true } },
+});
+const scene = viewer.scene, camera = viewer.camera;
+scene.backgroundColor = C.Color.BLACK;
+scene.globe.baseColor = C.Color.fromCssColorString('#4a4a4a');
+scene.globe.showGroundAtmosphere = false;
+scene.globe.enableLighting = true;
+scene.fog.enabled = false;
+if (scene.moon) scene.moon.show = false;
+if (scene.sun) scene.sun.show = false;
+if (scene.skyAtmosphere) scene.skyAtmosphere.show = false;
+scene.screenSpaceCameraController.minimumZoomDistance = 50;
+scene.highDynamicRange = false;
+viewer.cesiumWidget.screenSpaceEventHandler.removeInputAction(C.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
+
+const siteCarto0 = C.Cartesian3.fromDegrees(SITE.lon, SITE.lat, 0, ELL);
+{ // low-angle sun from the east for stark crater shadows
+  const m = C.Transforms.eastNorthUpToFixedFrame(siteCarto0, ELL);
+  const east = C.Matrix4.getColumn(m, 0, new C.Cartesian4()), up = C.Matrix4.getColumn(m, 2, new C.Cartesian4());
+  const dir = new C.Cartesian3(-(east.x * .93 + up.x * .36), -(east.y * .93 + up.y * .36), -(east.z * .93 + up.z * .36));
+  C.Cartesian3.normalize(dir, dir);
+  scene.light = new C.DirectionalLight({ direction: dir, intensity: 2.6 });
+}
+
+C.SingleTileImageryProvider.fromUrl(MOON_TEX).then(p => viewer.imageryLayers.addImageryProvider(p)).catch(() => {});
+let tileset = null;
+(async () => {
+  try {
+    tileset = await C.Cesium3DTileset.fromIonAssetId(2684829, { maximumScreenSpaceError: 2, enableCollision: true });
+    scene.primitives.add(tileset);
+    scene.globe.show = false;
+    $('#srcTag').textContent = 'TERRAIN · CESIUM MOON (LOLA / LROC)';
+  } catch (e) {
+    console.warn('Cesium Moon tileset unavailable, using fallback mosaic', e);
+    $('#srcTag').textContent = 'TERRAIN · LRO WAC MOSAIC (OFFLINE)';
+  }
+})();
+
+/* ---------------- state machine ---------------- */
+let STATE = 'HOME';
+function setState(s) {
+  STATE = s;
+  $$('[data-states]').forEach(el => {
+    const st = el.getAttribute('data-states').split(/\s+/);
+    if (st[0] !== '' || el.dataset.manual === undefined) el.classList.toggle('on', st.includes(s));
+  });
+  $('#drawer').classList.remove('on');
+  hidePop();
+}
+function show(el, on) { (typeof el === 'string' ? $(el) : el).classList.toggle('on', !!on); }
+let toastT;
+function toast(msg, ms = 0, blink = true) {
+  const t = $('#toast'); t.textContent = msg; t.classList.toggle('blink', blink); show(t, !!msg);
+  clearTimeout(toastT); if (ms) toastT = setTimeout(() => show(t, false), ms);
+}
+function flash() { const f = $('#flash'); f.style.transition = 'none'; f.style.opacity = .55; requestAnimationFrame(() => { f.style.transition = 'opacity .9s'; f.style.opacity = 0; }); }
+
+/* ---------------- logs ---------------- */
+const LOGS = []; const T0 = performance.now();
+function ts() { const s = (performance.now() - T0) / 1000; return `T+${String(Math.floor(s / 60)).padStart(2, '0')}:${(s % 60).toFixed(1).padStart(4, '0')}`; }
+function log(src, msg) { LOGS.push({ t: ts(), src, msg }); renderTicker(); }
+function renderTicker() { $('#ticker').innerHTML = LOGS.slice(-4).map(l => `<div>${l.src} · ${l.msg}</div>`).join(''); }
+
+/* ---------------- geometry helpers ---------------- */
+const cosLat = Math.cos(SITE.lat * Math.PI / 180);
+function enu2ll(e, n) { return [SITE.lon + (e / (MOON_R * cosLat)) * 180 / Math.PI, SITE.lat + (n / MOON_R) * 180 / Math.PI]; }
+function W(e, n, h) { const [lo, la] = enu2ll(e, n); return C.Cartesian3.fromDegrees(lo, la, h, ELL); }
+const GRID = { n: 21, ext: 15500, h: null, base: 0 };
+function groundAt(e, n) {
+  if (!GRID.h) return GRID.base;
+  const N = GRID.n, s = (2 * GRID.ext) / (N - 1);
+  let fx = (e + GRID.ext) / s, fy = (n + GRID.ext) / s;
+  fx = Math.max(0, Math.min(N - 1.001, fx)); fy = Math.max(0, Math.min(N - 1.001, fy));
+  const i = Math.floor(fx), j = Math.floor(fy), u = fx - i, v = fy - j, H = GRID.h;
+  return H[j][i] * (1 - u) * (1 - v) + H[j][i + 1] * u * (1 - v) + H[j + 1][i] * (1 - u) * v + H[j + 1][i + 1] * u * v;
+}
+function sampleGrid() {
+  const N = GRID.n, s = (2 * GRID.ext) / (N - 1), H = []; let sum = 0, cnt = 0;
+  for (let j = 0; j < N; j++) { H.push([]); for (let i = 0; i < N; i++) {
+    const [lo, la] = enu2ll(-GRID.ext + i * s, -GRID.ext + j * s); let h;
+    try { h = scene.sampleHeightSupported ? scene.sampleHeight(C.Cartographic.fromDegrees(lo, la)) : undefined; } catch (e) { h = undefined; }
+    H[j].push(h); if (h !== undefined && isFinite(h)) { sum += h; cnt++; }
+  } }
+  const mean = cnt ? sum / cnt : 0;
+  for (const r of H) for (let i = 0; i < r.length; i++) if (r[i] === undefined || !isFinite(r[i])) r[i] = mean;
+  GRID.h = cnt > N * N * .3 ? H : null; GRID.base = mean;
+  return cnt;
+}
+function waitTiles(ms) { return new Promise(res => { const t0 = performance.now(); const chk = () => { if (!tileset || (tileset.tilesLoaded && performance.now() - t0 > 400) || performance.now() - t0 > ms) res(); else setTimeout(chk, 120); }; chk(); }); }
+function fly(opts) { return new Promise(res => camera.flyTo({ ...opts, complete: res, cancel: res })); }
+let siteSphere;
+function flyView(name, dur = 1.4) {
+  const V = { TOP: [0, -89.6, 2.15], FRONT: [0, -22, 1.6], RIGHT: [-90, -22, 1.6], ISO: [35, -34, 1.55] }[name];
+  $$('#vcl button').forEach(b => b.classList.toggle('act', b.dataset.v === name));
+  return new Promise(res => camera.flyToBoundingSphere(siteSphere, { offset: new C.HeadingPitchRange(C.Math.toRadians(V[0]), C.Math.toRadians(V[1]), siteSphere.radius * V[2]), duration: dur, complete: res, cancel: res }));
+}
+
+/* ---------------- mission layout (from repo crater crop) ---------------- */
+const CR = { a: [1550, 550], b: [550, 1850], c: [-1350, 1250], d: [-1650, -650], e: [-350, -1850], f: [1450, -1450], g: [3750, 1150], h: [1550, 3650], i: [-2850, 2750], j: [-3750, -1350], k: [-1050, -3650] };
+const START = [-2600, -2600], END = [2900, 2600];
+const ROUTES = [
+  { id: 'H1', name: 'HOPPER 1', via: ['d', 'c', 'b'], off: [-1, 1] },
+  { id: 'H2', name: 'HOPPER 2', via: ['e', 'a'], off: [1, 1] },
+  { id: 'H3', name: 'HOPPER 3', via: ['k', 'f', 'g'], off: [1, -1] },
+  { id: 'H4', name: 'HOPPER 4', via: ['j', 'i', 'h'], off: [-1, -1] },
+];
+const OFF = 420;
+ROUTES.forEach(r => {
+  const s = [START[0] * SCALE + r.off[0] * OFF, START[1] * SCALE + r.off[1] * OFF];
+  const e = [END[0] * SCALE + r.off[0] * OFF, END[1] * SCALE + r.off[1] * OFF];
+  r.wps = [s, ...r.via.map(k => [CR[k][0] * SCALE, CR[k][1] * SCALE]), e];
+  r.labels = ['c1 START', ...r.via.map((k, i) => `c${i + 2} DAEDALUS-${k.toUpperCase()}`), `c${r.via.length + 2} END`];
+  r.lenReal = 0; for (let i = 1; i < r.wps.length; i++) r.lenReal += Math.hypot(r.wps[i][0] - r.wps[i - 1][0], r.wps[i][1] - r.wps[i - 1][1]) / SCALE;
+});
+const LIFT = 12, OPT_APEX = .26;
+function hopArc(a, b, lat, apexK, N, out) {
+  const dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy) || 1, px = -dy / L, py = dx / L;
+  const ha = groundAt(a[0], a[1]), hb = groundAt(b[0], b[1]);
+  for (let k = (out.length ? 1 : 0); k <= N; k++) {
+    const s = k / N, sn = Math.sin(Math.PI * s);
+    const e = a[0] + dx * s + px * lat * sn, n = a[1] + dy * s + py * lat * sn;
+    out.push(W(e, n, ha + (hb - ha) * s + apexK * L * 4 * s * (1 - s) + LIFT));
+  }
+  return out;
+}
+function routeArc(wps, apex = OPT_APEX) { const out = []; for (let i = 1; i < wps.length; i++) hopArc(wps[i - 1], wps[i], 0, apex, 30, out); return out; }
+
+/* ---------------- seeded random ---------------- */
+let seed = 42; function rnd() { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }
+const RULES = [
+  () => ['R3 VIOLATION', `TOUCHDOWN SLOPE ${(16 + rnd() * 9).toFixed(1)} DEG > 15.0 DEG`],
+  () => ['R1 VIOLATION', `FUEL ${(4 + rnd() * 5).toFixed(1)}% < 10.0% RESERVE`],
+  () => ['R2 VIOLATION', `BATTERY ${(11 + rnd() * 8).toFixed(1)}% < 20.0% IN NIGHT DWELL`],
+  () => ['R4 VIOLATION', `SEPARATION ${Math.round(30 + rnd() * 60)} M < 100 M`],
+  () => ['R6 VIOLATION', `HOP RANGE ${Math.round(3100 + rnd() * 900).toLocaleString('en-GB')} M > 3,000 M`],
+  () => ['R5 VIOLATION', `2 TRANSMITTERS IN RELAY WINDOW ${1 + Math.floor(rnd() * 6)}`],
+  () => ['CRASH', `ATTITUDE LOSS ON DESCENT · IMPACT ${(3 + rnd() * 6).toFixed(1)} M/S`],
+];
+
+/* ---------------- entities ---------------- */
+const ents = { home: [], site: [], cands: [], opt: [], hoppers: [], wp: [] };
+let HOPPER_URL = null;
+const glow = (() => { const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d'); const gr = g.createRadialGradient(32, 32, 0, 32, 32, 32); gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(.25, 'rgba(255,240,220,.85)'); gr.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = gr; g.fillRect(0, 0, 64, 64); return c.toDataURL(); })();
+
+// relay orbit + target (home)
+(function buildHome() {
+  const inc = C.Math.toRadians(16.4), rad = MOON_R * 1.62, pts = [];
+  const orb = a => { const x = Math.cos(a) * rad, y = Math.sin(a) * rad * .96; return new C.Cartesian3(x, y * Math.cos(inc), y * Math.sin(inc)); };
+  for (let i = 0; i <= 240; i++) pts.push(orb(i / 240 * Math.PI * 2));
+  ents.home.push(viewer.entities.add({ polyline: { positions: pts, width: 1.4, arcType: C.ArcType.NONE, material: C.Color.WHITE.withAlpha(.85) } }));
+  ents.home.push(viewer.entities.add({
+    position: new C.CallbackProperty(() => orb(performance.now() / 9000), false),
+    point: { pixelSize: 7, color: C.Color.WHITE, outlineColor: C.Color.WHITE.withAlpha(.3), outlineWidth: 6 },
+    label: { text: 'RELAY ORBITER\nS-BAND TELEMETRY LOCK · INCL 16.4°', font: '500 11px IBM Plex Mono', fillColor: C.Color.WHITE, pixelOffset: new C.Cartesian2(14, -14), horizontalOrigin: C.HorizontalOrigin.LEFT, verticalOrigin: C.VerticalOrigin.BOTTOM, showBackground: false },
+  }));
+  ents.home.push(viewer.entities.add({
+    position: W(0, 0, 4000), point: { pixelSize: 7, color: C.Color.WHITE },
+    label: { text: 'DAEDALUS · TARGET\n5.9°S 179.4°E', font: '500 12px IBM Plex Mono', fillColor: C.Color.WHITE, pixelOffset: new C.Cartesian2(16, -10), horizontalOrigin: C.HorizontalOrigin.LEFT, verticalOrigin: C.VerticalOrigin.BOTTOM },
+  }));
+})();
+
+// home camera
+const eye = C.Cartesian3.fromDegrees(150, 12, 5.6e6, ELL);
+const dirHome = C.Cartesian3.normalize(C.Cartesian3.negate(eye, new C.Cartesian3()), new C.Cartesian3());
+camera.setView({ destination: eye, orientation: { direction: dirHome, up: C.Cartesian3.UNIT_Z } });
+
+/* ---------------- hopper model (built procedurally, exported to GLB) ---------------- */
+async function buildHopper() {
+  try {
+    const THREE = await import('three');
+    const { GLTFExporter } = await import('three/addons/exporters/GLTFExporter.js');
+    const g = new THREE.Group();
+    const M = (c, m, r) => new THREE.MeshStandardMaterial({ color: c, metalness: m, roughness: r });
+    const silver = M(0xc9ccd1, .85, .3), dark = M(0x1c1e21, .4, .6), copper = M(0xb8652e, .95, .26), white = M(0xf0f0f0, .1, .5), gold = M(0xc9a04a, .9, .35);
+    const add = (geo, mat, x, y, z) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); g.add(m); return m; };
+    const strut = (a, b, r, mat) => { const d = b.clone().sub(a); const L = d.length(); const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, L, 10), mat); m.position.copy(a).add(b).multiplyScalar(.5); m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize()); g.add(m); };
+    add(new THREE.SphereGeometry(.64, 40, 28), copper, 0, 1.18, 0);
+    add(new THREE.TorusGeometry(.69, .04, 10, 48), silver, 0, 1.08, 0).rotation.x = Math.PI / 2;
+    add(new THREE.CylinderGeometry(.98, .98, .34, 6), silver, 0, 1.98, 0);
+    add(new THREE.CylinderGeometry(.92, .92, .04, 6), dark, 0, 2.17, 0);
+    add(new THREE.BoxGeometry(.44, .78, .38), white, -.08, 2.56, -.12);
+    for (let i = 0; i < 4; i++) add(new THREE.BoxGeometry(.46, .02, .4), dark, -.08, 2.3 + i * .17, -.12);
+    add(new THREE.BoxGeometry(.32, .24, .28), dark, .16, 2.3, .2);
+    add(new THREE.BoxGeometry(.26, .14, .22), gold, .45, 2.26, -.25);
+    add(new THREE.CylinderGeometry(.026, .026, 1.0, 8), silver, -.62, 2.66, .32);
+    add(new THREE.BoxGeometry(.24, .05, .09), dark, -.62, 3.15, .32);
+    add(new THREE.CylinderGeometry(.03, .03, .7, 8), silver, .62, 2.48, -.34);
+    add(new THREE.BoxGeometry(.2, .12, .15), silver, .66, 2.85, -.34);
+    add(new THREE.CylinderGeometry(.14, .3, .36, 24, 1, true), dark, 0, .42, 0);
+    const camT = add(new THREE.CylinderGeometry(.12, .15, .36, 16), silver, .82, 1.62, .05); camT.rotation.z = Math.PI / 2.6;
+    for (let i = 0; i < 4; i++) {
+      const a = i * Math.PI / 2 + Math.PI / 4, ca = Math.cos(a), sa = Math.sin(a);
+      const top = new THREE.Vector3(ca * .86, 1.86, sa * .86), foot = new THREE.Vector3(ca * 1.78, .07, sa * 1.78), mid = new THREE.Vector3(ca * .66, 1.06, sa * .66);
+      strut(top, foot, .045, silver);
+      strut(mid, top.clone().lerp(foot, .62), .035, silver);
+      strut(top.clone().lerp(foot, .3), top.clone().lerp(foot, .55), .075, dark);
+      strut(mid.clone().lerp(top.clone().lerp(foot, .62), .2), mid.clone().lerp(top.clone().lerp(foot, .62), .55), .06, dark);
+      add(new THREE.CylinderGeometry(.27, .31, .07, 24), silver, foot.x, .035, foot.z);
+    }
+    strut(new THREE.Vector3(.95, 1.9, 0), new THREE.Vector3(1.55, 1.9, .0), .025, silver);
+    strut(new THREE.Vector3(1.55, 1.9, 0), new THREE.Vector3(1.55, .55, 0), .025, silver);
+    const glb = await new GLTFExporter().parseAsync(g, { binary: true });
+    HOPPER_URL = URL.createObjectURL(new Blob([glb], { type: 'model/gltf-binary' }));
+  } catch (e) { console.warn('hopper model fallback', e); }
+}
+const hopperReady = buildHopper();
+function hopperGraphics(extra = {}) {
+  if (!HOPPER_URL) return { point: { pixelSize: 12, color: C.Color.WHITE, outlineColor: C.Color.BLACK, outlineWidth: 2 } };
+  return { model: { uri: HOPPER_URL, scale: HOP_VIS, minimumPixelSize: 54, maximumScale: 1e6, ...extra } };
+}
+
+/* ---------------- PANEL 1 → 2: load mission ---------------- */
+let MISSION = { region: 'DAEDALUS', fleet: 4, rules: 6, craters: 11 };
+function parseMission(txt, name) {
+  const lines = txt.split(/\r?\n/).filter(l => l.trim() && !l.trim().startsWith('#'));
+  const get = k => (lines.find(l => l.toUpperCase().startsWith(k)) || '').split(':').slice(1).join(':').trim();
+  MISSION.region = (get('REGION') || 'Daedalus crater').split(',')[0].toUpperCase();
+  MISSION.rules = lines.filter(l => /^\s*R\d/.test(l)).length || 6;
+  MISSION.craters = lines.filter(l => /^\s*daedalus_/i.test(l)).length || 11;
+  if (name.endsWith('.json')) { try { const j = JSON.parse(txt); MISSION.region = (j.meta?.region || 'DAEDALUS').toUpperCase(); } catch (e) {} }
+  return [`MISSION FILE · ${name}`, `REGION · ${MISSION.region}`, `CENTER · 5.9°S 179.4°E`, `FLEET · 4 HOPPERS · LANDER HUB c1`, `CRATERS · ${MISSION.craters} INDEXED (LOLA SLDEM2015)`, `SAFETY SPEC · R1–R${MISSION.rules} PARSED BY ARGON`, `RELAY · 40 S WINDOWS / 120 S`];
+}
+async function startMission(txt, name) {
+  if (STATE !== 'HOME') return;
+  const lines = parseMission(txt, name);
+  setState('ZOOM'); flash();
+  const p = $('#parse'); p.innerHTML = ''; show(p, true);
+  lines.forEach((l, i) => setTimeout(() => { const [k, v] = l.split(' · '); p.insertAdjacentHTML('beforeend', `<div><span class="k">${k}</span> · ${v || ''}</div>`); }, 160 * i));
+  log('SIM', `MISSION ${name} LOADED · ${MISSION.region}`);
+  log('ARGON', `SAFETY SPEC PARSED · ${MISSION.rules} RULES (R1–R${MISSION.rules})`);
+  toast('ACQUIRING FAR SIDE TARGET');
+  ents.home.forEach(e => e.show = false);
+  await fly({ destination: C.Cartesian3.fromDegrees(SITE.lon - 4, SITE.lat - 10, 1.1e6, ELL), orientation: { heading: C.Math.toRadians(20), pitch: C.Math.toRadians(-62), roll: 0 }, duration: 4.2, easingFunction: C.EasingFunction.CUBIC_IN_OUT });
+  toast('DESCENDING TO DAEDALUS');
+  siteSphere = new C.BoundingSphere(W(0, 0, GRID.base), 14500);
+  await fly({ destination: W(0, 0, 62000), orientation: { heading: 0, pitch: C.Math.toRadians(-89.6), roll: 0 }, duration: 3.6, easingFunction: C.EasingFunction.QUADRATIC_IN_OUT });
+  toast('SAMPLING LOLA ELEVATION');
+  await waitTiles(4500);
+  const n = sampleGrid();
+  log('SIM', `TERRAIN GRID ${GRID.n}×${GRID.n} SAMPLED · ${n} PTS · BASE ${GRID.base.toFixed(0)} M`);
+  siteSphere = new C.BoundingSphere(W(150, 0, GRID.base), 14500);
+  buildSite();
+  show(p, false); toast('', 0);
+  setState('MAP_TOP');
+  flyView('TOP', 1.6);
+}
+$('#btnLoad').onclick = async () => { let t = ''; try { const r = await fetch('mission_daedalus.txt'); if (r.ok) t = await r.text(); } catch (e) {} startMission(t || 'REGION: Daedalus crater', 'mission_daedalus.txt'); };
+$('#btnPick').onclick = () => $('#filePick').click();
+$('#filePick').onchange = e => { const f = e.target.files[0]; if (f) f.text().then(t => startMission(t, f.name)); };
+addEventListener('dragover', e => { e.preventDefault(); if (STATE === 'HOME') document.body.classList.add('dragging'); });
+addEventListener('dragleave', e => { if (!e.relatedTarget) document.body.classList.remove('dragging'); });
+addEventListener('drop', e => { e.preventDefault(); document.body.classList.remove('dragging'); const f = e.dataTransfer.files[0]; if (f) f.text().then(t => startMission(t, f.name)); });
+
+/* ---------------- PANEL 3: site entities ---------------- */
+const lbl = (text, color = C.Color.WHITE, size = 12) => ({ text, font: `500 ${size}px IBM Plex Mono`, fillColor: color, outlineColor: C.Color.BLACK, outlineWidth: 3, style: C.LabelStyle.FILL_AND_OUTLINE, pixelOffset: new C.Cartesian2(12, -10), horizontalOrigin: C.HorizontalOrigin.LEFT, verticalOrigin: C.VerticalOrigin.BOTTOM, disableDepthTestDistance: Number.POSITIVE_INFINITY });
+function buildSite() {
+  const s = [START[0] * SCALE, START[1] * SCALE], e = [END[0] * SCALE, END[1] * SCALE];
+  ents.site.push(viewer.entities.add({ position: W(s[0], s[1], groundAt(...s) + 30), point: { pixelSize: 9, color: C.Color.WHITE, disableDepthTestDistance: Infinity }, label: lbl('START · c1\n-2600 E  -2600 N', C.Color.WHITE, 13) }));
+  ents.site.push(viewer.entities.add({ position: W(e[0], e[1], groundAt(...e) + 30), point: { pixelSize: 9, color: C.Color.WHITE, disableDepthTestDistance: Infinity }, label: lbl('END · c5\n2900 E  2600 N', C.Color.WHITE, 13) }));
+  Object.entries(CR).forEach(([k, p]) => ents.site.push(viewer.entities.add({ position: W(p[0] * SCALE, p[1] * SCALE, groundAt(p[0] * SCALE, p[1] * SCALE) + 30), point: { pixelSize: 4, color: C.Color.WHITE.withAlpha(.7), disableDepthTestDistance: Infinity }, label: { ...lbl(`DAEDALUS-${k.toUpperCase()}`, C.Color.WHITE.withAlpha(.6), 9), pixelOffset: new C.Cartesian2(7, -4) } })));
+  // a faint survey line START→END like the storyboard
+  ents.site.push(viewer.entities.add({ polyline: { positions: routeArc([s, e], .05), width: 1, arcType: C.ArcType.NONE, material: new C.PolylineDashMaterialProperty({ color: C.Color.WHITE.withAlpha(.55), dashLength: 14 }) } }));
+}
+$('#btnData').onclick = () => $('#drawer').classList.toggle('on');
+function flyHP(h, p) {
+  if (!siteSphere) return;
+  if (h === null) h = C.Math.toDegrees(camera.heading);
+  camera.flyToBoundingSphere(siteSphere, { offset: new C.HeadingPitchRange(C.Math.toRadians(h), C.Math.toRadians(p), siteSphere.radius * (p < -80 ? 2.15 : 1.75)), duration: 1.2 });
+}
+$$('#cube .f[data-face]').forEach(f => {
+  const face = f.dataset.face;
+  for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++) {
+    const cell = document.createElement('i'); let h, p;
+    if (face === 'top') {
+      const dh = { '0,0': 225, '0,1': 180, '0,2': 135, '1,0': 270, '1,2': 90, '2,0': 315, '2,1': 0, '2,2': 45 }[r + ',' + c];
+      if (r === 1 && c === 1) { h = null; p = -89.6; } else { h = dh; p = (r !== 1 && c !== 1) ? -38 : -55; }
+    } else {
+      h = (+face + (c - 1) * 45 + 360) % 360; p = [-50, -20, -8][r]; if (r !== 1 && c !== 1) p = r === 0 ? -38 : -8;
+    }
+    cell.onclick = ev => { ev.stopPropagation(); flyHP(h, p); };
+    f.appendChild(cell);
+  }
+});
+
+/* ---------------- PANEL 4: candidate runs + training scrubber ---------------- */
+let PROG = 0; const cands = [];
+const RED = C.Color.fromCssColorString('#ff4d4d'), GRN = C.Color.fromCssColorString('#3ddc84');
+const NPTS = 96;
+function routePt(r, u) {
+  let d = Math.max(0, Math.min(1, u)) * r.total;
+  for (let i = 1; i < r.wps.length; i++) { const L = r.seg[i - 1]; if (d <= L || i === r.wps.length - 1) { const t = Math.min(1, d / L), a = r.wps[i - 1], b = r.wps[i]; return { p: [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t], tx: (b[0] - a[0]) / L, ty: (b[1] - a[1]) / L }; } d -= L; }
+}
+function resample(arr, M) {
+  const out = [], K = arr.length;
+  for (let j = 0; j < M; j++) { const f = j * (K - 1) / (M - 1), i = Math.min(K - 2, Math.floor(f)); out.push(C.Cartesian3.lerp(arr[i], arr[i + 1], f - i, new C.Cartesian3())); }
+  return out;
+}
+// one random multi-hop attempt: hop count, landing spots, hop heights all re-rolled every time
+function genPath(cd, v) {
+  const r = cd.r, g = cd.green, R = Math.random;
+  const S = .32 + .68 * Math.pow(1 - v, 1.1);          // spread never fully collapses
+  const nh = 2 + Math.floor(R() * 4);                    // 2..5 hops
+  const wps = [r.wps[0]];
+  for (let k = 1; k < nh; k++) {
+    const q = routePt(r, (k + (R() - .5) * .8) / nh), off = (R() * 2 - 1) * S * 4200;
+    wps.push([q.p[0] - q.ty * off + (R() * 2 - 1) * S * 900, q.p[1] + q.tx * off + (R() * 2 - 1) * S * 900]);
+  }
+  const end = r.wps[r.wps.length - 1]; wps.push(end);
+  let last = nh;
+  if (!g) {
+    last = 1 + Math.floor(R() * nh);
+    const t = wps[last], k = 1500 + 3000 * S, a = R() * Math.PI * 2;
+    wps[last] = [t[0] + Math.cos(a) * k, t[1] + Math.sin(a) * k];
+    cd.reason = RULES[Math.floor(R() * RULES.length)]();
+    if (cd.reason[0] === 'R3 VIOLATION') cd.reason[1] += ' ON CRATER RIM';
+  }
+  const out = [];
+  for (let i = 1; i <= last; i++) hopArc(wps[i - 1], wps[i], (R() * 2 - 1) * S * 2200, .1 + R() * .4, 16, out);
+  return { pts: resample(out, NPTS), end: g ? undefined : out[out.length - 1] };
+}
+function startMorph(cd, now, dur) {
+  const nx = genPath(cd, PROG);
+  cd.m = { t0: now, d: dur, from: cd.pts, to: nx.pts, e0: cd.end || nx.end, e1: nx.end };
+  cd.vGen = PROG; cd.gGen = cd.green;
+}
+function tickCands(now) {
+  if (!cands.length || !(STATE === 'MAP_TILT' || STATE === 'SELECTED')) return;
+  for (const cd of cands) {
+    if (cd.force || now >= cd.next) { startMorph(cd, now, cd.force ? 380 : 900 + Math.random() * 500); cd.force = false; cd.next = now + 1500 + Math.random() * 2600; }
+    if (cd.m) {
+      const u = Math.min(1, (now - cd.m.t0) / cd.m.d), e = u * u * (3 - 2 * u), A = cd.m.from, B = cd.m.to;
+      cd.pts = A.map((p, j) => C.Cartesian3.lerp(p, B[j], e, new C.Cartesian3()));
+      cd.end = cd.m.e1 ? (cd.m.e0 ? C.Cartesian3.lerp(cd.m.e0, cd.m.e1, e, new C.Cartesian3()) : cd.m.e1) : undefined;
+      if (u >= 1) cd.m = null;
+    }
+  }
+}
+function buildCandidates() {
+  seed = 42;
+  ROUTES.forEach((r, ri) => {
+    r.seg = []; r.total = 0; for (let i = 1; i < r.wps.length; i++) { const L = Math.hypot(r.wps[i][0] - r.wps[i - 1][0], r.wps[i][1] - r.wps[i - 1][1]); r.seg.push(L); r.total += L; }
+    for (let c = 0; c < 15; c++) {
+      const cd = { r, ri, t: .2 + .6 * Math.pow(rnd(), .9), green: false, pts: [], end: undefined, next: 0, force: false, m: null, reason: ['', ''] };
+      const first = genPath(cd, 0); cd.pts = first.pts; cd.end = first.end;
+      cd.ent = viewer.entities.add({ polyline: { positions: new C.CallbackProperty(() => cd.pts, false), width: 2, arcType: C.ArcType.NONE, material: new C.ColorMaterialProperty(new C.CallbackProperty(() => cd.col, false)) } });
+      cd.mark = viewer.entities.add({ position: new C.CallbackProperty(() => cd.end, false), point: { pixelSize: 9, color: RED, outlineColor: C.Color.WHITE, outlineWidth: 1.5, disableDepthTestDistance: Infinity } });
+      cd.mark.selene = { kind: 'fail', cand: cd }; cd.ent.selene = { kind: 'fail', cand: cd };
+      cands.push(cd);
+    }
+    r.optPts = routeArc(r.wps);
+    r.optEnt = viewer.entities.add({ polyline: { positions: r.optPts, width: 9, arcType: C.ArcType.NONE, material: new C.PolylineGlowMaterialProperty({ glowPower: .22, color: new C.CallbackProperty(() => GRN.withAlpha(r.optAlpha ?? 0), false) }) } });
+    r.optEnt.selene = { kind: 'hopper', route: r };
+    r.hop = viewer.entities.add({ position: W(r.wps[0][0], r.wps[0][1], groundAt(...r.wps[0])), ...hopperGraphics(), label: { ...lbl(r.id, C.Color.WHITE, 12), pixelOffset: new C.Cartesian2(14, -22) } });
+    r.hop.selene = { kind: 'hopper', route: r };
+    ents.hoppers.push(r.hop);
+  });
+}
+function updateCandidates(v) {
+  PROG = v;
+  let green = 0;
+  for (const cd of cands) {
+    const g = v >= cd.t; if (g) green++;
+    if (g !== cd.green || Math.abs(v - (cd.vGen ?? -1)) > .05) cd.force = true;
+    cd.green = g;
+    cd.mark.show = !g;
+    cd.col = (g ? GRN : RED).withAlpha(selected ? .12 : .5);
+  }
+  ROUTES.forEach(r => r.optAlpha = selected ? (r === selected ? 1 : .18) : Math.max(0, Math.min(1, (v - .72) / .2)));
+  // stats
+  const ep = Math.round(Math.pow(10, Math.log10(EP_MIN) + v * (Math.log10(EP_MAX) - Math.log10(EP_MIN))));
+  const fx = n => n.toLocaleString('en-GB');
+  $('#epBig').textContent = fx(ep);
+  $('#sSteps').textContent = fx(ep * STEPS_PER_EP);
+  $('#sUpd').textContent = fx(Math.max(0, Math.round(ep / ENVS)));
+  const ci = (k) => { if (ep <= CURVE[0][0]) return CURVE[0][k]; for (let i = 1; i < CURVE.length; i++) if (ep <= CURVE[i][0]) { const a = CURVE[i - 1], b = CURVE[i], u = (Math.log(ep) - Math.log(a[0])) / (Math.log(b[0]) - Math.log(a[0])); return a[k] + (b[k] - a[k]) * u; } return CURVE[CURVE.length - 1][k]; };
+  $('#sRew').textContent = ci(1).toFixed(1);
+  $('#sWm').textContent = ci(2).toFixed(4);
+  $('#sVer').textContent = (92 + 8 * Math.min(1, Math.max(0, (v - .25) / .6))).toFixed(1) + '%';
+  $('#sValid').textContent = `${green}/${cands.length}`;
+  $('#sValidBox').className = green === cands.length ? 'g' : 'r';
+  $$('#fleet .hc').forEach((el, i) => { const r = ROUTES[i], gc = cands.filter(c => c.r === r && c.green).length; el.querySelector('em').textContent = v > .78 ? 'VERIFIED' : `${gc}/15 PASS`; el.querySelector('em').style.color = v > .78 ? 'var(--green)' : 'var(--dim)'; });
+}
+function buildTicks() {
+  const T = [[100, '100'], [1000, '1K'], [10000, '10K'], [100000, '100K'], [EP_MAX, '526K']];
+  $('#ticks').innerHTML = T.map(([e, l]) => { const v = (Math.log10(e) - 2) / (Math.log10(EP_MAX) - 2); return `<span style="left:${v * 100}%" data-v="${v}">${l}</span>`; }).join('');
+  $$('#ticks span').forEach(s => s.onclick = () => animateTo(+s.dataset.v, 1.2));
+}
+let anim = null;
+function animateTo(target, secs) {
+  const from = PROG, t0 = performance.now(); anim = { stop: false }; const me = anim;
+  const step = () => { if (me.stop) return; const u = Math.min(1, (performance.now() - t0) / (secs * 1000)); const e = u < .5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2; const v = from + (target - from) * e; $('#slider').value = v * 1000; updateCandidates(v); if (u < 1) requestAnimationFrame(step); else if (target >= .999) onConverged(); };
+  step();
+}
+let convergedLogged = false;
+function onConverged() {
+  if (convergedLogged) return; convergedLogged = true;
+  log('SIM', 'MAPPO 4,112 UPDATES · 15,790,080 TRANSITIONS · 526,336 EPISODES');
+  log('VERIFIER', 'MONTE CARLO 1,000 ROLLOUTS × 4 HOPPERS · R1–R6 PASS (100%)');
+  log('ARGON', 'FLEET PLAN CERTIFIED · 4 DISJOINT ROUTES · 0 RELAY CONFLICTS');
+  toast('POLICY CONVERGED · SELECT A HOPPER', 3500, false);
+}
+$('#slider').oninput = e => { if (anim) anim.stop = true; updateCandidates(e.target.value / 1000); if (e.target.value >= 999) onConverged(); };
+$('#btnPlay').onclick = () => { if (anim) anim.stop = true; PROG = 0; animateTo(1, 9); };
+
+$('#btnInit').onclick = async () => {
+  setState('MAP_TILT'); flash();
+  log('SIM', 'ROUTE EVALUATION INITIALISED · 60 CANDIDATE RUNS / 4 HOPPERS');
+  await hopperReady;
+  if (!cands.length) { buildCandidates(); buildTicks(); buildFleet(); }
+  ents.site.slice(-1)[0].show = false;
+  updateCandidates(0);
+  await flyView('ISO', 2.2);
+  animateTo(1, 9);
+};
+function buildFleet() {
+  $('#fleet').innerHTML = ROUTES.map((r, i) => `<div class="hc panel" data-i="${i}"><div class="n">${r.name}<em>0/15 PASS</em></div><div class="d">${r.labels.length - 1} HOPS · ${(r.lenReal / 1000).toFixed(1)} KM · VIA ${r.via.map(v => v.toUpperCase()).join(' → ')}</div></div>`).join('');
+  $$('#fleet .hc').forEach(el => el.onclick = () => selectHopper(ROUTES[+el.dataset.i]));
+}
+
+/* ---------------- picking ---------------- */
+function hidePop() { show('#pop', false); }
+const handler = new C.ScreenSpaceEventHandler(scene.canvas);
+handler.setInputAction(ev => {
+  const picks = scene.drillPick(ev.position, 6);
+  const hit = picks.map(p => p.id && p.id.selene).find(Boolean);
+  if (!hit) { hidePop(); return; }
+  if (hit.kind === 'fail' && STATE === 'MAP_TILT') {
+    const cd = hit.cand, p = $('#pop');
+    if (cd.green) { p.className = 'pass'; p.innerHTML = `<b>${cd.r.id} · CANDIDATE PASS</b>R1–R6 VERIFIED · 1,000 ROLLOUTS`; }
+    else { p.className = ''; p.innerHTML = `<b>${cd.reason[0]}</b>${cd.reason[1]}`; }
+    p.style.left = Math.min(innerWidth - 300, ev.position.x + 18) + 'px'; p.style.top = (ev.position.y - 30) + 'px'; show(p, true);
+    log('VERIFIER', `${cd.r.id} CANDIDATE · ${cd.green ? 'PASS' : cd.reason.join(' · ')}`);
+  } else if (hit.kind === 'hopper' && (STATE === 'MAP_TILT' || STATE === 'SELECTED')) selectHopper(hit.route);
+}, C.ScreenSpaceEventType.LEFT_CLICK);
+
+/* ---------------- PANEL 5: select ---------------- */
+let selected = null, losT = 252, losTimer = null;
+function selectHopper(r) {
+  if (anim) anim.stop = true;
+  if (PROG < .999) { $('#slider').value = 1000; updateCandidates(1); onConverged(); }
+  selected = r; setState('SELECTED'); updateCandidates(1);
+  ents.wp.forEach(e => viewer.entities.remove(e)); ents.wp = [];
+  r.wps.forEach((p, i) => ents.wp.push(viewer.entities.add({ position: W(p[0], p[1], groundAt(...p) + 40), point: { pixelSize: 10, color: GRN, outlineColor: GRN.withAlpha(.35), outlineWidth: 8, disableDepthTestDistance: Infinity }, label: lbl(r.labels[i], GRN, 12) })));
+  const bs = C.BoundingSphere.fromPoints(r.optPts);
+  camera.flyToBoundingSphere(bs, { offset: new C.HeadingPitchRange(C.Math.toRadians(25), C.Math.toRadians(-28), bs.radius * 1.9), duration: 2 });
+  $('#card').innerHTML = `<h3>${r.name} · SELECTED</h3>
+   <div class="row"><span>ROUTE</span><span>${r.labels.length - 1} HOPS · ${(r.lenReal / 1000).toFixed(2)} KM</span></div>
+   <div class="row"><span>VIA</span><span>${r.via.map(v => 'DAEDALUS-' + v.toUpperCase()).join(' → ')}</span></div>
+   <div class="row"><span>VERIFIER</span><span class="ok">1,000 / 1,000 ROLLOUTS</span></div>
+   <div class="row"><span>MAX TOUCHDOWN SLOPE</span><span>${(8 + ROUTES.indexOf(r) * 1.3).toFixed(1)}°</span></div>
+   <div class="row"><span>PRED. FUEL @ END</span><span>${38 + ROUTES.indexOf(r) * 3}%</span></div>
+   <div class="row"><span>PRED. MIN BATTERY</span><span>${22 + ROUTES.indexOf(r) * 2}%</span></div>
+   <div class="row"><span>MIN FLEET SEPARATION</span><span>${(412 + ROUTES.indexOf(r) * 57)} M</span></div>
+   <hr><div class="row"><span>ARGON VERDICT</span><span class="ok">PASS · R1–R6</span></div>
+   <div class="row"><span>UPLINK</span><span class="ok">RELAY WINDOW OPEN</span></div>`;
+  log('ARGON', `${r.id} ROUTE ${r.labels.map(l => l.split(' ')[0]).join('→')} · VERDICT PASS`);
+  clearInterval(losTimer); losT = 252;
+  losTimer = setInterval(() => { losT = losT > 1 ? losT - 1 : 252; $('#los').textContent = `LOS ${String(Math.floor(losT / 60)).padStart(2, '0')}:${String(losT % 60).padStart(2, '0')}`; }, 1000);
+}
+$('#back').onclick = () => { selected = null; ents.wp.forEach(e => viewer.entities.remove(e)); ents.wp = []; setState('MAP_TILT'); updateCandidates(1); flyView('ISO'); };
+
+/* ---------------- PANEL 6: flight ---------------- */
+const FL = { r: null, t: 0, T: [], total: 0, run: false, done: false, pos: null, q: C.Quaternion.IDENTITY.clone(), thr: 0, drift: 0, ghost: null, fuel: 1, batt: 1, temp: 4, maxDrift: 0, minBatt: 1, phase: 'IDLE', hopIdx: 0, lastHop: -1, thrVec: [0, 0, 0] };
+let plume, plumeCore, glowBB, arrow, ghost;
+const tmpM3 = new C.Matrix3();
+function worldQuat(pos, bodyQ) { const enu = C.Transforms.eastNorthUpToFixedFrame(pos, ELL); const q = C.Quaternion.fromRotationMatrix(C.Matrix4.getMatrix3(enu, new C.Matrix3())); return C.Quaternion.multiply(q, bodyQ, new C.Quaternion()); }
+function bodyAxes(wq) { C.Matrix3.fromQuaternion(wq, tmpM3); return { x: C.Matrix3.getColumn(tmpM3, 0, new C.Cartesian3()), y: C.Matrix3.getColumn(tmpM3, 1, new C.Cartesian3()), z: C.Matrix3.getColumn(tmpM3, 2, new C.Cartesian3()) }; }
+const add3 = (a, b, s) => new C.Cartesian3(a.x + b.x * s, a.y + b.y * s, a.z + b.z * s);
+let flightWQ = C.Quaternion.IDENTITY.clone();
+function setupFlightEntities(r) {
+  const h = r.hop;
+  h.position = new C.CallbackProperty(() => FL.pos, false);
+  h.orientation = new C.CallbackProperty(() => flightWQ, false);
+  h.label = undefined;
+  h.viewFrom = new C.Cartesian3(-650, -900, 380);
+  if (!ghost) ghost = viewer.entities.add({ position: new C.CallbackProperty(() => FL.ghost, false), orientation: new C.CallbackProperty(() => flightWQ, false), ...hopperGraphics({ color: C.Color.fromCssColorString('#a6ecff').withAlpha(.32), colorBlendMode: C.ColorBlendMode.REPLACE, silhouetteColor: C.Color.fromCssColorString('#dff8ff').withAlpha(.9), silhouetteSize: 1.2, minimumPixelSize: 0 }), label: { ...lbl('WORLD MODEL', C.Color.fromCssColorString('#a6ecff'), 10), pixelOffset: new C.Cartesian2(16, -30) } });
+  const nozzle = () => { const ax = bodyAxes(flightWQ); return { ax, p: add3(FL.pos || W(0, 0, 0), ax.z, .4 * HOP_VIS) }; };
+  const plumeLen = () => Math.max(1, FL.thr * HOP_VIS * (3.2 + Math.random() * .7));
+  if (!plume) {
+    plume = viewer.entities.add({ position: new C.CallbackProperty(() => { const n = nozzle(); return add3(n.p, n.ax.z, -plumeLen() / 2); }, false), orientation: new C.CallbackProperty(() => flightWQ, false),
+      cylinder: { length: new C.CallbackProperty(plumeLen, false), topRadius: .25 * HOP_VIS, bottomRadius: new C.CallbackProperty(() => (.6 + FL.thr * .9) * HOP_VIS, false), material: new C.ColorMaterialProperty(new C.CallbackProperty(() => C.Color.WHITE.withAlpha(.16 * FL.thr), false)), outline: false } });
+    plumeCore = viewer.entities.add({ position: new C.CallbackProperty(() => { const n = nozzle(); return add3(n.p, n.ax.z, -plumeLen() * .3); }, false), orientation: new C.CallbackProperty(() => flightWQ, false),
+      cylinder: { length: new C.CallbackProperty(() => plumeLen() * .6, false), topRadius: .17 * HOP_VIS, bottomRadius: .05 * HOP_VIS, material: new C.ColorMaterialProperty(new C.CallbackProperty(() => C.Color.fromCssColorString('#fff3e0').withAlpha(.55 * FL.thr), false)) } });
+    glowBB = viewer.entities.add({ position: new C.CallbackProperty(() => nozzle().p, false), billboard: { image: glow, scale: new C.CallbackProperty(() => .4 + FL.thr * 1.6 + Math.random() * .15, false), color: new C.CallbackProperty(() => C.Color.WHITE.withAlpha(Math.min(1, FL.thr * 1.3)), false) } });
+    arrow = viewer.entities.add({ polyline: { positions: new C.CallbackProperty(() => { const n = nozzle(); return [n.p, add3(n.p, n.ax.z, -(.6 + FL.thr * 5.5) * HOP_VIS)]; }, false), width: 14, arcType: C.ArcType.NONE, material: new C.PolylineArrowMaterialProperty(C.Color.WHITE.withAlpha(.9)), show: new C.CallbackProperty(() => FL.thr > .05, false) } });
+  }
+}
+function planFlight(r) {
+  FL.r = r; FL.T = []; let t = 0;
+  for (let i = 1; i < r.wps.length; i++) { const L = Math.hypot(r.wps[i][0] - r.wps[i - 1][0], r.wps[i][1] - r.wps[i - 1][1]); const d = 3.4 + L / 5200; FL.T.push({ i, t0: t, d, L }); t += d + 1.5; }
+  FL.total = t; FL.t = 0; FL.done = false; FL.fuel = 1; FL.batt = 1; FL.temp = 4.0; FL.maxDrift = 0; FL.minBatt = 1; FL.lastHop = -1;
+  FL.fuelEnd = .38 + ROUTES.indexOf(r) * .03; FL.battEnd = .22 + ROUTES.indexOf(r) * .02;
+}
+function evalFlight(t) {
+  const r = FL.r; let seg = FL.T[FL.T.length - 1], dwell = true, s = 1;
+  for (const sg of FL.T) { if (t < sg.t0) { seg = sg; s = 0; dwell = true; break; } if (t <= sg.t0 + sg.d) { seg = sg; s = (t - sg.t0) / sg.d; dwell = false; break; } if (t <= sg.t0 + sg.d + 1.5) { seg = sg; s = 1; dwell = true; break; } }
+  const a = r.wps[seg.i - 1], b = r.wps[seg.i], dx = b[0] - a[0], dy = b[1] - a[1];
+  const ha = groundAt(...a), hb = groundAt(...b);
+  const e = a[0] + dx * s, n = a[1] + dy * s, h = ha + (hb - ha) * s + OPT_APEX * seg.L * 4 * s * (1 - s);
+  FL.pos = W(e, n, h + (s > 0 && s < 1 ? LIFT : 0));
+  let thr = 0, phase = dwell ? 'SURFACE · SCAN' : 'COAST';
+  if (!dwell && s < .2) { thr = 1; phase = 'ASCENT BURN'; } else if (!dwell && s > .76) { thr = .85; phase = 'DESCENT BURN'; }
+  FL.thr += (thr - FL.thr) * .18; FL.phase = phase; FL.hopIdx = seg.i;
+  const yaw = Math.atan2(dx, dy), lean = dwell ? 0 : (s < .2 ? .16 : s > .76 ? -.1 : .05);
+  const qy = C.Quaternion.fromAxisAngle(C.Cartesian3.UNIT_Z, -yaw), qx = C.Quaternion.fromAxisAngle(C.Cartesian3.UNIT_X, -lean);
+  FL.q = C.Quaternion.multiply(qy, qx, new C.Quaternion());
+  flightWQ = worldQuat(FL.pos, FL.q);
+  // world-model ghost: drifts on the unvisited rim (hop 2)
+  const driftM = seg.i === 2 && !dwell ? 42 * Math.sin(Math.PI * Math.min(1, s * 1.15)) : (seg.i === 2 ? 4 : 1.2 + Math.sin(t * 2) * .8);
+  FL.drift = Math.max(.3, driftM); FL.maxDrift = Math.max(FL.maxDrift, FL.drift);
+  const px = -dy / (seg.L || 1), py = dx / (seg.L || 1), vis = FL.drift * 9;
+  FL.ghost = W(e + px * vis, n + py * vis, h + LIFT + FL.drift * 3);
+  // telemetry
+  const u = Math.min(1, t / FL.total);
+  FL.fuel = 1 - (1 - FL.fuelEnd) * Math.min(1, (seg.i - 1 + (dwell ? (s ? 1 : 0) : s)) / FL.T.length);
+  FL.batt = 1 - (1 - FL.battEnd) * u; FL.minBatt = Math.min(FL.minBatt, FL.batt);
+  FL.temp = 4 - 17 * u + Math.sin(t) * .3;
+  const ax = bodyAxes(flightWQ), enuF = 412 * FL.thr; FL.thrVec = [enuF * Math.sin(lean) * Math.sin(yaw), enuF * Math.sin(lean) * Math.cos(yaw), enuF * Math.cos(lean)];
+  if (dwell && s === 1 && FL.lastHop < seg.i) {
+    FL.lastHop = seg.i;
+    const lb = r.labels[seg.i].split(' ')[0];
+    log('SIM', `${r.id} HOP ${lb} TOUCHDOWN · SLOPE ${(4 + ((seg.i * 37) % 9) * .9).toFixed(1)}°`);
+    log('VERIFIER', `R3 PASS · R1 FUEL ${(FL.fuel * 100).toFixed(0)}% · R2 BATT ${(FL.batt * 100).toFixed(0)}%`);
+    if (seg.i === 2) log('ARGON', `GHOST DRIFT ON RIM · WM ERROR PEAK ${FL.maxDrift.toFixed(1)} M · WITHIN TOLERANCE`);
+  }
+}
+$('#btnExec').onclick = () => {
+  const r = selected; if (!r) return;
+  clearInterval(losTimer); flash();
+  log('ARGON', `UPLINK AUTHORISED · ${r.id} · RELAY WINDOW ${$('#los').textContent}`);
+  cands.forEach(c => { c.ent.show = false; c.mark.show = false; });
+  ROUTES.forEach(o => { o.optAlpha = o === r ? .55 : 0; if (o !== r) o.hop.show = false; });
+  ents.site.forEach(e => e.show = false);
+  planFlight(r); setupFlightEntities(r); evalFlight(0);
+  setState('FLIGHT'); FL.run = true;
+  viewer.trackedEntity = r.hop;
+};
+
+/* ---------------- PANEL 7: manual override (free 6-DOF) ---------------- */
+const OV = { anchor: null, aG: 0, p: new C.Cartesian3(), v: new C.Cartesian3(), q: C.Quaternion.IDENTITY.clone(), w: new C.Cartesian3(), thr: 0, fuel: 1, crashed: false, landed: false, keys: {}, start: null, gPhys: 0, frame: 0, crashes: 0, used: false };
+const G = 1.62, ACC_MAIN = 3.4, ALPHA = 1.5;
+function enterOverride() {
+  if (STATE !== 'FLIGHT') return;
+  FL.run = false; OV.used = true;
+  const c = C.Cartographic.fromCartesian(FL.pos, ELL);
+  const e = (C.Math.toDegrees(c.longitude) - SITE.lon) * Math.PI / 180 * MOON_R * cosLat, n = (C.Math.toDegrees(c.latitude) - SITE.lat) * Math.PI / 180 * MOON_R;
+  OV.anchor = [e, n]; OV.aG = groundAt(e, n);
+  const z = Math.max(25, (c.height - OV.aG) / HOP_VIS);
+  OV.start = { z, q: C.Quaternion.clone(FL.q) };
+  OV.startFuel = FL.fuel;
+  respawn();
+  setState('OVERRIDE');
+  log('SIM', `LOCAL SIM OVERRIDE ENGAGED · ${FL.r.id} · 1.62 M/S² BALLISTIC`);
+}
+function respawn() {
+  OV.p = new C.Cartesian3(0, 0, OV.start.z); OV.v = new C.Cartesian3(0, 0, 0); OV.w = new C.Cartesian3(0, 0, 0);
+  OV.q = C.Quaternion.clone(OV.start.q); OV.thr = 0; OV.crashed = false; OV.landed = false;
+  OV.fuel = Math.max(OV.startFuel || .6, .6);
+  show('#crash', false);
+  if (FL.r) FL.r.hop.model && (FL.r.hop.model.color = undefined);
+}
+function stepOverride(dt) {
+  const K = OV.keys;
+  if (!OV.crashed) {
+    const cut = K.ShiftLeft || K.ShiftRight;
+    const want = (!cut && K.Space && OV.fuel > 0) ? 1 : 0;
+    OV.thr = cut ? 0 : OV.thr + (want - OV.thr) * Math.min(1, dt * 8);
+    OV.fuel = Math.max(0, OV.fuel - OV.thr * .012 * dt);
+    const al = new C.Cartesian3((K.KeyW ? 1 : 0) - (K.KeyS ? 1 : 0), (K.KeyD ? 1 : 0) - (K.KeyA ? 1 : 0), (K.KeyQ ? 1 : 0) - (K.KeyE ? 1 : 0));
+    OV.w = add3(OV.w, al, ALPHA * dt);
+    if (OV.landed && OV.thr < .2) { OV.w = new C.Cartesian3(0, 0, 0); }
+    const wm = C.Cartesian3.magnitude(OV.w);
+    if (wm > 1e-6) { const dq = C.Quaternion.fromAxisAngle(C.Cartesian3.normalize(OV.w, new C.Cartesian3()), wm * dt); OV.q = C.Quaternion.multiply(OV.q, dq, new C.Quaternion()); C.Quaternion.normalize(OV.q, OV.q); }
+    const up = C.Matrix3.getColumn(C.Matrix3.fromQuaternion(OV.q, tmpM3), 2, new C.Cartesian3());
+    const acc = new C.Cartesian3(up.x * ACC_MAIN * OV.thr, up.y * ACC_MAIN * OV.thr, up.z * ACC_MAIN * OV.thr - G);
+    if (OV.landed && OV.thr * ACC_MAIN * up.z < G) { OV.v = new C.Cartesian3(0, 0, 0); }
+    else { OV.landed = false; OV.v = add3(OV.v, acc, dt); OV.p = add3(OV.p, OV.v, dt); }
+    // ground contact
+    const E = OV.anchor[0] + OV.p.x * HOP_VIS, N = OV.anchor[1] + OV.p.y * HOP_VIS;
+    let gH = groundAt(E, N);
+    if ((OV.frame++ % 3) === 0 && scene.sampleHeightSupported && tileset) {
+      try { const [lo, la] = enu2ll(E, N); const sh = scene.sampleHeight(C.Cartographic.fromDegrees(lo, la), [FL.r.hop, ghost, plume, plumeCore, glowBB, arrow].filter(Boolean)); if (sh !== undefined && isFinite(sh)) OV.gCache = sh; } catch (e) {}
+    }
+    if (OV.gCache !== undefined && Math.abs(OV.gCache - gH) < 2500) gH = OV.gCache;
+    OV.gPhys = (gH - OV.aG) / HOP_VIS;
+    if (OV.p.z <= OV.gPhys && !OV.landed) {
+      const spd = C.Cartesian3.magnitude(OV.v), tilt = C.Math.toDegrees(Math.acos(Math.max(-1, Math.min(1, up.z))));
+      OV.p = new C.Cartesian3(OV.p.x, OV.p.y, OV.gPhys);
+      if (spd > 3.0 || tilt > 32) {
+        OV.crashed = true; OV.thr = 0; OV.crashes++;
+        $('#crashWhy').textContent = `IMPACT ${spd.toFixed(1)} M/S · TILT ${tilt.toFixed(0)}° · ${tilt > 32 ? 'TIPPED OVER ON SLOPE' : 'HARD LANDING'}`;
+        show('#crash', true);
+        if (FL.r.hop.model) FL.r.hop.model.color = C.Color.fromCssColorString('#ff4d4d').withAlpha(1);
+        if (FL.r.hop.model) FL.r.hop.model.colorBlendMode = C.ColorBlendMode.MIX;
+        if (FL.r.hop.model) FL.r.hop.model.colorBlendAmount = .45;
+        log('SIM', `MANUAL OVERRIDE · VEHICLE LOST · ${spd.toFixed(1)} M/S · TILT ${tilt.toFixed(0)}°`);
+      } else { OV.landed = true; OV.v = new C.Cartesian3(0, 0, 0); OV.w = new C.Cartesian3(0, 0, 0); log('SIM', `MANUAL TOUCHDOWN · ${spd.toFixed(1)} M/S · TILT ${tilt.toFixed(0)}°`); }
+    }
+  }
+  const E = OV.anchor[0] + OV.p.x * HOP_VIS, N = OV.anchor[1] + OV.p.y * HOP_VIS;
+  FL.pos = W(E, N, OV.aG + OV.p.z * HOP_VIS);
+  FL.q = OV.q; flightWQ = worldQuat(FL.pos, OV.q); FL.thr = OV.thr; FL.fuel = OV.fuel;
+  FL.ghost = undefined;
+  const up = C.Matrix3.getColumn(C.Matrix3.fromQuaternion(OV.q, tmpM3), 2, new C.Cartesian3()), F = 120 * ACC_MAIN * OV.thr;
+  FL.thrVec = [up.x * F, up.y * F, up.z * F];
+}
+addEventListener('keydown', e => {
+  if (STATE === 'OVERRIDE') { OV.keys[e.code] = true; if (e.code === 'Space') e.preventDefault(); if (e.code === 'KeyR') respawn(); }
+});
+addEventListener('keyup', e => { OV.keys[e.code] = false; });
+$('#btnOvr').onclick = enterOverride;
+$('#btnRespawn').onclick = respawn;
+$('#btnResume').onclick = () => { show('#crash', false); if (FL.r.hop.model) FL.r.hop.model.color = undefined; setState('FLIGHT'); FL.run = !FL.done; if (FL.done) evalFlight(FL.total); log('SIM', 'AUTONOMY RESUMED · SPLINE REPLAY'); };
+
+/* ---------------- telemetry HUD ---------------- */
+let teleT = 0;
+function renderTele() {
+  const bar = v => `<div class="bar"><i style="width:${Math.max(0, Math.min(100, v * 100))}%"></i></div>`;
+  const tv = FL.thrVec.map(x => x.toFixed(0).padStart(4, ' ')).join(', ');
+  if (STATE === 'OVERRIDE') {
+    const sp = C.Cartesian3.magnitude(OV.v), up = C.Matrix3.getColumn(C.Matrix3.fromQuaternion(OV.q, tmpM3), 2, new C.Cartesian3());
+    $('#tele').innerHTML = `<h4><span>${FL.r.name} · MANUAL</span><span>${OV.crashed ? '<span style="color:var(--red)">LOST</span>' : OV.landed ? 'LANDED' : 'FREE FLIGHT'}</span></h4>
+    <div class="row"><span>ALTITUDE AGL</span><span>${Math.max(0, OV.p.z - OV.gPhys).toFixed(1)} M</span></div>
+    <div class="row"><span>VERTICAL SPEED</span><span>${OV.v.z.toFixed(2)} M/S</span></div>
+    <div class="row"><span>GROUND SPEED</span><span>${Math.hypot(OV.v.x, OV.v.y).toFixed(2)} M/S</span></div>
+    <div class="row"><span>ATTITUDE TILT</span><span>${C.Math.toDegrees(Math.acos(Math.max(-1, Math.min(1, up.z)))).toFixed(1)}°</span></div>
+    <div class="row"><span>THROTTLE</span><span>${(OV.thr * 100).toFixed(0)}%</span></div>
+    <div class="row"><span>FUEL</span><span>${(OV.fuel * 100).toFixed(1)}%</span></div>${bar(OV.fuel)}
+    <div class="row"><span>THRUST [FX,FY,FZ]</span><span>[${tv}] N</span></div>
+    <div class="row"><span>GRAVITY</span><span>1.62 M/S²</span></div>
+    <div class="row"><span>SPEED</span><span>${sp.toFixed(2)} M/S</span></div>`;
+    return;
+  }
+  const r = FL.r; if (!r) return;
+  $('#tele').innerHTML = `<h4><span>${r.name} · AUTONOMOUS</span><span>${FL.done ? 'COMPLETE' : 'HOP ' + Math.min(FL.hopIdx, r.wps.length - 1) + '/' + (r.wps.length - 1)}</span></h4>
+   <div class="row"><span>PHASE</span><span>${FL.done ? 'END COORD · SAFE' : FL.phase}</span></div>
+   <div class="row"><span>TARGET</span><span>${r.labels[Math.min(FL.hopIdx, r.labels.length - 1)]}</span></div>
+   <div class="row"><span>FUEL</span><span>${(FL.fuel * 100).toFixed(1)}%</span></div>${bar(FL.fuel)}
+   <div class="row"><span>BATTERY</span><span>${(FL.batt * 100).toFixed(1)}%</span></div>${bar(FL.batt)}
+   <div class="row"><span>INTERNAL TEMP</span><span>${FL.temp.toFixed(1)} °C</span></div>
+   <div class="row"><span>SURFACE TEMP</span><span>-173.0 °C</span></div>
+   <div class="row"><span>THRUST [FX,FY,FZ]</span><span>[${tv}] N</span></div>
+   <div class="row wm"><span>WORLD-MODEL ERROR</span><span>${FL.drift.toFixed(1)} M</span></div>
+   <div class="row"><span>RELAY</span><span>${Math.floor(FL.t / 10) % 3 === 0 ? 'TX · H-' + r.id.slice(1) : 'STANDBY'}</span></div>`;
+}
+
+/* ---------------- frame loop ---------------- */
+let lastT = performance.now();
+scene.preRender.addEventListener(() => {
+  const now = performance.now(), dt = Math.min(.05, (now - lastT) / 1000); lastT = now;
+  if (STATE === 'HOME') camera.rotate(C.Cartesian3.UNIT_Z, -.0009);
+  if (STATE === 'FLIGHT' && FL.run) {
+    FL.t += dt; evalFlight(Math.min(FL.t, FL.total));
+    if (FL.t >= FL.total && !FL.done) { FL.done = true; FL.run = false; FL.thr = 0; show('#banner', true); setTimeout(() => show('#banner', false), 4000); $('#btnTerm').classList.add('pulse'); log('SIM', `${FL.r.id} END COORDINATE REACHED · ${FL.r.wps.length - 1} HOPS`); log('VERIFIER', 'POST-FLIGHT TRACE · R1–R6 PASS'); }
+  }
+  if (STATE === 'FLIGHT' && !FL.run && FL.done) FL.thr *= .9;
+  if (STATE === 'OVERRIDE') stepOverride(dt);
+  tickCands(now);
+  // keep the camera above the horizon and above the terrain on the map views
+  if (['MAP_TOP', 'MAP_TILT', 'SELECTED'].includes(STATE) && !camera._currentFlight && !viewer.trackedEntity) {
+    const minP = -0.14; let fix = false, dest;
+    const pc = camera.positionCartographic;
+    const e = (C.Math.toDegrees(pc.longitude) - SITE.lon) * Math.PI / 180 * MOON_R * cosLat, n = (C.Math.toDegrees(pc.latitude) - SITE.lat) * Math.PI / 180 * MOON_R;
+    const minH = groundAt(e, n) + 600;
+    if (pc.height < minH) { fix = true; dest = C.Cartesian3.fromRadians(pc.longitude, pc.latitude, minH, ELL); }
+    if (camera.pitch > minP || Math.abs(C.Math.negativePiToPi(camera.roll)) > .03) fix = true;
+    if (fix) camera.setView({ destination: dest, orientation: { heading: camera.heading, pitch: Math.min(camera.pitch, minP), roll: 0 } });
+  }
+  // view cube sync
+  if (['MAP_TOP', 'MAP_TILT', 'SELECTED'].includes(STATE)) $('#cube').style.transform = `rotateX(${C.Math.toDegrees(camera.pitch).toFixed(1)}deg) rotateY(${(-C.Math.toDegrees(camera.heading)).toFixed(1)}deg)`;
+  if (now - teleT > 90 && (STATE === 'FLIGHT' || STATE === 'OVERRIDE')) { teleT = now; renderTele(); $('#frameNo').textContent = 6642 + Math.floor(now / 1000) % 400; }
+});
+
+/* ---------------- PANEL 8: summary ---------------- */
+async function terminate() {
+  if (!FL.r) return;
+  const r = FL.r; FL.run = false; FL.thr = 0; show('#crash', false);
+  viewer.trackedEntity = undefined; camera.lookAtTransform(C.Matrix4.IDENTITY);
+  [plume, plumeCore, glowBB, arrow, ghost].forEach(e => e && (e.show = false));
+  log('ARGON', `MISSION TERMINATED BY OPERATOR · ${r.id}`);
+  toast('COMPILING MISSION SUMMARY');
+  ROUTES.forEach(o => { o.optAlpha = 1; o.hop.show = o === r; });
+  ents.wp.forEach(e => e.show = true);
+  const bs = new C.BoundingSphere(W(150, 0, GRID.base), 14500);
+  camera.flyToBoundingSphere(bs, { offset: new C.HeadingPitchRange(0, C.Math.toRadians(-89.6), bs.radius * 2.2), duration: 0 });
+  await waitTiles(3500); await new Promise(r2 => setTimeout(r2, 300));
+  try { scene.render(); } catch (e) {}
+  let url = ''; try { url = scene.canvas.toDataURL('image/png'); } catch (e) {}
+  SUMMARY.img = url;
+  $('#ovImg').style.backgroundImage = url ? `url(${url})` : 'none';
+  const crat = r.wps.length - 1;
+  SUMMARY.line = `CRATERS ${crat} · FUEL ${(FL.fuelEnd * 100).toFixed(0)}% · MIN BATTERY ${(FL.minBatt * 100).toFixed(0)}% · MAX DRIFT ${FL.maxDrift.toFixed(0)} m · SPEC PASS${OV.used ? ` · OVERRIDE ${OV.crashes} CRASH${OV.crashes === 1 ? '' : 'ES'}` : ''}`;
+  $('#sumLine').textContent = SUMMARY.line;
+  const cls = { SIM: 's1', VERIFIER: 's2', ARGON: 's3' };
+  $('#logs').innerHTML = LOGS.map(l => `<div class="${/LOST|VIOLATION/.test(l.msg) ? 's4' : cls[l.src] || ''}"><span>${l.t}</span>${l.src} ${l.msg}</div>`).join('');
+  toast('', 0); setState('SUMMARY');
+}
+const SUMMARY = { img: '', line: '' };
+$('#btnTerm').onclick = terminate;
+function download(name, href) { const a = document.createElement('a'); a.href = href; a.download = name; document.body.appendChild(a); a.click(); a.remove(); }
+$('#btnExport').onclick = () => {
+  const cv = document.createElement('canvas'); cv.width = 1920; cv.height = 1080; const g = cv.getContext('2d');
+  g.fillStyle = '#000'; g.fillRect(0, 0, 1920, 1080);
+  const done = () => {
+    g.strokeStyle = 'rgba(255,255,255,.8)'; g.strokeRect(60, 60, 1800, 960);
+    g.fillStyle = 'rgba(0,0,0,.72)'; g.fillRect(60, 900, 1800, 120);
+    g.fillStyle = '#fff'; g.font = '300 34px Jost, sans-serif'; g.fillText('S E L E N E  ·  MISSION PATH · ' + FL.r.name, 90, 950);
+    g.font = '16px IBM Plex Mono, monospace'; g.fillStyle = '#3ddc84'; g.fillText(SUMMARY.line, 90, 990);
+    g.fillStyle = 'rgba(255,255,255,.6)'; g.fillText('DAEDALUS · 5.9°S 179.4°E · ' + new Date().toISOString(), 1300, 950);
+    download(`selene_${FL.r.id}_mission_path.png`, cv.toDataURL('image/png'));
+  };
+  if (SUMMARY.img) { const im = new Image(); im.onload = () => { const s = Math.max(1800 / im.width, 960 / im.height); const w = im.width * s, h = im.height * s; g.save(); g.beginPath(); g.rect(60, 60, 1800, 960); g.clip(); g.drawImage(im, 960 - w / 2, 540 - h / 2, w, h); g.restore(); done(); }; im.src = SUMMARY.img; } else done();
+  log('SIM', 'MISSION PATH EXPORTED · PNG');
+};
+$('#btnUplink').onclick = () => {
+  const r = FL.r, pkg = { mission: 'SELENE-DAEDALUS-01', hopper: r.id, region: 'Daedalus', center_deg: [SITE.lat, SITE.lon], frame: 'ENU metres (crop)', waypoints: r.wps.map((p, i) => ({ id: r.labels[i], x: Math.round(p[0] / SCALE), y: Math.round(p[1] / SCALE) })), verifier: { rollouts: 1000, rules: ['R1', 'R2', 'R3', 'R4', 'R5', 'R6'], verdict: 'PASS' }, policy: { updates: 4112, transitions: 15790080, episodes: 526336 } };
+  download(`selene_${r.id}_uplink.json`, URL.createObjectURL(new Blob([JSON.stringify(pkg, null, 2)], { type: 'application/json' })));
+};
+$('#btnNew').onclick = () => location.reload();
+
+setState('HOME');
+log('SIM', 'MISSION CONTROL ONLINE · CESIUM MOON · ELLIPSOID 1,737.4 KM');
+</script>
+</body>
+</html>
