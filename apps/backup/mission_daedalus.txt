@@ -1,0 +1,38 @@
+# ============================================================
+#  SELENE MISSION FILE  ·  v3.1  ·  FAR SIDE NIGHT OPS
+# ============================================================
+MISSION:      SELENE-DAEDALUS-01
+REGION:       Daedalus crater, lunar far side
+CENTER:       5.9 S  179.4 E
+TERRAIN:      NASA LOLA SLDEM2015 · 200x200 crop @ 100 m
+ENVIRONMENT:  lunar night · surface -173 C · no Earth LOS
+FLEET:        4 hoppers (H1-H4) · shared lander hub
+
+# Coordinates are local ENU metres from the Daedalus crop centre
+START c1:     -2600 E   -2600 N   (lander hub)
+END   c5:      2900 E    2600 N   (survey rendezvous)
+
+CRATERS:
+  daedalus_a   1550   550   r797
+  daedalus_b    550  1850   r730
+  daedalus_c  -1350  1250   r864
+  daedalus_d  -1650  -650   r794
+  daedalus_e   -350 -1850   r766
+  daedalus_f   1450 -1450   r853
+  daedalus_g   3750  1150   r957
+  daedalus_h   1550  3650   r924
+  daedalus_i  -2850  2750   r935
+  daedalus_j  -3750 -1350   r883
+  daedalus_k  -1050 -3650   r973
+
+SAFETY SPEC (Argon):
+  R1  fuel reserve        >= 10% (1.5 kg)
+  R2  battery reserve     >= 20%
+  R3  landing slope       <= 15 deg
+  R4  fleet separation    >= 100 m
+  R5  relay uplink        single transmitter per window
+  R6  single-hop range    <= 3000 m
+
+RELAY:        orbiter windows 40 s every 120 s
+POLICY:       MAPPO (CTDE) + ensemble world model · checkpoints_nasa_extended
+VERIFIER:     Monte Carlo · 1000 perturbed rollouts per plan
