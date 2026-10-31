@@ -11,5 +11,6 @@ Numbered, one decision per file. Use `0000-template.md` as the starting point fo
 | [0005](0005-far-side-at-night.md) | Far side at lunar night, Halloween styling | Accepted |
 | [0006](0006-learned-world-model.md) | A learned world model inside a hand-built simulator | Accepted |
 | [0007](0007-episode-json-handoff.md) | Episode JSON as the handoff to the 3D view | Accepted |
+| [0008](0008-fleet-and-single-orchestrator.md) | A hopper fleet under a single Argon orchestrator | Accepted |
 
 This table must stay in sync with the files in this folder.

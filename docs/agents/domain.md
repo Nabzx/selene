@@ -6,7 +6,7 @@ How an engineering agent should consume this repo's domain documentation.
 
 - [`CONTEXT.md`](../../CONTEXT.md) at the repo root: the glossary.
 - [`docs/adr/`](../adr): the ADRs that touch the area you are about to change.
-- [`docs/OVERVIEW.md`](../OVERVIEW.md): what the project is and how the demo runs.
+- [`docs/SUMMARY.md`](../SUMMARY.md): what the project is and how each part works.
 
 ## Use the glossary's vocabulary
 

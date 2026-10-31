@@ -15,6 +15,19 @@ The roughly 14.75 Earth days without sunlight at a given spot. No solar charging
 The drone. A small rocket-propelled lander that moves by short ballistic hops. No air on the Moon, so no rotors.
 _Avoid_: quadcopter, rover.
 
+**Fleet**
+The four to five hoppers trained together. The project's multi-agent system.
+
+**Orchestrator**
+Gemini 4 Argon, the single model that plans, reads documents and judges results for the whole fleet.
+_Avoid_: commander agent, planner agent (there is only one orchestrator).
+
+**MAPPO**
+Multi-agent PPO. One policy shared by every hopper, a centralised critic during training, each hopper acting on its own observations.
+
+**Fleet plan**
+Argon's assignment of craters to hoppers plus every hop for every hopper. What the verifier checks.
+
 **Hop**
 One flight from a launch cell to a landing cell. Costs fuel set by distance and lunar gravity (1.62 m/s²).
 
@@ -26,7 +39,7 @@ The hand-built ground truth: terrain from LOLA, hop physics, battery, temperatur
 _Avoid_: world model (that is the learned one).
 
 **World model**
-The small neural network the hopper learns from simulator transitions. Given a state and an action, it predicts the next state. The policy plans inside it.
+The small neural network the fleet learns from simulator transitions, shared by every hopper. Given a state and an action, it predicts the next state. The policy plans inside it.
 
 **World-model error**
 The gap between what the world model predicted and what the simulator did. Logged per step, mapped per cell, read by Argon.

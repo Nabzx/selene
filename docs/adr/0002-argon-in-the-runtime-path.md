@@ -10,7 +10,7 @@ The judges ask whether a project does work that needed Gemini 4 Argon. Code is w
 
 ## Decision
 
-Argon does five jobs while the app runs: writing the safety spec from documents, writing and rewriting the reward function, planning the crater route, revising a route from failure statistics, and reviewing the world model's errors. Smaller Gemini models handle summaries and guardrails. The verifier is deterministic code. No non-Gemini model runs inside the app.
+Argon does five jobs while the app runs: writing the safety spec from documents, writing and rewriting the reward function, planning the crater route, revising a route from failure statistics, and reviewing the world model's errors. Argon is the single orchestrator (ADR-0008): no other model plans or judges. The verifier is deterministic code. No non-Gemini model runs inside the app.
 
 ## Consequences
 
