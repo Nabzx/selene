@@ -67,7 +67,8 @@ Status: scaffold. See [`ROADMAP.md`](ROADMAP.md).
 ## Structure
 
 ```
-apps/sim     simulator, world model, MAPPO training, verifier, Argon orchestrator
+apps/sim     simulator, world model, MAPPO training, verifier
+apps/agent   Argon orchestrator, run as a Gemini managed agent
 data/        terrain crop and logged episodes (raw downloads are gitignored)
 docs/        summary, ADRs, datasets, research notes
 scripts/     one-off tools
