@@ -30,6 +30,7 @@ from torch.distributions import Categorical
 
 from selene_sim.env import FleetEnv, VectorFleetEnv
 from selene_sim.reward import reward_versions
+from selene_sim.sim import SimConfig, TerrainGrid
 from selene_sim.world_model import (
     TransitionBuffer,
     WorldModelEnsemble,
@@ -84,6 +85,12 @@ class MAPPOConfig:
     mbpo_rollout_batch: int = 64
     mbpo_loss_weight: float = 0.1
     device: str | None = None
+    curriculum: bool = True
+    curriculum_warmup_updates: int = 40
+    lr_schedule: str = "cosine"
+    entropy_decay: bool = True
+    ent_coef_min: float = 0.003
+    terrain_path: str | None = None
 
     def __post_init__(self) -> None:
         if self.quick:
@@ -103,6 +110,8 @@ class MAPPOConfig:
                 self.total_updates = 40
             if self.time_budget_s == 1200.0:
                 self.time_budget_s = 120.0
+            if self.curriculum_warmup_updates == 40:
+                self.curriculum_warmup_updates = 15
 
 
 def _layer_init(
@@ -499,11 +508,36 @@ def _compute_ctde_coordination_shaping(
             same_hop = is_hop & (act_np[:, j] == a_i)
             shaping[:, i] -= np.where(same_hop, 15.0, 0.0)
 
+        # Relay transmission coordination shaping:
+        # Enforce solitary clean send and penalise concurrent transmission attempts
+        is_send_i = (a_i == send_action_idx)
+        unsent_i = obs_prev[:, i, 5] * 5.0
+
+        for j in range(n_hoppers):
+            if j == i:
+                continue
+            is_send_j = (act_np[:, j] == send_action_idx)
+            conflict_pair = is_send_i & is_send_j
+            # Heavy penalty for simultaneous transmission collisions
+            shaping[:, i] -= np.where(conflict_pair, 35.0, 0.0)
+
+            # Buffer priority yield rule: if hopper j also sends and has more unsent data, hopper i must yield
+            unsent_j = obs_prev[:, j, 5] * 5.0
+            yield_violation = conflict_pair & (unsent_i < unsent_j)
+            shaping[:, i] -= np.where(yield_violation, 20.0, 0.0)
+
+        # Bonus for successful solitary transmission when carrying data
+        other_sends = np.zeros(num_envs, dtype=bool)
+        for j in range(n_hoppers):
+            if j != i:
+                other_sends |= (act_np[:, j] == send_action_idx)
+        solo_send = is_send_i & (~other_sends) & (unsent_i >= 0.8)
+        shaping[:, i] += np.where(solo_send, 10.0, 0.0)
+
         # Stagger relay transmissions across hoppers so hopper 0 transmits on 1+ scans
         # while hoppers i > 0 batch >= 2 scans before transmitting
         if i > 0:
-            unsent_prev = obs_prev[:, i, 5] * 5.0
-            early_send = (a_i == send_action_idx) & (unsent_prev < 1.5)
+            early_send = is_send_i & (unsent_i < 1.5)
             shaping[:, i] -= np.where(early_send, 25.0, 0.0)
 
     return shaping
@@ -536,6 +570,25 @@ def train_mappo(
     np.random.seed(cfg.seed)
 
     device = resolve_mappo_device(cfg.device)
+
+    # Optional NASA DEM terrain ingestion or custom terrain grid
+    custom_terrain: TerrainGrid | None = None
+    if cfg.terrain_path is not None:
+        t_path = Path(cfg.terrain_path)
+        if t_path.exists():
+            custom_terrain = TerrainGrid.from_npz(t_path)
+
+    # Configure base physical noise settings for curriculum ramp
+    nominal_sim_config = SimConfig()
+    initial_sim_config = SimConfig(
+        noise_enabled=True,
+        thrust_sigma_rel=0.0 if cfg.curriculum else nominal_sim_config.thrust_sigma_rel,
+        scatter_sigma_rel=0.0 if cfg.curriculum else nominal_sim_config.scatter_sigma_rel,
+        scatter_sigma_base_m=0.0 if cfg.curriculum else nominal_sim_config.scatter_sigma_base_m,
+        slope_noise_sigma_deg=0.0 if cfg.curriculum else nominal_sim_config.slope_noise_sigma_deg,
+        dust_max_extra_burn=0.0 if cfg.curriculum else nominal_sim_config.dust_max_extra_burn,
+    )
+
     env = VectorFleetEnv(
         num_envs=cfg.num_envs,
         n_hoppers=cfg.n_hoppers,
@@ -543,6 +596,8 @@ def train_mappo(
         max_steps=cfg.max_steps,
         quick=cfg.quick,
         seed=cfg.seed,
+        terrain=custom_terrain,
+        config=initial_sim_config,
         record_transitions=True,
     )
 
@@ -600,10 +655,39 @@ def train_mappo(
     start_wall = time.perf_counter()
 
     for update in range(1, cfg.total_updates + 1):
-        frac = 1.0 - (update - 1.0) / float(max(1, cfg.total_updates))
-        lr_now = cfg.lr * max(0.1, frac)
+        # Progress fraction from 0.0 (start) to 1.0 (end)
+        progress = (update - 1.0) / float(max(1, cfg.total_updates - 1)) if cfg.total_updates > 1 else 0.0
+
+        # Learning rate schedule
+        if cfg.lr_schedule == "cosine":
+            lr_min = cfg.lr * 0.1
+            lr_now = lr_min + 0.5 * (cfg.lr - lr_min) * (1.0 + math.cos(math.pi * progress))
+        else:
+            frac = 1.0 - (update - 1.0) / float(max(1, cfg.total_updates))
+            lr_now = cfg.lr * max(0.1, frac)
+
         for pg in optimizer.param_groups:
             pg["lr"] = lr_now
+
+        # Dynamic entropy decay schedule
+        if cfg.entropy_decay:
+            ent_coef_now = cfg.ent_coef_min + 0.5 * (cfg.ent_coef - cfg.ent_coef_min) * (
+                1.0 + math.cos(math.pi * progress)
+            )
+        else:
+            ent_coef_now = cfg.ent_coef
+
+        # Curriculum noise ramp: ramp noise parameters smoothly from 0 to nominal over warmup updates
+        if cfg.curriculum and cfg.curriculum_warmup_updates > 0:
+            c_factor = min(1.0, float(update) / float(cfg.curriculum_warmup_updates))
+            env.config = SimConfig(
+                noise_enabled=True,
+                thrust_sigma_rel=c_factor * nominal_sim_config.thrust_sigma_rel,
+                scatter_sigma_rel=c_factor * nominal_sim_config.scatter_sigma_rel,
+                scatter_sigma_base_m=c_factor * nominal_sim_config.scatter_sigma_base_m,
+                slope_noise_sigma_deg=c_factor * nominal_sim_config.slope_noise_sigma_deg,
+                dust_max_extra_burn=c_factor * nominal_sim_config.dust_max_extra_burn,
+            )
 
         b_obs = torch.zeros(
             (rollout_steps, num_envs, n_hoppers, env.obs_dim),
@@ -758,7 +842,7 @@ def train_mappo(
                 v_loss = 0.5 * ((newvalue_norm - f_returns_norm[mb_idx]) ** 2).mean()
                 entropy_loss = entropy.mean()
 
-                loss = pg_loss - cfg.ent_coef * entropy_loss + cfg.vf_coef * v_loss
+                loss = pg_loss - ent_coef_now * entropy_loss + cfg.vf_coef * v_loss
 
                 optimizer.zero_grad(set_to_none=True)
                 loss.backward()
@@ -881,7 +965,7 @@ def train_mappo(
                         )
                         mbpo_loss = cfg.mbpo_loss_weight * (
                             -(im_adv.detach() * im_logp).mean()
-                            - cfg.ent_coef * im_ent.mean()
+                            - ent_coef_now * im_ent.mean()
                         )
                         optimizer.zero_grad(set_to_none=True)
                         mbpo_loss.backward()
@@ -1217,11 +1301,42 @@ def main(argv: list[str] | None = None) -> int:
         default="data/episodes.json",
         help="Path to export 3D replay episodes JSON.",
     )
+    parser.add_argument(
+        "--terrain",
+        type=str,
+        default=None,
+        help="Path to terrain NPZ file (e.g. data/terrain/daedalus_nasa_sldem2015.npz).",
+    )
+    parser.add_argument(
+        "--curriculum",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Enable physics noise curriculum warmup (default: True).",
+    )
+    parser.add_argument(
+        "--lr-schedule",
+        type=str,
+        choices=["cosine", "linear"],
+        default="cosine",
+        help="Learning rate schedule type (cosine or linear).",
+    )
+    parser.add_argument(
+        "--time-budget",
+        type=float,
+        default=None,
+        help="Override training wall-time budget in seconds (e.g. 1800 for 30 mins).",
+    )
     args = parser.parse_args(argv)
 
     cfg = MAPPOConfig(quick=args.quick)
     if args.updates is not None:
         cfg.total_updates = int(args.updates)
+    if args.time_budget is not None:
+        cfg.time_budget_s = float(args.time_budget)
+    if args.terrain is not None:
+        cfg.terrain_path = args.terrain
+    cfg.curriculum = args.curriculum
+    cfg.lr_schedule = args.lr_schedule
 
     res = train_mappo(
         config=cfg,
