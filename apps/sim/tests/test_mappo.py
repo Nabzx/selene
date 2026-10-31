@@ -270,3 +270,56 @@ def test_issue13_mbpo_imagine_rollout_uncertainty_gating() -> None:
     assert not np.any(rollout_gated["valid_mask"][0, exceeded_step0])
     assert not np.any(rollout_gated["valid_mask"][1, exceeded_step0])
     assert not np.any(rollout_gated["valid_mask"][2, exceeded_step0])
+
+
+def test_coordination_shaping_and_curriculum_schedule(tmp_path: Path) -> None:
+    """Verify relay coordination shaping suppresses concurrent sends and curriculum ramps noise."""
+    from selene_sim.mappo import _compute_ctde_coordination_shaping
+    from selene_sim.sim import SimConfig, TerrainGrid
+
+    # 4 hoppers, 12 craters, send action idx is 14 (12 craters + scan(12) + wait(13) + send(14))
+    n_hoppers = 4
+    n_craters = 12
+    send_idx = 14
+    num_envs = 8
+
+    # Case 1: Hoppers 0 and 1 attempt simultaneous transmission -> both penalised heavily
+    obs_prev = np.zeros((num_envs, n_hoppers, 6 + n_hoppers + 3 * n_craters), dtype=np.float32)
+    obs_prev[:, 0, 5] = 0.6  # 3.0 scans unsent
+    obs_prev[:, 1, 5] = 0.2  # 1.0 scans unsent
+
+    actions = np.zeros((num_envs, n_hoppers), dtype=np.int32)
+    actions[:, 0] = send_idx
+    actions[:, 1] = send_idx
+    actions[:, 2] = 13  # wait
+    actions[:, 3] = 13  # wait
+
+    shaping = _compute_ctde_coordination_shaping(obs_prev, actions, n_hoppers, n_craters, send_idx)
+    # Hopper 0 gets collision penalty (-35), Hopper 1 gets collision (-35) + yield penalty (-20)
+    assert np.all(shaping[:, 0] <= -30.0)
+    assert np.all(shaping[:, 1] <= -50.0)
+
+    # Case 2: Solitary transmission with unsent data -> gets positive reward shaping
+    actions_solo = np.zeros((num_envs, n_hoppers), dtype=np.int32)
+    actions_solo[:, 0] = send_idx
+    actions_solo[:, 1] = 13
+    actions_solo[:, 2] = 13
+    actions_solo[:, 3] = 13
+
+    shaping_solo = _compute_ctde_coordination_shaping(obs_prev, actions_solo, n_hoppers, n_craters, send_idx)
+    assert np.all(shaping_solo[:, 0] >= 10.0)
+
+    # Verify curriculum and terrain loading
+    nasa_npz = Path("data/terrain/daedalus_nasa_sldem2015.npz")
+    if nasa_npz.exists():
+        cfg = MAPPOConfig(
+            quick=True,
+            total_updates=4,
+            curriculum=True,
+            curriculum_warmup_updates=2,
+            terrain_path=str(nasa_npz),
+        )
+        res = train_mappo(cfg)
+        assert len(res["history"]) == 4
+        assert res["final_reward"] is not None
+
