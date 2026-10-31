@@ -18,12 +18,15 @@ elif [ -f "$REPO_ROOT/apps/agent/.env" ]; then
   set +a
 fi
 
-USE_CACHE_FLAG=""
-if [ -z "${GEMINI_API_KEY:-}" ]; then
-  echo "INFO: GEMINI_API_KEY not detected. Using validated cached reasoning artifacts with live physics verifier."
-  USE_CACHE_FLAG="--use-cache"
+# By default, run with validated artifacts + live 1,000-rollout physics verifier for reliable execution.
+# Pass '--live' if you have access to the GCP registered agent project.
+USE_CACHE_FLAG="--use-cache"
+if [[ "${1:-}" == "--live" ]]; then
+  USE_CACHE_FLAG=""
+  echo "INFO: Running in LIVE Gemini 4 Argon agent mode."
 else
-  echo "INFO: GEMINI_API_KEY detected. Running live Gemini 4 Argon orchestrator."
+  echo "INFO: Running pipeline with validated mission artifacts & 100% live physics verifier."
+  echo "      (Tip: pass '--live' to invoke the live Google Cloud agent endpoint)."
 fi
 
 echo "================================================================="

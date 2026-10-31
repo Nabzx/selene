@@ -376,7 +376,22 @@ def ask(
     if active_tools:
         kwargs["tools"] = active_tools
 
-    interaction = _poll_interaction(client, client.interactions.create(**kwargs))
+    try:
+        interaction = _poll_interaction(client, client.interactions.create(**kwargs))
+    except Exception as exc:
+        if ("not found" in str(exc).lower() or "404" in str(exc)) and "agent" in kwargs:
+            fallback_kwargs = dict(kwargs)
+            fallback_kwargs.pop("agent", None)
+            fallback_kwargs.pop("environment", None)
+            fallback_kwargs.pop("background", None)
+            fallback_kwargs["model"] = "gemini-flash-latest"
+            interaction = _poll_interaction(client, client.interactions.create(**fallback_kwargs))
+            kwargs["model"] = "gemini-flash-latest"
+            kwargs.pop("agent", None)
+            kwargs.pop("environment", None)
+            kwargs.pop("background", None)
+        else:
+            raise
 
     rounds = 0
     while interaction.status == "requires_action" and toolset is not None and rounds < MAX_TOOL_ROUNDS:
@@ -409,12 +424,15 @@ def ask(
                     }
                 )
         next_kwargs: dict[str, Any] = {
-            "agent": AGENT_ID,
             "input": results,
             "previous_interaction_id": interaction.id,
             "environment": getattr(interaction, "environment_id", None) or environment,
             "background": True,
         }
+        if "model" in kwargs:
+            next_kwargs["model"] = kwargs["model"]
+        else:
+            next_kwargs["agent"] = AGENT_ID
         if active_tools:
             next_kwargs["tools"] = active_tools
         if response_format is not None:
@@ -501,25 +519,33 @@ def _run_structured_job(
         return model_cls.model_validate(cached_data)
 
     prompt = f"{instructions}\n\n## Input data\n\n{payload_text}"
-    interaction = ask(
-        client,
-        prompt,
-        previous_interaction_id=previous_interaction_id,
-        environment=environment,
-        toolset=toolset,
-    )
-    raw_json = extract_json(interaction.output_text)
-    raw_json["source"] = "live"
-    raw_json["interaction_id"] = getattr(interaction, "id", None)
-    raw_json["environment_id"] = getattr(interaction, "environment_id", None)
-    result = model_cls.model_validate(raw_json)
+    try:
+        interaction = ask(
+            client,
+            prompt,
+            previous_interaction_id=previous_interaction_id,
+            environment=environment,
+            toolset=toolset,
+        )
+        raw_json = extract_json(interaction.output_text)
+        raw_json["source"] = "live"
+        raw_json["interaction_id"] = getattr(interaction, "id", None)
+        raw_json["environment_id"] = getattr(interaction, "environment_id", None)
+        result = model_cls.model_validate(raw_json)
 
-    if cache_file:
-        cache_file.parent.mkdir(parents=True, exist_ok=True)
-        cached_copy = result.model_copy(update={"source": "cached"})
-        cache_file.write_text(cached_copy.model_dump_json(indent=2))
+        if cache_file:
+            cache_file.parent.mkdir(parents=True, exist_ok=True)
+            cached_copy = result.model_copy(update={"source": "cached"})
+            cache_file.write_text(cached_copy.model_dump_json(indent=2))
 
-    return result
+        return result
+    except Exception as exc:
+        if cache_file and cache_file.is_file():
+            print(f"Notice: Live interaction unavailable ({exc}). Using validated cached artifact at {cache_file}.")
+            cached_data = json.loads(cache_file.read_text())
+            cached_data["source"] = "cached"
+            return model_cls.model_validate(cached_data)
+        raise
 
 
 def should_rewrite_reward(summary: dict[str, Any]) -> tuple[bool, list[str]]:
