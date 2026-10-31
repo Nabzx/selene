@@ -1,0 +1,359 @@
+{
+  "plan_id": "nasa_daedalus_mission_4hopper_safe",
+  "revision": 2,
+  "plan_source": "cached",
+  "approved_by_human": true,
+  "approved_by": "nabilshah",
+  "approved_at": "2026-10-31T15:42:53.853692+00:00",
+  "mission_time_s": 10.0,
+  "plan_sha256": "69407ee2584b7fead6dc61f3607df1d6599cf576f9d8f6c2769b5cd411dd8e79",
+  "verdict": {
+    "plan_id": "nasa_daedalus_mission_4hopper_safe",
+    "revision": 2,
+    "passed": true,
+    "pass_rate": 1.0,
+    "required_pass_rate": 0.99,
+    "approved_by_human": true,
+    "source": "simulator",
+    "terrain": "Daedalus",
+    "seed": 42,
+    "rollout_count": 1000,
+    "n_rollouts": 1000,
+    "rule_failures": {},
+    "worst_failure": null,
+    "failing_hops": [],
+    "stage_conflicts": [],
+    "resources": [
+      {
+        "hopper_id": "h0",
+        "min_fuel_fraction": 0.932,
+        "min_battery_fraction": 0.966
+      },
+      {
+        "hopper_id": "h1",
+        "min_fuel_fraction": 0.931,
+        "min_battery_fraction": 0.966
+      },
+      {
+        "hopper_id": "h2",
+        "min_fuel_fraction": 0.931,
+        "min_battery_fraction": 0.966
+      },
+      {
+        "hopper_id": "h3",
+        "min_fuel_fraction": 0.931,
+        "min_battery_fraction": 0.966
+      }
+    ],
+    "failed_rollout_count": 0,
+    "rule_results": [
+      {
+        "rule_id": "R1_fuel_reserve",
+        "statement": "Every hopper must retain at least 10% (1.5 kg) of initial fuel at all times.",
+        "passed": true,
+        "pass_rate": 1.0,
+        "reason": "min fuel 0.931"
+      },
+      {
+        "rule_id": "R2_battery_reserve",
+        "statement": "Battery charge must remain at or above 20% at every step.",
+        "passed": true,
+        "pass_rate": 1.0,
+        "reason": "min battery 0.966"
+      },
+      {
+        "rule_id": "R3_landing_slope",
+        "statement": "Touchdown terrain slope must not exceed 15.0 degrees.",
+        "passed": true,
+        "pass_rate": 1.0,
+        "reason": "max slope 10.87 deg"
+      },
+      {
+        "rule_id": "R4_fleet_separation",
+        "statement": "Minimum horizontal separation between any two hoppers must be at least 100.0 m.",
+        "passed": true,
+        "pass_rate": 1.0,
+        "reason": "min sep 546.7 m"
+      },
+      {
+        "rule_id": "R5_relay_uplink",
+        "statement": "At most one hopper may transmit during an active relay window.",
+        "passed": true,
+        "pass_rate": 1.0,
+        "reason": "relay conflict check"
+      },
+      {
+        "rule_id": "R6_max_hop_range",
+        "statement": "No single ballistic hop may exceed 3000.0 m horizontal distance.",
+        "passed": true,
+        "pass_rate": 1.0,
+        "reason": "max hop 267.4 m"
+      },
+      {
+        "rule_id": "SIM_NO_CRASH",
+        "statement": "No hopper crashes in the simulator.",
+        "passed": true,
+        "pass_rate": 1.0,
+        "reason": "ok"
+      }
+    ]
+  },
+  "fleet_plan": {
+    "plan_id": "nasa_daedalus_mission_4hopper_safe",
+    "revision": 2,
+    "rationale": "Verified four-hopper plan with 100% pass rate across 1,000 Monte Carlo rollouts on NASA DEM.",
+    "hoppers": [
+      {
+        "id": "h0",
+        "start_pos_xy": [
+          -300.0,
+          -300.0
+        ],
+        "craters_assigned": [],
+        "steps": [
+          {
+            "stage": 0,
+            "action": "hop",
+            "target_crater": null,
+            "target_xy": [
+              -400.0,
+              -500.0
+            ],
+            "from_xy": null,
+            "to_xy": [
+              -400.0,
+              -500.0
+            ],
+            "wait_s": 0.0
+          },
+          {
+            "stage": 1,
+            "action": "scan",
+            "target_crater": null,
+            "target_xy": [
+              -400.0,
+              -500.0
+            ],
+            "from_xy": null,
+            "to_xy": [
+              -400.0,
+              -500.0
+            ],
+            "wait_s": 0.0
+          }
+        ]
+      },
+      {
+        "id": "h1",
+        "start_pos_xy": [
+          300.0,
+          -300.0
+        ],
+        "craters_assigned": [],
+        "steps": [
+          {
+            "stage": 0,
+            "action": "hop",
+            "target_crater": null,
+            "target_xy": [
+              200.0,
+              -500.0
+            ],
+            "from_xy": null,
+            "to_xy": [
+              200.0,
+              -500.0
+            ],
+            "wait_s": 0.0
+          },
+          {
+            "stage": 1,
+            "action": "scan",
+            "target_crater": null,
+            "target_xy": [
+              200.0,
+              -500.0
+            ],
+            "from_xy": null,
+            "to_xy": [
+              200.0,
+              -500.0
+            ],
+            "wait_s": 0.0
+          }
+        ]
+      },
+      {
+        "id": "h2",
+        "start_pos_xy": [
+          -300.0,
+          300.0
+        ],
+        "craters_assigned": [],
+        "steps": [
+          {
+            "stage": 0,
+            "action": "hop",
+            "target_crater": null,
+            "target_xy": [
+              -400.0,
+              100.0
+            ],
+            "from_xy": null,
+            "to_xy": [
+              -400.0,
+              100.0
+            ],
+            "wait_s": 0.0
+          },
+          {
+            "stage": 1,
+            "action": "scan",
+            "target_crater": null,
+            "target_xy": [
+              -400.0,
+              100.0
+            ],
+            "from_xy": null,
+            "to_xy": [
+              -400.0,
+              100.0
+            ],
+            "wait_s": 0.0
+          }
+        ]
+      },
+      {
+        "id": "h3",
+        "start_pos_xy": [
+          300.0,
+          300.0
+        ],
+        "craters_assigned": [],
+        "steps": [
+          {
+            "stage": 0,
+            "action": "hop",
+            "target_crater": null,
+            "target_xy": [
+              200.0,
+              100.0
+            ],
+            "from_xy": null,
+            "to_xy": [
+              200.0,
+              100.0
+            ],
+            "wait_s": 0.0
+          },
+          {
+            "stage": 1,
+            "action": "scan",
+            "target_crater": null,
+            "target_xy": [
+              200.0,
+              100.0
+            ],
+            "from_xy": null,
+            "to_xy": [
+              200.0,
+              100.0
+            ],
+            "wait_s": 0.0
+          }
+        ]
+      }
+    ]
+  },
+  "sim_plan": {
+    "num_hoppers": 4,
+    "start_positions_xy": [
+      [
+        -300.0,
+        -300.0
+      ],
+      [
+        300.0,
+        -300.0
+      ],
+      [
+        -300.0,
+        300.0
+      ],
+      [
+        300.0,
+        300.0
+      ]
+    ],
+    "stages": [
+      [
+        {
+          "hopper_id": 0,
+          "action": "hop",
+          "target_xy": [
+            -400.0,
+            -500.0
+          ]
+        },
+        {
+          "hopper_id": 1,
+          "action": "hop",
+          "target_xy": [
+            200.0,
+            -500.0
+          ]
+        },
+        {
+          "hopper_id": 2,
+          "action": "hop",
+          "target_xy": [
+            -400.0,
+            100.0
+          ]
+        },
+        {
+          "hopper_id": 3,
+          "action": "hop",
+          "target_xy": [
+            200.0,
+            100.0
+          ]
+        }
+      ],
+      [
+        {
+          "hopper_id": 0,
+          "action": "scan",
+          "target_xy": [
+            -400.0,
+            -500.0
+          ]
+        },
+        {
+          "hopper_id": 1,
+          "action": "scan",
+          "target_xy": [
+            200.0,
+            -500.0
+          ]
+        },
+        {
+          "hopper_id": 2,
+          "action": "scan",
+          "target_xy": [
+            -400.0,
+            100.0
+          ]
+        },
+        {
+          "hopper_id": 3,
+          "action": "scan",
+          "target_xy": [
+            200.0,
+            100.0
+          ]
+        }
+      ]
+    ]
+  }
+}

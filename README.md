@@ -103,11 +103,12 @@ cp .env.example .env    # Add GEMINI_API_KEY (optional for offline cached runs)
 (cd apps/agent && uv run pytest)
 ```
 
-### 3. End-to-End Pipeline
-Execute the complete five-phase mission loop (Safety Spec $\to$ Environment Export $\to$ Argon Planning $\to$ Monte Carlo Verification $\to$ Diagnostic Log Review):
+### 3. End-to-End Mission Pipeline & Sign-Off
+Execute the full autonomous mission loop (Safety Spec $\to$ Environment Export $\to$ Argon Planning & Revision $\to$ 1,000-Rollout Monte Carlo Verification $\to$ Log Review $\to$ Human Uplink Sign-Off):
 ```bash
-./scripts/run_demo_pipeline.sh
+./scripts/mission_pipeline.sh
 ```
+*(Or run `./scripts/run_demo_pipeline.sh` for the non-interactive 5-phase batch check.)*
 
 ### 4. Retrain MAPPO Policy on NASA DEM
 ```bash
