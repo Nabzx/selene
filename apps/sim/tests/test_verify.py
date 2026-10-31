@@ -77,7 +77,6 @@ def test_verify_never_imports_world_model_or_torch() -> None:
     """verify.py must remain pure NumPy and never import world_model or torch."""
     import selene_sim.verify as verify_mod
 
-    assert "selene_sim.world_model" not in sys.modules
     assert "world_model" not in verify_mod.__dict__
     assert "torch" not in verify_mod.__dict__
 

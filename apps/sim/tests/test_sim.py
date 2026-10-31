@@ -24,10 +24,19 @@ from selene_sim.sim import (
 
 def test_sim_does_not_import_torch() -> None:
     """sim.py must stay pure NumPy and never import torch or world_model."""
-    assert "selene_sim.world_model" not in sys.modules
+    import ast
     import selene_sim.sim as sim_mod
 
     assert "torch" not in sim_mod.__dict__
+    assert "world_model" not in sim_mod.__dict__
+    sim_path = Path(sim_mod.__file__).resolve()
+    tree = ast.parse(sim_path.read_text(encoding="utf-8"))
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                assert not alias.name.startswith(("torch", "selene_sim.world_model"))
+        elif isinstance(node, ast.ImportFrom) and node.module is not None:
+            assert not node.module.startswith(("torch", "selene_sim.world_model"))
 
 
 def test_terrain_grid_synthetic_full_and_quick(tmp_path: Path) -> None:
