@@ -11,6 +11,7 @@ from typing import Any, TypeVar
 
 from google import genai
 from pydantic import BaseModel
+from selene_sim.sim import TerrainGrid
 
 from selene_agent.schemas import (
     FleetPlan,
@@ -29,13 +30,22 @@ from selene_agent.tools import (
     _default_mission_doc_path,
     _default_safety_spec_path,
 )
+from selene_agent.uplink import SignoffRefused, sign_off
+from selene_agent.verifier import (
+    REQUIRED_PASS_RATE,
+    passes,
+    verdict_for_revision,
+    verify_sim_plan,
+)
 
 AGENT_ID = "selene-orchestrator"
 BASE_AGENT = "antigravity-preview-09-2026"
 MODEL = "gemini-4-argon"
 PROMPT = Path(__file__).parent / "prompts" / "orchestrator.md"
+NASA_TERRAIN = Path(__file__).resolve().parents[3] / "data" / "terrain" / "daedalus_nasa_sldem2015.npz"
 TOOLS_FILE = Path(__file__).parent / "tools.py"
 POLL_SECONDS = 5
+MAX_INLINE_SOURCE_BYTES = 900_000
 MAX_TOOL_ROUNDS = 10
 
 T = TypeVar("T", bound=BaseModel)
@@ -165,6 +175,7 @@ Return ONLY valid JSON with this structure:
 
 REVISE_FLEET_INSTRUCTIONS = """Task: Verify and revise the fleet plan so it passes the safety rules.
 Use `verify_fleet_plan` to run the verifier on candidate routes, and `estimate_hop` to check hop costs. Explain what failed and what you changed in `revision_summary` and `changes`.
+The verdict in the input data comes from the simulator and is the only one that counts. The plan must reach a pass rate of at least 0.99. Fix the failing hops and stages it names. A result with `"source": "sandbox_estimate"` is only an estimate.
 
 Return ONLY valid JSON with this structure:
 {
@@ -276,10 +287,21 @@ def build_cloud_sources(
             {
                 "type": "inline",
                 "target": "/workspace/episodes.json",
-                "content": ep_file.read_text(),
+                "content": _episodes_for_sandbox(ep_file),
             }
         )
     return sources
+
+
+def _episodes_for_sandbox(path: Path) -> str:
+    """Fit episodes under the inline source limit: an agent over it is created but rejects every call."""
+    data = json.loads(path.read_text())
+    content = json.dumps(data, separators=(",", ":"))
+    while len(content.encode()) > MAX_INLINE_SOURCE_BYTES and data.get("episodes"):
+        data["episodes"].pop(0)
+        data["episodes_trimmed_for_sandbox"] = True
+        content = json.dumps(data, separators=(",", ":"))
+    return content
 
 
 def create_agent(
@@ -784,28 +806,60 @@ def verify_and_revise(
     initial_plan: FleetPlan,
     verifier_fn: Callable[[FleetPlan], dict[str, Any]] | None = None,
     *,
-    max_revisions: int = 3,
+    spec: SafetySpec | None = None,
+    max_revisions: int = 5,
     environment: str | dict[str, Any] = "remote",
     toolset: AgentToolset | None = None,
+    n: int = 1000,
+    seed: int = 42,
+    terrain: Any = None,
+    required_pass_rate: float = REQUIRED_PASS_RATE,
 ) -> tuple[FleetPlan, dict[str, Any]]:
-    """Run the verifier on a fleet plan and ask Argon to revise it until it passes or max_revisions is reached."""
+    """Revise a fleet plan from simulator failures until pass_rate reaches the bar or max_revisions runs out.
+
+    The verdict is always computed here, outside the agent. The caller must check `passes(verdict)`:
+    when revisions run out, the last plan and its failing verdict are returned.
+    """
     active_toolset = toolset if toolset is not None else AgentToolset()
-    check_fn = verifier_fn or (
-        lambda p: active_toolset.verify_fleet_plan(fleet_plan=p.model_dump())
-    )
+    if verifier_fn is None:
+        active_spec = spec or SafetySpec(rules=active_toolset._load_safety_rules())
+
+        def verify_payload(sim_plan: dict[str, Any]) -> dict[str, Any]:
+            return verify_sim_plan(
+                sim_plan,
+                active_spec,
+                n=n,
+                seed=seed,
+                terrain=terrain,
+                required_pass_rate=required_pass_rate,
+            )
+
+        check_fn = lambda p: verify_payload(
+            {**p.to_sim_plan(), "plan_id": p.plan_id, "revision": p.revision}
+        )
+        # Argon's own verify_fleet_plan calls run the same simulator check.
+        active_toolset._verifier_fn = lambda payload: verdict_for_revision(verify_payload(payload["fleet_plan"]))
+    else:
+        check_fn = verifier_fn
+
     plan = initial_plan
     verdict = check_fn(plan)
+    history = [{"revision": plan.revision, "pass_rate": verdict.get("pass_rate", 0.0)}]
     attempts = 0
-    while not verdict.get("passed", False) and attempts < max_revisions:
+    while not passes(verdict, required_pass_rate) and attempts < max_revisions:
+        previous_pass_rate = verdict.get("pass_rate", 0.0)
         plan = revise_fleet_plan(
             client,
             plan,
-            verdict,
+            verdict_for_revision(verdict),
             environment=plan.environment_id or environment,
             toolset=active_toolset,
         )
+        plan.previous_verdict_pass_rate = previous_pass_rate
         verdict = check_fn(plan)
+        history.append({"revision": plan.revision, "pass_rate": verdict.get("pass_rate", 0.0)})
         attempts += 1
+    verdict["history"] = history
     return plan, verdict
 
 
@@ -1173,6 +1227,31 @@ def main():
     revise_cmd.add_argument("verdict", nargs="?", default=None, help="optional verifier verdict file or string")
     _add_io_flags(revise_cmd)
 
+    loop_cmd = commands.add_parser(
+        "verify-revise",
+        help="check a fleet plan in the simulator and revise it with Argon until pass_rate >= 0.99",
+    )
+    loop_cmd.add_argument("fleet_plan", help="fleet plan JSON file")
+    loop_cmd.add_argument("--safety-spec", default=None, help="safety_spec.json path")
+    loop_cmd.add_argument("--terrain", default=str(NASA_TERRAIN), help="terrain .npz path")
+    loop_cmd.add_argument("--max-revisions", type=int, default=5)
+    loop_cmd.add_argument("--rollouts", type=int, default=1000)
+    loop_cmd.add_argument("--seed", type=int, default=42)
+    loop_cmd.add_argument("-o", "--output", help="write the final fleet plan JSON to this file")
+    loop_cmd.add_argument("--verdict-output", help="write the final verdict JSON to this file")
+
+    signoff_cmd = commands.add_parser(
+        "signoff",
+        help="re-verify a fleet plan, ask a person to approve it and write the uplink package",
+    )
+    signoff_cmd.add_argument("fleet_plan", help="fleet plan JSON file")
+    signoff_cmd.add_argument("--mission-time", type=float, required=True, help="current mission time in seconds")
+    signoff_cmd.add_argument("--safety-spec", default=None, help="safety_spec.json path")
+    signoff_cmd.add_argument("--terrain", default=str(NASA_TERRAIN), help="terrain .npz path")
+    signoff_cmd.add_argument("--rollouts", type=int, default=1000)
+    signoff_cmd.add_argument("--seed", type=int, default=42)
+    signoff_cmd.add_argument("-o", "--output", required=True, help="write the uplink package JSON to this file")
+
     logs_cmd = commands.add_parser("review-logs", help="review hopper logs and world-model errors using tools")
     logs_cmd.add_argument("inputs", nargs="*", help="optional episodes.json or log files/strings")
     _add_io_flags(logs_cmd)
@@ -1181,7 +1260,9 @@ def main():
 
     use_cache = getattr(args, "use_cache", False)
     cache_path = getattr(args, "cache", None)
-    client = None if (use_cache and cache_path and Path(cache_path).is_file()) else genai.Client()
+    # Signoff calls no model, so it runs without an API key.
+    offline = args.command == "signoff" or (use_cache and cache_path and Path(cache_path).is_file())
+    client = None if offline else genai.Client()
 
     if args.command == "create":
         agent = create_agent(
@@ -1222,6 +1303,41 @@ def main():
             client, args.fleet_plan, args.verdict, cache_path=cache_path, use_cache=use_cache
         )
         _emit(res, args.output)
+    elif args.command == "signoff":
+        plan = FleetPlan.model_validate_json(Path(args.fleet_plan).read_text())
+        spec_path = Path(args.safety_spec) if args.safety_spec else _default_safety_spec_path()
+        # Verify again here so a stale or edited verdict file can't reach the operator.
+        verdict = verify_sim_plan(
+            {**plan.to_sim_plan(), "plan_id": plan.plan_id, "revision": plan.revision},
+            SafetySpec.model_validate_json(spec_path.read_text()),
+            n=args.rollouts,
+            seed=args.seed,
+            terrain=TerrainGrid.from_npz(args.terrain),
+        )
+        try:
+            package = sign_off(plan, verdict, args.mission_time)
+        except SignoffRefused as exc:
+            sys.exit(f"Uplink refused: {exc}")
+        Path(args.output).write_text(json.dumps(package, indent=2))
+        print(f"Uplink package written to {args.output}")
+    elif args.command == "verify-revise":
+        spec_path = Path(args.safety_spec) if args.safety_spec else _default_safety_spec_path()
+        plan, verdict = verify_and_revise(
+            client,
+            FleetPlan.model_validate_json(Path(args.fleet_plan).read_text()),
+            spec=SafetySpec.model_validate_json(spec_path.read_text()),
+            max_revisions=args.max_revisions,
+            n=args.rollouts,
+            seed=args.seed,
+            terrain=TerrainGrid.from_npz(args.terrain),
+        )
+        if args.output:
+            Path(args.output).write_text(plan.model_dump_json(indent=2))
+        if args.verdict_output:
+            Path(args.verdict_output).write_text(json.dumps(verdict, indent=2))
+        print(json.dumps({**verdict_for_revision(verdict), "history": verdict["history"]}, indent=2))
+        if not passes(verdict):
+            sys.exit(f"Plan did not reach a pass rate of {REQUIRED_PASS_RATE} after {args.max_revisions} revisions")
     elif args.command == "review-logs":
         res = review_logs(client, args.inputs or None, cache_path=cache_path, use_cache=use_cache)
         _emit(res, args.output)
