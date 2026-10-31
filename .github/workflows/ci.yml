@@ -1,0 +1,22 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  sim:
+    name: apps/sim tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+        with:
+          working-directory: apps/sim
+      - name: Install dependencies
+        working-directory: apps/sim
+        run: uv sync --locked
+      - name: Run tests
+        working-directory: apps/sim
+        run: uv run pytest

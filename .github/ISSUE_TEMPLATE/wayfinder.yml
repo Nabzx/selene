@@ -1,0 +1,37 @@
+name: Wayfinder ticket
+description: A map, research, grilling, prototype, or task ticket in the wayfinder protocol
+labels: ["wayfinder:task"]
+body:
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind
+      options:
+        - map
+        - research
+        - grilling
+        - prototype
+        - task
+    validations:
+      required: true
+  - type: input
+    id: part-of
+    attributes:
+      label: Part of
+      description: "The phase's map issue, for example #1"
+      placeholder: "#1"
+    validations:
+      required: false
+  - type: textarea
+    id: body
+    attributes:
+      label: Details
+      description: For a map issue, use Fog, Decisions so far, and Frontier sections. For other kinds, describe the question or task.
+    validations:
+      required: true
+  - type: textarea
+    id: done-when
+    attributes:
+      label: Done when
+    validations:
+      required: false

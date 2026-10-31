@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Feature request or question
+    url: https://github.com/Nabzx/selene/discussions
+    about: Feature ideas and questions belong in Discussions, not issues.
