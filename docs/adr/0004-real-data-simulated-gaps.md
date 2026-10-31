@@ -1,17 +1,17 @@
-# 0004: Real terrain, simulated ice and flight
+# 0004: Real terrain, simulated hopper and payload
 
 ## Status
 
-Accepted
+Accepted. Revised by ADR-0005 for the move to the far side.
 
 ## Context
 
-Terrain, shadow, illumination and temperature at the lunar south pole are mapped and public. Ice abundance per cell is not: the instruments give indications, not quantities. No public dataset describes a hopper.
+Far-side terrain and night temperatures are mapped and public. No public dataset describes a hopper, a relay orbit for our scenario, or the payload readings.
 
 ## Decision
 
-Use the real datasets in `docs/data/DATASETS.md` for terrain, PSR, illumination and temperature. Sample a hidden ice field from the PSR ice database and LAMP data plus noise. Model hopper flight ballistically at 1.62 m/s² with a simple fuel model.
+Use the real datasets in `docs/data/DATASETS.md` for terrain and temperature. Model hopper flight ballistically at 1.62 m/s² with simple fuel, battery and thermal models. Simulate relay windows and payload readings.
 
 ## Consequences
 
-The UI labels the ice field and flight model as simulated. The terrain claims can be checked against NASA products.
+The UI labels the hopper, relay and payload models as simulated. Terrain claims can be checked against NASA products.
