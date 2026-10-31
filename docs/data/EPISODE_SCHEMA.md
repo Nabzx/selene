@@ -8,7 +8,7 @@ An example lives at [`data/episodes.example.json`](../../data/episodes.example.j
 
 - Positions in metres, in a local east-north-up frame centred on the terrain crop. `x` east, `y` north, `z` up.
 - Angles in radians. Time in seconds of simulated mission time.
-- Terrain heights come from `data/terrain.json` (same frame), so the view can drop the hopper onto the surface.
+- Terrain heights come from `data/terrain.json` (same frame), so the view can drop the hoppers onto the surface.
 
 ## Top level
 
@@ -31,6 +31,7 @@ An example lives at [`data/episodes.example.json`](../../data/episodes.example.j
 | `generated_at` | string | ISO 8601 timestamp |
 | `source` | `"trained"` or `"scripted"` | `scripted` must be shown as illustrative in the view |
 | `seed` | int | Simulator seed |
+| `fleet_size` | int | Number of hoppers in the fleet (4 to 5) |
 
 ### `craters[]`
 
@@ -51,7 +52,7 @@ An example lives at [`data/episodes.example.json`](../../data/episodes.example.j
 
 | Field | Type | Meaning |
 |---|---|---|
-| `episode_rewards` | number[] | Mean reward per logged episode, for the reward curve |
+| `episode_rewards` | number[] | Mean fleet reward per logged episode, for the reward curve |
 | `reward_versions` | object[] | `{ "episode": int, "summary": string }` each time Argon rewrote the reward |
 
 ### `episodes[]`
@@ -61,12 +62,22 @@ Only a sample of episodes is logged (for example 1, 50, 200, 500), not every one
 | Field | Type | Meaning |
 |---|---|---|
 | `index` | int | Training episode number |
-| `outcome` | `"completed"`, `"crashed"`, `"battery"`, `"timeout"` | How it ended |
-| `total_reward` | number | |
-| `craters_visited` | string[] | Crater ids in visit order |
-| `steps` | object[] | See below |
+| `outcome` | `"completed"`, `"crashed"`, `"battery"`, `"timeout"` | How the fleet episode ended |
+| `total_reward` | number | Sum of rewards across the fleet |
+| `craters_visited` | string[] | Distinct crater ids visited by the fleet |
+| `drones` | object[] | Per-hopper records (length equals `meta.fleet_size`), see below |
 
-### `episodes[].steps[]`
+### `episodes[].drones[]`
+
+| Field | Type | Meaning |
+|---|---|---|
+| `id` | string | Stable hopper id, for example `"h0"` |
+| `name` | string | Display name, for example `"Hopper 0"` |
+| `outcome` | `"completed"`, `"crashed"`, `"battery"`, `"timeout"` | How this hopper ended the episode |
+| `craters_visited` | string[] | Crater ids visited by this hopper in visit order |
+| `steps` | object[] | Step-by-step log for this hopper, see below |
+
+### `episodes[].drones[].steps[]`
 
 | Field | Type | Meaning |
 |---|---|---|
@@ -77,7 +88,7 @@ Only a sample of episodes is logged (for example 1, 50, 200, 500), not every one
 | `fuel` | number | 0 to 1 |
 | `battery` | number | 0 to 1 |
 | `temp_c` | number | Hopper internal temperature |
-| `action` | object | `{ "type": "hop", "target": [x, y] }`, `{ "type": "scan" }` or `{ "type": "wait" }` |
+| `action` | object | `{ "type": "hop", "target": [x, y] }`, `{ "type": "scan" }`, `{ "type": "send" }` or `{ "type": "wait" }` |
 | `reward` | number | Reward for this step |
 | `wm_pos` | `[x, y, z]` or null | Where the world model predicted the hopper would be |
 | `wm_error` | number or null | Distance between `pos` and `wm_pos` in metres |
