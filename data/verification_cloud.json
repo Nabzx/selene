@@ -11,12 +11,12 @@
   "hopper_crash_rate": 0.0,
   "relay_conflict_rate": 0.0,
   "proximity_violation_rate": 0.0,
-  "min_fuel_kg": 9.627279281616211,
-  "mean_final_fuel_kg": 11.054368019104004,
-  "p05_final_fuel_kg": 9.720492362976074,
-  "min_battery_pct": 88.6460952758789,
-  "mean_final_battery_pct": 90.76274108886719,
-  "p05_final_battery_pct": 88.65882110595703,
+  "min_fuel_kg": 9.626069068908691,
+  "mean_final_fuel_kg": 11.053176879882812,
+  "p05_final_fuel_kg": 9.7192964553833,
+  "min_battery_pct": 88.53245544433594,
+  "mean_final_battery_pct": 90.66572570800781,
+  "p05_final_battery_pct": 88.55651092529297,
   "max_landing_slope_deg": 3.7596147060394287,
   "min_separation_m": 1474.6583251953125,
   "total_downlinks_mean": 1.0,
@@ -42,12 +42,12 @@
     "hopper_crash_rate": 0.0,
     "relay_conflict_rate": 0.0,
     "proximity_violation_rate": 0.0,
-    "min_fuel_kg": 9.627279281616211,
-    "mean_final_fuel_kg": 11.054368019104004,
-    "p05_final_fuel_kg": 9.720492362976074,
-    "min_battery_pct": 88.6460952758789,
-    "mean_final_battery_pct": 90.76274108886719,
-    "p05_final_battery_pct": 88.65882110595703,
+    "min_fuel_kg": 9.626069068908691,
+    "mean_final_fuel_kg": 11.053176879882812,
+    "p05_final_fuel_kg": 9.7192964553833,
+    "min_battery_pct": 88.53245544433594,
+    "mean_final_battery_pct": 90.66572570800781,
+    "p05_final_battery_pct": 88.55651092529297,
     "max_landing_slope_deg": 3.7596147060394287,
     "min_separation_m": 1474.6583251953125,
     "total_downlinks_mean": 1.0,
@@ -309,13 +309,13 @@
           "hopper_id": "h0",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.804,
-          "final_battery_pct": 88.67,
+          "final_fuel_kg": 9.803,
+          "final_battery_pct": 88.58,
           "path_xyz": [
             [
               150.0,
               0.0,
-              -4.74
+              9.34
             ],
             [
               1559.31,
@@ -348,13 +348,13 @@
           "hopper_id": "h1",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.262,
-          "final_battery_pct": 92.48,
+          "final_fuel_kg": 12.261,
+          "final_battery_pct": 92.38,
           "path_xyz": [
             [
               0.0,
               150.0,
-              -4.5
+              9.2
             ],
             [
               576.12,
@@ -387,13 +387,13 @@
           "hopper_id": "h2",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.335,
-          "final_battery_pct": 92.44,
+          "final_fuel_kg": 12.333,
+          "final_battery_pct": 92.38,
           "path_xyz": [
             [
               -150.0,
               0.0,
-              -4.23
+              10.18
             ],
             [
               -1416.32,
@@ -426,13 +426,13 @@
           "hopper_id": "h3",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.812,
-          "final_battery_pct": 89.55,
+          "final_fuel_kg": 9.811,
+          "final_battery_pct": 89.41,
           "path_xyz": [
             [
               -0.0,
               -150.0,
-              -4.71
+              10.47
             ],
             [
               -1645.67,
@@ -472,13 +472,13 @@
           "hopper_id": "h0",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.841,
-          "final_battery_pct": 88.67,
+          "final_fuel_kg": 9.84,
+          "final_battery_pct": 88.57,
           "path_xyz": [
             [
               150.0,
               0.0,
-              -4.74
+              9.34
             ],
             [
               1520.5,
@@ -511,13 +511,13 @@
           "hopper_id": "h1",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.247,
-          "final_battery_pct": 92.53,
+          "final_fuel_kg": 12.246,
+          "final_battery_pct": 92.37,
           "path_xyz": [
             [
               0.0,
               150.0,
-              -4.5
+              9.2
             ],
             [
               624.07,
@@ -550,13 +550,13 @@
           "hopper_id": "h2",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.282,
-          "final_battery_pct": 92.4,
+          "final_fuel_kg": 12.28,
+          "final_battery_pct": 92.37,
           "path_xyz": [
             [
               -150.0,
               0.0,
-              -4.23
+              10.18
             ],
             [
               -1321.5,
@@ -589,13 +589,13 @@
           "hopper_id": "h3",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.765,
-          "final_battery_pct": 89.52,
+          "final_fuel_kg": 9.764,
+          "final_battery_pct": 89.38,
           "path_xyz": [
             [
               -0.0,
               -150.0,
-              -4.71
+              10.47
             ],
             [
               -1618.46,
@@ -635,13 +635,13 @@
           "hopper_id": "h0",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.829,
-          "final_battery_pct": 88.71,
+          "final_fuel_kg": 9.828,
+          "final_battery_pct": 88.57,
           "path_xyz": [
             [
               150.0,
               0.0,
-              -4.74
+              9.34
             ],
             [
               1573.91,
@@ -674,13 +674,13 @@
           "hopper_id": "h1",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.255,
-          "final_battery_pct": 92.47,
+          "final_fuel_kg": 12.254,
+          "final_battery_pct": 92.37,
           "path_xyz": [
             [
               0.0,
               150.0,
-              -4.5
+              9.2
             ],
             [
               590.76,
@@ -713,13 +713,13 @@
           "hopper_id": "h2",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.34,
-          "final_battery_pct": 92.43,
+          "final_fuel_kg": 12.339,
+          "final_battery_pct": 92.37,
           "path_xyz": [
             [
               -150.0,
               0.0,
-              -4.23
+              10.18
             ],
             [
               -1288.11,
@@ -752,13 +752,13 @@
           "hopper_id": "h3",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.775,
-          "final_battery_pct": 89.5,
+          "final_fuel_kg": 9.774,
+          "final_battery_pct": 89.37,
           "path_xyz": [
             [
               -0.0,
               -150.0,
-              -4.71
+              10.47
             ],
             [
               -1703.23,
@@ -798,13 +798,13 @@
           "hopper_id": "h0",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.851,
-          "final_battery_pct": 88.68,
+          "final_fuel_kg": 9.85,
+          "final_battery_pct": 88.56,
           "path_xyz": [
             [
               150.0,
               0.0,
-              -4.74
+              9.34
             ],
             [
               1523.97,
@@ -837,13 +837,13 @@
           "hopper_id": "h1",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.302,
-          "final_battery_pct": 92.46,
+          "final_fuel_kg": 12.301,
+          "final_battery_pct": 92.36,
           "path_xyz": [
             [
               0.0,
               150.0,
-              -4.5
+              9.2
             ],
             [
               587.77,
@@ -876,13 +876,13 @@
           "hopper_id": "h2",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.387,
-          "final_battery_pct": 92.38,
+          "final_fuel_kg": 12.386,
+          "final_battery_pct": 92.36,
           "path_xyz": [
             [
               -150.0,
               0.0,
-              -4.23
+              10.18
             ],
             [
               -1359.73,
@@ -915,13 +915,13 @@
           "hopper_id": "h3",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.799,
-          "final_battery_pct": 89.47,
+          "final_fuel_kg": 9.797,
+          "final_battery_pct": 89.36,
           "path_xyz": [
             [
               -0.0,
               -150.0,
-              -4.71
+              10.47
             ],
             [
               -1660.45,
@@ -961,13 +961,13 @@
           "hopper_id": "h0",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.778,
-          "final_battery_pct": 88.67,
+          "final_fuel_kg": 9.777,
+          "final_battery_pct": 88.57,
           "path_xyz": [
             [
               150.0,
               0.0,
-              -4.74
+              9.34
             ],
             [
               1555.02,
@@ -1000,13 +1000,13 @@
           "hopper_id": "h1",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.321,
-          "final_battery_pct": 92.53,
+          "final_fuel_kg": 12.32,
+          "final_battery_pct": 92.37,
           "path_xyz": [
             [
               0.0,
               150.0,
-              -4.5
+              9.2
             ],
             [
               614.31,
@@ -1039,13 +1039,13 @@
           "hopper_id": "h2",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.336,
-          "final_battery_pct": 92.43,
+          "final_fuel_kg": 12.335,
+          "final_battery_pct": 92.37,
           "path_xyz": [
             [
               -150.0,
               0.0,
-              -4.23
+              10.18
             ],
             [
               -1293.31,
@@ -1078,13 +1078,13 @@
           "hopper_id": "h3",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.82,
-          "final_battery_pct": 89.48,
+          "final_fuel_kg": 9.818,
+          "final_battery_pct": 89.37,
           "path_xyz": [
             [
               -0.0,
               -150.0,
-              -4.71
+              10.47
             ],
             [
               -1630.11,
@@ -1124,13 +1124,13 @@
           "hopper_id": "h0",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.808,
-          "final_battery_pct": 88.66,
+          "final_fuel_kg": 9.806,
+          "final_battery_pct": 88.56,
           "path_xyz": [
             [
               150.0,
               0.0,
-              -4.74
+              9.34
             ],
             [
               1540.25,
@@ -1163,13 +1163,13 @@
           "hopper_id": "h1",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.324,
-          "final_battery_pct": 92.46,
+          "final_fuel_kg": 12.323,
+          "final_battery_pct": 92.36,
           "path_xyz": [
             [
               0.0,
               150.0,
-              -4.5
+              9.2
             ],
             [
               542.97,
@@ -1202,13 +1202,13 @@
           "hopper_id": "h2",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.357,
-          "final_battery_pct": 92.39,
+          "final_fuel_kg": 12.356,
+          "final_battery_pct": 92.36,
           "path_xyz": [
             [
               -150.0,
               0.0,
-              -4.23
+              10.18
             ],
             [
               -1341.4,
@@ -1241,13 +1241,13 @@
           "hopper_id": "h3",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.8,
-          "final_battery_pct": 89.48,
+          "final_fuel_kg": 9.799,
+          "final_battery_pct": 89.36,
           "path_xyz": [
             [
               -0.0,
               -150.0,
-              -4.71
+              10.47
             ],
             [
               -1671.27,
@@ -1287,13 +1287,13 @@
           "hopper_id": "h0",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.86,
-          "final_battery_pct": 88.67,
+          "final_fuel_kg": 9.858,
+          "final_battery_pct": 88.57,
           "path_xyz": [
             [
               150.0,
               0.0,
-              -4.74
+              9.34
             ],
             [
               1583.76,
@@ -1326,13 +1326,13 @@
           "hopper_id": "h1",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.227,
-          "final_battery_pct": 92.47,
+          "final_fuel_kg": 12.226,
+          "final_battery_pct": 92.37,
           "path_xyz": [
             [
               0.0,
               150.0,
-              -4.5
+              9.2
             ],
             [
               500.69,
@@ -1365,13 +1365,13 @@
           "hopper_id": "h2",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.395,
-          "final_battery_pct": 92.43,
+          "final_fuel_kg": 12.394,
+          "final_battery_pct": 92.37,
           "path_xyz": [
             [
               -150.0,
               0.0,
-              -4.23
+              10.18
             ],
             [
               -1334.25,
@@ -1404,13 +1404,13 @@
           "hopper_id": "h3",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.764,
-          "final_battery_pct": 89.48,
+          "final_fuel_kg": 9.763,
+          "final_battery_pct": 89.37,
           "path_xyz": [
             [
               -0.0,
               -150.0,
-              -4.71
+              10.47
             ],
             [
               -1642.23,
@@ -1450,13 +1450,13 @@
           "hopper_id": "h0",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.706,
-          "final_battery_pct": 88.69,
+          "final_fuel_kg": 9.705,
+          "final_battery_pct": 88.56,
           "path_xyz": [
             [
               150.0,
               0.0,
-              -4.74
+              9.34
             ],
             [
               1551.89,
@@ -1489,13 +1489,13 @@
           "hopper_id": "h1",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.325,
-          "final_battery_pct": 92.46,
+          "final_fuel_kg": 12.324,
+          "final_battery_pct": 92.36,
           "path_xyz": [
             [
               0.0,
               150.0,
-              -4.5
+              9.2
             ],
             [
               546.91,
@@ -1528,13 +1528,13 @@
           "hopper_id": "h2",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.339,
-          "final_battery_pct": 92.47,
+          "final_fuel_kg": 12.338,
+          "final_battery_pct": 92.36,
           "path_xyz": [
             [
               -150.0,
               0.0,
-              -4.23
+              10.18
             ],
             [
               -1291.58,
@@ -1567,13 +1567,13 @@
           "hopper_id": "h3",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.714,
-          "final_battery_pct": 89.5,
+          "final_fuel_kg": 9.713,
+          "final_battery_pct": 89.36,
           "path_xyz": [
             [
               -0.0,
               -150.0,
-              -4.71
+              10.47
             ],
             [
               -1717.78,
@@ -1613,13 +1613,13 @@
           "hopper_id": "h0",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.836,
-          "final_battery_pct": 88.76,
+          "final_fuel_kg": 9.835,
+          "final_battery_pct": 88.59,
           "path_xyz": [
             [
               150.0,
               0.0,
-              -4.74
+              9.34
             ],
             [
               1542.33,
@@ -1652,13 +1652,13 @@
           "hopper_id": "h1",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.285,
-          "final_battery_pct": 92.49,
+          "final_fuel_kg": 12.284,
+          "final_battery_pct": 92.39,
           "path_xyz": [
             [
               0.0,
               150.0,
-              -4.5
+              9.2
             ],
             [
               515.32,
@@ -1691,13 +1691,13 @@
           "hopper_id": "h2",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.326,
-          "final_battery_pct": 92.45,
+          "final_fuel_kg": 12.325,
+          "final_battery_pct": 92.39,
           "path_xyz": [
             [
               -150.0,
               0.0,
-              -4.23
+              10.18
             ],
             [
               -1444.43,
@@ -1730,13 +1730,13 @@
           "hopper_id": "h3",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.823,
-          "final_battery_pct": 89.51,
+          "final_fuel_kg": 9.822,
+          "final_battery_pct": 89.39,
           "path_xyz": [
             [
               -0.0,
               -150.0,
-              -4.71
+              10.47
             ],
             [
               -1689.96,
@@ -1776,13 +1776,13 @@
           "hopper_id": "h0",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.846,
-          "final_battery_pct": 88.66,
+          "final_fuel_kg": 9.844,
+          "final_battery_pct": 88.56,
           "path_xyz": [
             [
               150.0,
               0.0,
-              -4.74
+              9.34
             ],
             [
               1580.21,
@@ -1815,13 +1815,13 @@
           "hopper_id": "h1",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.313,
-          "final_battery_pct": 92.46,
+          "final_fuel_kg": 12.311,
+          "final_battery_pct": 92.36,
           "path_xyz": [
             [
               0.0,
               150.0,
-              -4.5
+              9.2
             ],
             [
               505.23,
@@ -1854,13 +1854,13 @@
           "hopper_id": "h2",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.364,
-          "final_battery_pct": 92.43,
+          "final_fuel_kg": 12.363,
+          "final_battery_pct": 92.36,
           "path_xyz": [
             [
               -150.0,
               0.0,
-              -4.23
+              10.18
             ],
             [
               -1398.51,
@@ -1893,13 +1893,13 @@
           "hopper_id": "h3",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.814,
-          "final_battery_pct": 89.48,
+          "final_fuel_kg": 9.813,
+          "final_battery_pct": 89.36,
           "path_xyz": [
             [
               -0.0,
               -150.0,
-              -4.71
+              10.47
             ],
             [
               -1646.29,
@@ -1939,13 +1939,13 @@
           "hopper_id": "h0",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.758,
-          "final_battery_pct": 88.65,
+          "final_fuel_kg": 9.756,
+          "final_battery_pct": 88.55,
           "path_xyz": [
             [
               150.0,
               0.0,
-              -4.74
+              9.34
             ],
             [
               1555.88,
@@ -1978,13 +1978,13 @@
           "hopper_id": "h1",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.341,
-          "final_battery_pct": 92.57,
+          "final_fuel_kg": 12.34,
+          "final_battery_pct": 92.4,
           "path_xyz": [
             [
               0.0,
               150.0,
-              -4.5
+              9.2
             ],
             [
               468.42,
@@ -2017,13 +2017,13 @@
           "hopper_id": "h2",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.309,
-          "final_battery_pct": 92.38,
+          "final_fuel_kg": 12.308,
+          "final_battery_pct": 92.35,
           "path_xyz": [
             [
               -150.0,
               0.0,
-              -4.23
+              10.18
             ],
             [
               -1337.25,
@@ -2056,13 +2056,13 @@
           "hopper_id": "h3",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.758,
-          "final_battery_pct": 89.47,
+          "final_fuel_kg": 9.757,
+          "final_battery_pct": 89.35,
           "path_xyz": [
             [
               -0.0,
               -150.0,
-              -4.71
+              10.47
             ],
             [
               -1691.31,
@@ -2102,13 +2102,13 @@
           "hopper_id": "h0",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.83,
-          "final_battery_pct": 88.67,
+          "final_fuel_kg": 9.829,
+          "final_battery_pct": 88.57,
           "path_xyz": [
             [
               150.0,
               0.0,
-              -4.74
+              9.34
             ],
             [
               1558.37,
@@ -2141,13 +2141,13 @@
           "hopper_id": "h1",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.271,
-          "final_battery_pct": 92.52,
+          "final_fuel_kg": 12.27,
+          "final_battery_pct": 92.37,
           "path_xyz": [
             [
               0.0,
               150.0,
-              -4.5
+              9.2
             ],
             [
               485.54,
@@ -2180,13 +2180,13 @@
           "hopper_id": "h2",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.335,
-          "final_battery_pct": 92.39,
+          "final_fuel_kg": 12.334,
+          "final_battery_pct": 92.37,
           "path_xyz": [
             [
               -150.0,
               0.0,
-              -4.23
+              10.18
             ],
             [
               -1361.13,
@@ -2219,13 +2219,13 @@
           "hopper_id": "h3",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.815,
-          "final_battery_pct": 89.48,
+          "final_fuel_kg": 9.814,
+          "final_battery_pct": 89.37,
           "path_xyz": [
             [
               -0.0,
               -150.0,
-              -4.71
+              10.47
             ],
             [
               -1669.08,
@@ -2265,13 +2265,13 @@
           "hopper_id": "h0",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.871,
-          "final_battery_pct": 88.71,
+          "final_fuel_kg": 9.87,
+          "final_battery_pct": 88.57,
           "path_xyz": [
             [
               150.0,
               0.0,
-              -4.74
+              9.34
             ],
             [
               1495.71,
@@ -2304,13 +2304,13 @@
           "hopper_id": "h1",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.335,
-          "final_battery_pct": 92.47,
+          "final_fuel_kg": 12.334,
+          "final_battery_pct": 92.37,
           "path_xyz": [
             [
               0.0,
               150.0,
-              -4.5
+              9.2
             ],
             [
               557.49,
@@ -2343,13 +2343,13 @@
           "hopper_id": "h2",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.297,
-          "final_battery_pct": 92.39,
+          "final_fuel_kg": 12.296,
+          "final_battery_pct": 92.37,
           "path_xyz": [
             [
               -150.0,
               0.0,
-              -4.23
+              10.18
             ],
             [
               -1319.13,
@@ -2382,13 +2382,13 @@
           "hopper_id": "h3",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.829,
-          "final_battery_pct": 89.49,
+          "final_fuel_kg": 9.828,
+          "final_battery_pct": 89.37,
           "path_xyz": [
             [
               -0.0,
               -150.0,
-              -4.71
+              10.47
             ],
             [
               -1659.7,
@@ -2428,13 +2428,13 @@
           "hopper_id": "h0",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.829,
-          "final_battery_pct": 88.69,
+          "final_fuel_kg": 9.827,
+          "final_battery_pct": 88.56,
           "path_xyz": [
             [
               150.0,
               0.0,
-              -4.74
+              9.34
             ],
             [
               1566.97,
@@ -2467,13 +2467,13 @@
           "hopper_id": "h1",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.296,
-          "final_battery_pct": 92.46,
+          "final_fuel_kg": 12.294,
+          "final_battery_pct": 92.36,
           "path_xyz": [
             [
               0.0,
               150.0,
-              -4.5
+              9.2
             ],
             [
               521.84,
@@ -2506,13 +2506,13 @@
           "hopper_id": "h2",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.325,
-          "final_battery_pct": 92.39,
+          "final_fuel_kg": 12.324,
+          "final_battery_pct": 92.36,
           "path_xyz": [
             [
               -150.0,
               0.0,
-              -4.23
+              10.18
             ],
             [
               -1350.95,
@@ -2545,13 +2545,13 @@
           "hopper_id": "h3",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.797,
-          "final_battery_pct": 89.5,
+          "final_fuel_kg": 9.795,
+          "final_battery_pct": 89.36,
           "path_xyz": [
             [
               -0.0,
               -150.0,
-              -4.71
+              10.47
             ],
             [
               -1575.28,
@@ -2591,13 +2591,13 @@
           "hopper_id": "h0",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.739,
-          "final_battery_pct": 88.66,
+          "final_fuel_kg": 9.738,
+          "final_battery_pct": 88.56,
           "path_xyz": [
             [
               150.0,
               0.0,
-              -4.74
+              9.34
             ],
             [
               1587.75,
@@ -2630,13 +2630,13 @@
           "hopper_id": "h1",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.289,
-          "final_battery_pct": 92.46,
+          "final_fuel_kg": 12.288,
+          "final_battery_pct": 92.36,
           "path_xyz": [
             [
               0.0,
               150.0,
-              -4.5
+              9.2
             ],
             [
               588.45,
@@ -2669,13 +2669,13 @@
           "hopper_id": "h2",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.295,
-          "final_battery_pct": 92.39,
+          "final_fuel_kg": 12.294,
+          "final_battery_pct": 92.36,
           "path_xyz": [
             [
               -150.0,
               0.0,
-              -4.23
+              10.18
             ],
             [
               -1334.41,
@@ -2708,13 +2708,13 @@
           "hopper_id": "h3",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.814,
-          "final_battery_pct": 89.5,
+          "final_fuel_kg": 9.813,
+          "final_battery_pct": 89.36,
           "path_xyz": [
             [
               -0.0,
               -150.0,
-              -4.71
+              10.47
             ],
             [
               -1626.38,
@@ -2754,13 +2754,13 @@
           "hopper_id": "h0",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.789,
-          "final_battery_pct": 88.66,
+          "final_fuel_kg": 9.788,
+          "final_battery_pct": 88.56,
           "path_xyz": [
             [
               150.0,
               0.0,
-              -4.74
+              9.34
             ],
             [
               1552.14,
@@ -2793,13 +2793,13 @@
           "hopper_id": "h1",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.361,
-          "final_battery_pct": 92.46,
+          "final_fuel_kg": 12.36,
+          "final_battery_pct": 92.36,
           "path_xyz": [
             [
               0.0,
               150.0,
-              -4.5
+              9.2
             ],
             [
               516.19,
@@ -2832,13 +2832,13 @@
           "hopper_id": "h2",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.35,
-          "final_battery_pct": 92.42,
+          "final_fuel_kg": 12.349,
+          "final_battery_pct": 92.36,
           "path_xyz": [
             [
               -150.0,
               0.0,
-              -4.23
+              10.18
             ],
             [
               -1322.15,
@@ -2871,13 +2871,13 @@
           "hopper_id": "h3",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.831,
-          "final_battery_pct": 89.47,
+          "final_fuel_kg": 9.83,
+          "final_battery_pct": 89.36,
           "path_xyz": [
             [
               -0.0,
               -150.0,
-              -4.71
+              10.47
             ],
             [
               -1662.74,
@@ -2917,13 +2917,13 @@
           "hopper_id": "h0",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.78,
-          "final_battery_pct": 88.68,
+          "final_fuel_kg": 9.778,
+          "final_battery_pct": 88.58,
           "path_xyz": [
             [
               150.0,
               0.0,
-              -4.74
+              9.34
             ],
             [
               1575.28,
@@ -2956,13 +2956,13 @@
           "hopper_id": "h1",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.32,
-          "final_battery_pct": 92.53,
+          "final_fuel_kg": 12.319,
+          "final_battery_pct": 92.38,
           "path_xyz": [
             [
               0.0,
               150.0,
-              -4.5
+              9.2
             ],
             [
               491.95,
@@ -2995,13 +2995,13 @@
           "hopper_id": "h2",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.365,
-          "final_battery_pct": 92.4,
+          "final_fuel_kg": 12.364,
+          "final_battery_pct": 92.38,
           "path_xyz": [
             [
               -150.0,
               0.0,
-              -4.23
+              10.18
             ],
             [
               -1370.5,
@@ -3034,13 +3034,13 @@
           "hopper_id": "h3",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.83,
-          "final_battery_pct": 89.51,
+          "final_fuel_kg": 9.829,
+          "final_battery_pct": 89.38,
           "path_xyz": [
             [
               -0.0,
               -150.0,
-              -4.71
+              10.47
             ],
             [
               -1712.87,
@@ -3080,13 +3080,13 @@
           "hopper_id": "h0",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.75,
-          "final_battery_pct": 88.65,
+          "final_fuel_kg": 9.749,
+          "final_battery_pct": 88.56,
           "path_xyz": [
             [
               150.0,
               0.0,
-              -4.74
+              9.34
             ],
             [
               1575.24,
@@ -3119,13 +3119,13 @@
           "hopper_id": "h1",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.288,
-          "final_battery_pct": 92.46,
+          "final_fuel_kg": 12.287,
+          "final_battery_pct": 92.36,
           "path_xyz": [
             [
               0.0,
               150.0,
-              -4.5
+              9.2
             ],
             [
               583.68,
@@ -3158,13 +3158,13 @@
           "hopper_id": "h2",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.344,
-          "final_battery_pct": 92.38,
+          "final_fuel_kg": 12.343,
+          "final_battery_pct": 92.36,
           "path_xyz": [
             [
               -150.0,
               0.0,
-              -4.23
+              10.18
             ],
             [
               -1358.31,
@@ -3197,13 +3197,13 @@
           "hopper_id": "h3",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.711,
-          "final_battery_pct": 89.49,
+          "final_fuel_kg": 9.71,
+          "final_battery_pct": 89.36,
           "path_xyz": [
             [
               -0.0,
               -150.0,
-              -4.71
+              10.47
             ],
             [
               -1664.48,
@@ -3243,13 +3243,13 @@
           "hopper_id": "h0",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.834,
-          "final_battery_pct": 88.69,
+          "final_fuel_kg": 9.833,
+          "final_battery_pct": 88.57,
           "path_xyz": [
             [
               150.0,
               0.0,
-              -4.74
+              9.34
             ],
             [
               1508.73,
@@ -3282,13 +3282,13 @@
           "hopper_id": "h1",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.266,
-          "final_battery_pct": 92.47,
+          "final_fuel_kg": 12.265,
+          "final_battery_pct": 92.37,
           "path_xyz": [
             [
               0.0,
               150.0,
-              -4.5
+              9.2
             ],
             [
               524.03,
@@ -3321,13 +3321,13 @@
           "hopper_id": "h2",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.358,
-          "final_battery_pct": 92.39,
+          "final_fuel_kg": 12.357,
+          "final_battery_pct": 92.37,
           "path_xyz": [
             [
               -150.0,
               0.0,
-              -4.23
+              10.18
             ],
             [
               -1309.95,
@@ -3360,13 +3360,13 @@
           "hopper_id": "h3",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.745,
-          "final_battery_pct": 89.5,
+          "final_fuel_kg": 9.744,
+          "final_battery_pct": 89.37,
           "path_xyz": [
             [
               -0.0,
               -150.0,
-              -4.71
+              10.47
             ],
             [
               -1675.57,
@@ -3406,13 +3406,13 @@
           "hopper_id": "h0",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.839,
-          "final_battery_pct": 88.67,
+          "final_fuel_kg": 9.838,
+          "final_battery_pct": 88.57,
           "path_xyz": [
             [
               150.0,
               0.0,
-              -4.74
+              9.34
             ],
             [
               1590.6,
@@ -3445,13 +3445,13 @@
           "hopper_id": "h1",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.316,
-          "final_battery_pct": 92.53,
+          "final_fuel_kg": 12.315,
+          "final_battery_pct": 92.37,
           "path_xyz": [
             [
               0.0,
               150.0,
-              -4.5
+              9.2
             ],
             [
               620.06,
@@ -3484,13 +3484,13 @@
           "hopper_id": "h2",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.317,
-          "final_battery_pct": 92.39,
+          "final_fuel_kg": 12.316,
+          "final_battery_pct": 92.37,
           "path_xyz": [
             [
               -150.0,
               0.0,
-              -4.23
+              10.18
             ],
             [
               -1384.54,
@@ -3523,13 +3523,13 @@
           "hopper_id": "h3",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.694,
-          "final_battery_pct": 89.49,
+          "final_fuel_kg": 9.693,
+          "final_battery_pct": 89.37,
           "path_xyz": [
             [
               -0.0,
               -150.0,
-              -4.71
+              10.47
             ],
             [
               -1623.55,
@@ -3569,13 +3569,13 @@
           "hopper_id": "h0",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.793,
-          "final_battery_pct": 88.66,
+          "final_fuel_kg": 9.792,
+          "final_battery_pct": 88.55,
           "path_xyz": [
             [
               150.0,
               0.0,
-              -4.74
+              9.34
             ],
             [
               1530.21,
@@ -3608,13 +3608,13 @@
           "hopper_id": "h1",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.211,
-          "final_battery_pct": 92.45,
+          "final_fuel_kg": 12.209,
+          "final_battery_pct": 92.35,
           "path_xyz": [
             [
               0.0,
               150.0,
-              -4.5
+              9.2
             ],
             [
               519.49,
@@ -3647,13 +3647,13 @@
           "hopper_id": "h2",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.366,
-          "final_battery_pct": 92.37,
+          "final_fuel_kg": 12.365,
+          "final_battery_pct": 92.35,
           "path_xyz": [
             [
               -150.0,
               0.0,
-              -4.23
+              10.18
             ],
             [
               -1346.35,
@@ -3686,13 +3686,13 @@
           "hopper_id": "h3",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.74,
-          "final_battery_pct": 89.51,
+          "final_fuel_kg": 9.739,
+          "final_battery_pct": 89.35,
           "path_xyz": [
             [
               -0.0,
               -150.0,
-              -4.71
+              10.47
             ],
             [
               -1638.81,
@@ -3732,13 +3732,13 @@
           "hopper_id": "h0",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.739,
-          "final_battery_pct": 88.67,
+          "final_fuel_kg": 9.738,
+          "final_battery_pct": 88.56,
           "path_xyz": [
             [
               150.0,
               0.0,
-              -4.74
+              9.34
             ],
             [
               1636.02,
@@ -3771,13 +3771,13 @@
           "hopper_id": "h1",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.341,
-          "final_battery_pct": 92.46,
+          "final_fuel_kg": 12.34,
+          "final_battery_pct": 92.36,
           "path_xyz": [
             [
               0.0,
               150.0,
-              -4.5
+              9.2
             ],
             [
               563.25,
@@ -3810,13 +3810,13 @@
           "hopper_id": "h2",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.344,
-          "final_battery_pct": 92.42,
+          "final_fuel_kg": 12.343,
+          "final_battery_pct": 92.36,
           "path_xyz": [
             [
               -150.0,
               0.0,
-              -4.23
+              10.18
             ],
             [
               -1286.19,
@@ -3849,13 +3849,13 @@
           "hopper_id": "h3",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.75,
-          "final_battery_pct": 89.49,
+          "final_fuel_kg": 9.749,
+          "final_battery_pct": 89.36,
           "path_xyz": [
             [
               -0.0,
               -150.0,
-              -4.71
+              10.47
             ],
             [
               -1704.35,
@@ -3895,13 +3895,13 @@
           "hopper_id": "h0",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.743,
-          "final_battery_pct": 88.66,
+          "final_fuel_kg": 9.742,
+          "final_battery_pct": 88.54,
           "path_xyz": [
             [
               150.0,
               0.0,
-              -4.74
+              9.34
             ],
             [
               1559.44,
@@ -3934,13 +3934,13 @@
           "hopper_id": "h1",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.261,
-          "final_battery_pct": 92.44,
+          "final_fuel_kg": 12.26,
+          "final_battery_pct": 92.34,
           "path_xyz": [
             [
               0.0,
               150.0,
-              -4.5
+              9.2
             ],
             [
               514.38,
@@ -3973,13 +3973,13 @@
           "hopper_id": "h2",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.38,
-          "final_battery_pct": 92.37,
+          "final_fuel_kg": 12.379,
+          "final_battery_pct": 92.34,
           "path_xyz": [
             [
               -150.0,
               0.0,
-              -4.23
+              10.18
             ],
             [
               -1377.18,
@@ -4012,13 +4012,13 @@
           "hopper_id": "h3",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.781,
-          "final_battery_pct": 89.46,
+          "final_fuel_kg": 9.78,
+          "final_battery_pct": 89.34,
           "path_xyz": [
             [
               -0.0,
               -150.0,
-              -4.71
+              10.47
             ],
             [
               -1651.68,
@@ -4058,13 +4058,13 @@
           "hopper_id": "h0",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.749,
-          "final_battery_pct": 88.68,
+          "final_fuel_kg": 9.748,
+          "final_battery_pct": 88.57,
           "path_xyz": [
             [
               150.0,
               0.0,
-              -4.74
+              9.34
             ],
             [
               1635.57,
@@ -4097,13 +4097,13 @@
           "hopper_id": "h1",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.291,
-          "final_battery_pct": 92.52,
+          "final_fuel_kg": 12.29,
+          "final_battery_pct": 92.37,
           "path_xyz": [
             [
               0.0,
               150.0,
-              -4.5
+              9.2
             ],
             [
               491.99,
@@ -4136,13 +4136,13 @@
           "hopper_id": "h2",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.305,
-          "final_battery_pct": 92.39,
+          "final_fuel_kg": 12.304,
+          "final_battery_pct": 92.37,
           "path_xyz": [
             [
               -150.0,
               0.0,
-              -4.23
+              10.18
             ],
             [
               -1374.71,
@@ -4175,13 +4175,13 @@
           "hopper_id": "h3",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.778,
-          "final_battery_pct": 89.48,
+          "final_fuel_kg": 9.777,
+          "final_battery_pct": 89.37,
           "path_xyz": [
             [
               -0.0,
               -150.0,
-              -4.71
+              10.47
             ],
             [
               -1659.55,
@@ -4221,13 +4221,13 @@
           "hopper_id": "h0",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.844,
-          "final_battery_pct": 88.68,
+          "final_fuel_kg": 9.843,
+          "final_battery_pct": 88.58,
           "path_xyz": [
             [
               150.0,
               0.0,
-              -4.74
+              9.34
             ],
             [
               1535.46,
@@ -4260,13 +4260,13 @@
           "hopper_id": "h1",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.243,
-          "final_battery_pct": 92.53,
+          "final_fuel_kg": 12.242,
+          "final_battery_pct": 92.38,
           "path_xyz": [
             [
               0.0,
               150.0,
-              -4.5
+              9.2
             ],
             [
               472.15,
@@ -4299,13 +4299,13 @@
           "hopper_id": "h2",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.367,
-          "final_battery_pct": 92.4,
+          "final_fuel_kg": 12.365,
+          "final_battery_pct": 92.38,
           "path_xyz": [
             [
               -150.0,
               0.0,
-              -4.23
+              10.18
             ],
             [
               -1360.75,
@@ -4338,13 +4338,13 @@
           "hopper_id": "h3",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.746,
-          "final_battery_pct": 89.49,
+          "final_fuel_kg": 9.745,
+          "final_battery_pct": 89.38,
           "path_xyz": [
             [
               -0.0,
               -150.0,
-              -4.71
+              10.47
             ],
             [
               -1642.5,
@@ -4384,13 +4384,13 @@
           "hopper_id": "h0",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.771,
-          "final_battery_pct": 88.67,
+          "final_fuel_kg": 9.77,
+          "final_battery_pct": 88.55,
           "path_xyz": [
             [
               150.0,
               0.0,
-              -4.74
+              9.34
             ],
             [
               1545.1,
@@ -4423,13 +4423,13 @@
           "hopper_id": "h1",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.293,
-          "final_battery_pct": 92.45,
+          "final_fuel_kg": 12.292,
+          "final_battery_pct": 92.35,
           "path_xyz": [
             [
               0.0,
               150.0,
-              -4.5
+              9.2
             ],
             [
               507.69,
@@ -4462,13 +4462,13 @@
           "hopper_id": "h2",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.31,
-          "final_battery_pct": 92.41,
+          "final_fuel_kg": 12.309,
+          "final_battery_pct": 92.35,
           "path_xyz": [
             [
               -150.0,
               0.0,
-              -4.23
+              10.18
             ],
             [
               -1438.79,
@@ -4501,13 +4501,13 @@
           "hopper_id": "h3",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.773,
-          "final_battery_pct": 89.47,
+          "final_fuel_kg": 9.772,
+          "final_battery_pct": 89.35,
           "path_xyz": [
             [
               -0.0,
               -150.0,
-              -4.71
+              10.47
             ],
             [
               -1663.4,
@@ -4547,13 +4547,13 @@
           "hopper_id": "h0",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.675,
-          "final_battery_pct": 88.67,
+          "final_fuel_kg": 9.674,
+          "final_battery_pct": 88.57,
           "path_xyz": [
             [
               150.0,
               0.0,
-              -4.74
+              9.34
             ],
             [
               1550.95,
@@ -4586,13 +4586,13 @@
           "hopper_id": "h1",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.283,
-          "final_battery_pct": 92.47,
+          "final_fuel_kg": 12.282,
+          "final_battery_pct": 92.37,
           "path_xyz": [
             [
               0.0,
               150.0,
-              -4.5
+              9.2
             ],
             [
               513.51,
@@ -4625,13 +4625,13 @@
           "hopper_id": "h2",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.304,
-          "final_battery_pct": 92.4,
+          "final_fuel_kg": 12.303,
+          "final_battery_pct": 92.37,
           "path_xyz": [
             [
               -150.0,
               0.0,
-              -4.23
+              10.18
             ],
             [
               -1342.45,
@@ -4664,13 +4664,13 @@
           "hopper_id": "h3",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.856,
-          "final_battery_pct": 89.52,
+          "final_fuel_kg": 9.855,
+          "final_battery_pct": 89.38,
           "path_xyz": [
             [
               -0.0,
               -150.0,
-              -4.71
+              10.47
             ],
             [
               -1642.71,
@@ -4710,13 +4710,13 @@
           "hopper_id": "h0",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.834,
-          "final_battery_pct": 88.67,
+          "final_fuel_kg": 9.833,
+          "final_battery_pct": 88.57,
           "path_xyz": [
             [
               150.0,
               0.0,
-              -4.74
+              9.34
             ],
             [
               1548.52,
@@ -4749,13 +4749,13 @@
           "hopper_id": "h1",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.282,
-          "final_battery_pct": 92.53,
+          "final_fuel_kg": 12.281,
+          "final_battery_pct": 92.37,
           "path_xyz": [
             [
               0.0,
               150.0,
-              -4.5
+              9.2
             ],
             [
               526.14,
@@ -4788,13 +4788,13 @@
           "hopper_id": "h2",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.332,
-          "final_battery_pct": 92.39,
+          "final_fuel_kg": 12.331,
+          "final_battery_pct": 92.37,
           "path_xyz": [
             [
               -150.0,
               0.0,
-              -4.23
+              10.18
             ],
             [
               -1352.8,
@@ -4827,13 +4827,13 @@
           "hopper_id": "h3",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.737,
-          "final_battery_pct": 89.49,
+          "final_fuel_kg": 9.736,
+          "final_battery_pct": 89.37,
           "path_xyz": [
             [
               -0.0,
               -150.0,
-              -4.71
+              10.47
             ],
             [
               -1668.06,
@@ -4873,13 +4873,13 @@
           "hopper_id": "h0",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.844,
-          "final_battery_pct": 88.69,
+          "final_fuel_kg": 9.842,
+          "final_battery_pct": 88.57,
           "path_xyz": [
             [
               150.0,
               0.0,
-              -4.74
+              9.34
             ],
             [
               1569.69,
@@ -4912,13 +4912,13 @@
           "hopper_id": "h1",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.273,
-          "final_battery_pct": 92.47,
+          "final_fuel_kg": 12.272,
+          "final_battery_pct": 92.37,
           "path_xyz": [
             [
               0.0,
               150.0,
-              -4.5
+              9.2
             ],
             [
               561.08,
@@ -4951,13 +4951,13 @@
           "hopper_id": "h2",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.341,
-          "final_battery_pct": 92.39,
+          "final_fuel_kg": 12.34,
+          "final_battery_pct": 92.37,
           "path_xyz": [
             [
               -150.0,
               0.0,
-              -4.23
+              10.18
             ],
             [
               -1332.96,
@@ -4990,13 +4990,13 @@
           "hopper_id": "h3",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.732,
-          "final_battery_pct": 89.53,
+          "final_fuel_kg": 9.731,
+          "final_battery_pct": 89.38,
           "path_xyz": [
             [
               -0.0,
               -150.0,
-              -4.71
+              10.47
             ],
             [
               -1754.06,
@@ -5036,13 +5036,13 @@
           "hopper_id": "h0",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.741,
-          "final_battery_pct": 88.67,
+          "final_fuel_kg": 9.74,
+          "final_battery_pct": 88.57,
           "path_xyz": [
             [
               150.0,
               0.0,
-              -4.74
+              9.34
             ],
             [
               1559.93,
@@ -5075,13 +5075,13 @@
           "hopper_id": "h1",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.219,
-          "final_battery_pct": 92.47,
+          "final_fuel_kg": 12.217,
+          "final_battery_pct": 92.37,
           "path_xyz": [
             [
               0.0,
               150.0,
-              -4.5
+              9.2
             ],
             [
               544.57,
@@ -5114,13 +5114,13 @@
           "hopper_id": "h2",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.36,
-          "final_battery_pct": 92.47,
+          "final_fuel_kg": 12.358,
+          "final_battery_pct": 92.37,
           "path_xyz": [
             [
               -150.0,
               0.0,
-              -4.23
+              10.18
             ],
             [
               -1273.8,
@@ -5153,13 +5153,13 @@
           "hopper_id": "h3",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.85,
-          "final_battery_pct": 89.48,
+          "final_fuel_kg": 9.849,
+          "final_battery_pct": 89.37,
           "path_xyz": [
             [
               -0.0,
               -150.0,
-              -4.71
+              10.47
             ],
             [
               -1663.15,
@@ -5199,13 +5199,13 @@
           "hopper_id": "h0",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.811,
-          "final_battery_pct": 88.68,
+          "final_fuel_kg": 9.81,
+          "final_battery_pct": 88.55,
           "path_xyz": [
             [
               150.0,
               0.0,
-              -4.74
+              9.34
             ],
             [
               1544.75,
@@ -5238,13 +5238,13 @@
           "hopper_id": "h1",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.261,
-          "final_battery_pct": 92.51,
+          "final_fuel_kg": 12.26,
+          "final_battery_pct": 92.35,
           "path_xyz": [
             [
               0.0,
               150.0,
-              -4.5
+              9.2
             ],
             [
               569.47,
@@ -5277,13 +5277,13 @@
           "hopper_id": "h2",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.363,
-          "final_battery_pct": 92.38,
+          "final_fuel_kg": 12.362,
+          "final_battery_pct": 92.35,
           "path_xyz": [
             [
               -150.0,
               0.0,
-              -4.23
+              10.18
             ],
             [
               -1387.46,
@@ -5316,13 +5316,13 @@
           "hopper_id": "h3",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.775,
-          "final_battery_pct": 89.47,
+          "final_fuel_kg": 9.774,
+          "final_battery_pct": 89.35,
           "path_xyz": [
             [
               -0.0,
               -150.0,
-              -4.71
+              10.47
             ],
             [
               -1678.95,
@@ -5362,13 +5362,13 @@
           "hopper_id": "h0",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.871,
-          "final_battery_pct": 88.69,
+          "final_fuel_kg": 9.869,
+          "final_battery_pct": 88.57,
           "path_xyz": [
             [
               150.0,
               0.0,
-              -4.74
+              9.34
             ],
             [
               1541.66,
@@ -5401,13 +5401,13 @@
           "hopper_id": "h1",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.255,
-          "final_battery_pct": 92.47,
+          "final_fuel_kg": 12.254,
+          "final_battery_pct": 92.37,
           "path_xyz": [
             [
               0.0,
               150.0,
-              -4.5
+              9.2
             ],
             [
               552.54,
@@ -5440,13 +5440,13 @@
           "hopper_id": "h2",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.354,
-          "final_battery_pct": 92.39,
+          "final_fuel_kg": 12.352,
+          "final_battery_pct": 92.37,
           "path_xyz": [
             [
               -150.0,
               0.0,
-              -4.23
+              10.18
             ],
             [
               -1385.64,
@@ -5479,13 +5479,13 @@
           "hopper_id": "h3",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.829,
-          "final_battery_pct": 89.51,
+          "final_fuel_kg": 9.828,
+          "final_battery_pct": 89.37,
           "path_xyz": [
             [
               -0.0,
               -150.0,
-              -4.71
+              10.47
             ],
             [
               -1683.06,
@@ -5525,13 +5525,13 @@
           "hopper_id": "h0",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.791,
-          "final_battery_pct": 88.7,
+          "final_fuel_kg": 9.789,
+          "final_battery_pct": 88.55,
           "path_xyz": [
             [
               150.0,
               0.0,
-              -4.74
+              9.34
             ],
             [
               1526.08,
@@ -5564,13 +5564,13 @@
           "hopper_id": "h1",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.354,
-          "final_battery_pct": 92.45,
+          "final_fuel_kg": 12.353,
+          "final_battery_pct": 92.35,
           "path_xyz": [
             [
               0.0,
               150.0,
-              -4.5
+              9.2
             ],
             [
               580.77,
@@ -5603,13 +5603,13 @@
           "hopper_id": "h2",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.334,
-          "final_battery_pct": 92.42,
+          "final_fuel_kg": 12.333,
+          "final_battery_pct": 92.35,
           "path_xyz": [
             [
               -150.0,
               0.0,
-              -4.23
+              10.18
             ],
             [
               -1318.54,
@@ -5642,13 +5642,13 @@
           "hopper_id": "h3",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.807,
-          "final_battery_pct": 89.47,
+          "final_fuel_kg": 9.806,
+          "final_battery_pct": 89.35,
           "path_xyz": [
             [
               -0.0,
               -150.0,
-              -4.71
+              10.47
             ],
             [
               -1604.16,
@@ -5688,13 +5688,13 @@
           "hopper_id": "h0",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.733,
-          "final_battery_pct": 88.67,
+          "final_fuel_kg": 9.732,
+          "final_battery_pct": 88.57,
           "path_xyz": [
             [
               150.0,
               0.0,
-              -4.74
+              9.34
             ],
             [
               1549.6,
@@ -5727,13 +5727,13 @@
           "hopper_id": "h1",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.309,
-          "final_battery_pct": 92.47,
+          "final_fuel_kg": 12.308,
+          "final_battery_pct": 92.37,
           "path_xyz": [
             [
               0.0,
               150.0,
-              -4.5
+              9.2
             ],
             [
               541.27,
@@ -5766,13 +5766,13 @@
           "hopper_id": "h2",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.284,
-          "final_battery_pct": 92.39,
+          "final_fuel_kg": 12.283,
+          "final_battery_pct": 92.37,
           "path_xyz": [
             [
               -150.0,
               0.0,
-              -4.23
+              10.18
             ],
             [
               -1308.35,
@@ -5805,13 +5805,13 @@
           "hopper_id": "h3",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.836,
-          "final_battery_pct": 89.48,
+          "final_fuel_kg": 9.835,
+          "final_battery_pct": 89.37,
           "path_xyz": [
             [
               -0.0,
               -150.0,
-              -4.71
+              10.47
             ],
             [
               -1672.64,
@@ -5851,13 +5851,13 @@
           "hopper_id": "h0",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.712,
-          "final_battery_pct": 88.69,
+          "final_fuel_kg": 9.711,
+          "final_battery_pct": 88.55,
           "path_xyz": [
             [
               150.0,
               0.0,
-              -4.74
+              9.34
             ],
             [
               1548.01,
@@ -5890,13 +5890,13 @@
           "hopper_id": "h1",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.31,
-          "final_battery_pct": 92.51,
+          "final_fuel_kg": 12.309,
+          "final_battery_pct": 92.35,
           "path_xyz": [
             [
               0.0,
               150.0,
-              -4.5
+              9.2
             ],
             [
               609.66,
@@ -5929,13 +5929,13 @@
           "hopper_id": "h2",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.341,
-          "final_battery_pct": 92.37,
+          "final_fuel_kg": 12.34,
+          "final_battery_pct": 92.35,
           "path_xyz": [
             [
               -150.0,
               0.0,
-              -4.23
+              10.18
             ],
             [
               -1338.53,
@@ -5968,13 +5968,13 @@
           "hopper_id": "h3",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.705,
-          "final_battery_pct": 89.46,
+          "final_fuel_kg": 9.704,
+          "final_battery_pct": 89.35,
           "path_xyz": [
             [
               -0.0,
               -150.0,
-              -4.71
+              10.47
             ],
             [
               -1625.67,
@@ -6014,13 +6014,13 @@
           "hopper_id": "h0",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.83,
-          "final_battery_pct": 88.69,
+          "final_fuel_kg": 9.829,
+          "final_battery_pct": 88.56,
           "path_xyz": [
             [
               150.0,
               0.0,
-              -4.74
+              9.34
             ],
             [
               1519.59,
@@ -6053,13 +6053,13 @@
           "hopper_id": "h1",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.355,
-          "final_battery_pct": 92.46,
+          "final_fuel_kg": 12.354,
+          "final_battery_pct": 92.36,
           "path_xyz": [
             [
               0.0,
               150.0,
-              -4.5
+              9.2
             ],
             [
               585.25,
@@ -6092,13 +6092,13 @@
           "hopper_id": "h2",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.327,
-          "final_battery_pct": 92.39,
+          "final_fuel_kg": 12.325,
+          "final_battery_pct": 92.36,
           "path_xyz": [
             [
               -150.0,
               0.0,
-              -4.23
+              10.18
             ],
             [
               -1344.33,
@@ -6131,13 +6131,13 @@
           "hopper_id": "h3",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.861,
-          "final_battery_pct": 89.5,
+          "final_fuel_kg": 9.86,
+          "final_battery_pct": 89.36,
           "path_xyz": [
             [
               -0.0,
               -150.0,
-              -4.71
+              10.47
             ],
             [
               -1620.64,
@@ -6177,13 +6177,13 @@
           "hopper_id": "h0",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.763,
-          "final_battery_pct": 88.7,
+          "final_fuel_kg": 9.762,
+          "final_battery_pct": 88.58,
           "path_xyz": [
             [
               150.0,
               0.0,
-              -4.74
+              9.34
             ],
             [
               1531.43,
@@ -6216,13 +6216,13 @@
           "hopper_id": "h1",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.265,
-          "final_battery_pct": 92.48,
+          "final_fuel_kg": 12.264,
+          "final_battery_pct": 92.38,
           "path_xyz": [
             [
               0.0,
               150.0,
-              -4.5
+              9.2
             ],
             [
               540.0,
@@ -6255,13 +6255,13 @@
           "hopper_id": "h2",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.348,
-          "final_battery_pct": 92.45,
+          "final_fuel_kg": 12.347,
+          "final_battery_pct": 92.38,
           "path_xyz": [
             [
               -150.0,
               0.0,
-              -4.23
+              10.18
             ],
             [
               -1334.34,
@@ -6294,13 +6294,13 @@
           "hopper_id": "h3",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.779,
-          "final_battery_pct": 89.52,
+          "final_fuel_kg": 9.778,
+          "final_battery_pct": 89.38,
           "path_xyz": [
             [
               -0.0,
               -150.0,
-              -4.71
+              10.47
             ],
             [
               -1644.0,
@@ -6340,13 +6340,13 @@
           "hopper_id": "h0",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.831,
-          "final_battery_pct": 88.66,
+          "final_fuel_kg": 9.83,
+          "final_battery_pct": 88.56,
           "path_xyz": [
             [
               150.0,
               0.0,
-              -4.74
+              9.34
             ],
             [
               1594.01,
@@ -6379,13 +6379,13 @@
           "hopper_id": "h1",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.354,
-          "final_battery_pct": 92.46,
+          "final_fuel_kg": 12.353,
+          "final_battery_pct": 92.36,
           "path_xyz": [
             [
               0.0,
               150.0,
-              -4.5
+              9.2
             ],
             [
               539.5,
@@ -6418,13 +6418,13 @@
           "hopper_id": "h2",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.339,
-          "final_battery_pct": 92.38,
+          "final_fuel_kg": 12.338,
+          "final_battery_pct": 92.36,
           "path_xyz": [
             [
               -150.0,
               0.0,
-              -4.23
+              10.18
             ],
             [
               -1360.3,
@@ -6457,13 +6457,13 @@
           "hopper_id": "h3",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.717,
-          "final_battery_pct": 89.51,
+          "final_fuel_kg": 9.715,
+          "final_battery_pct": 89.36,
           "path_xyz": [
             [
               -0.0,
               -150.0,
-              -4.71
+              10.47
             ],
             [
               -1677.33,
@@ -6503,13 +6503,13 @@
           "hopper_id": "h0",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.83,
-          "final_battery_pct": 88.69,
+          "final_fuel_kg": 9.829,
+          "final_battery_pct": 88.57,
           "path_xyz": [
             [
               150.0,
               0.0,
-              -4.74
+              9.34
             ],
             [
               1509.46,
@@ -6542,13 +6542,13 @@
           "hopper_id": "h1",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.293,
-          "final_battery_pct": 92.47,
+          "final_fuel_kg": 12.292,
+          "final_battery_pct": 92.37,
           "path_xyz": [
             [
               0.0,
               150.0,
-              -4.5
+              9.2
             ],
             [
               534.14,
@@ -6581,13 +6581,13 @@
           "hopper_id": "h2",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.298,
-          "final_battery_pct": 92.39,
+          "final_fuel_kg": 12.296,
+          "final_battery_pct": 92.37,
           "path_xyz": [
             [
               -150.0,
               0.0,
-              -4.23
+              10.18
             ],
             [
               -1321.16,
@@ -6620,13 +6620,13 @@
           "hopper_id": "h3",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.627,
-          "final_battery_pct": 89.48,
+          "final_fuel_kg": 9.626,
+          "final_battery_pct": 89.37,
           "path_xyz": [
             [
               -0.0,
               -150.0,
-              -4.71
+              10.47
             ],
             [
               -1675.35,
@@ -6666,13 +6666,13 @@
           "hopper_id": "h0",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.815,
-          "final_battery_pct": 88.66,
+          "final_fuel_kg": 9.814,
+          "final_battery_pct": 88.54,
           "path_xyz": [
             [
               150.0,
               0.0,
-              -4.74
+              9.34
             ],
             [
               1582.87,
@@ -6705,13 +6705,13 @@
           "hopper_id": "h1",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.266,
-          "final_battery_pct": 92.45,
+          "final_fuel_kg": 12.264,
+          "final_battery_pct": 92.34,
           "path_xyz": [
             [
               0.0,
               150.0,
-              -4.5
+              9.2
             ],
             [
               541.0,
@@ -6744,13 +6744,13 @@
           "hopper_id": "h2",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.39,
-          "final_battery_pct": 92.37,
+          "final_fuel_kg": 12.389,
+          "final_battery_pct": 92.34,
           "path_xyz": [
             [
               -150.0,
               0.0,
-              -4.23
+              10.18
             ],
             [
               -1367.79,
@@ -6783,13 +6783,13 @@
           "hopper_id": "h3",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.812,
-          "final_battery_pct": 89.48,
+          "final_fuel_kg": 9.81,
+          "final_battery_pct": 89.34,
           "path_xyz": [
             [
               -0.0,
               -150.0,
-              -4.71
+              10.47
             ],
             [
               -1592.05,
@@ -6829,13 +6829,13 @@
           "hopper_id": "h0",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.784,
-          "final_battery_pct": 88.65,
+          "final_fuel_kg": 9.782,
+          "final_battery_pct": 88.56,
           "path_xyz": [
             [
               150.0,
               0.0,
-              -4.74
+              9.34
             ],
             [
               1582.56,
@@ -6868,13 +6868,13 @@
           "hopper_id": "h1",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.298,
-          "final_battery_pct": 92.46,
+          "final_fuel_kg": 12.297,
+          "final_battery_pct": 92.36,
           "path_xyz": [
             [
               0.0,
               150.0,
-              -4.5
+              9.2
             ],
             [
               587.3,
@@ -6907,13 +6907,13 @@
           "hopper_id": "h2",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.383,
-          "final_battery_pct": 92.38,
+          "final_fuel_kg": 12.382,
+          "final_battery_pct": 92.36,
           "path_xyz": [
             [
               -150.0,
               0.0,
-              -4.23
+              10.18
             ],
             [
               -1342.87,
@@ -6946,13 +6946,13 @@
           "hopper_id": "h3",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.772,
-          "final_battery_pct": 89.5,
+          "final_fuel_kg": 9.771,
+          "final_battery_pct": 89.36,
           "path_xyz": [
             [
               -0.0,
               -150.0,
-              -4.71
+              10.47
             ],
             [
               -1618.87,
@@ -6992,13 +6992,13 @@
           "hopper_id": "h0",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.819,
-          "final_battery_pct": 88.7,
+          "final_fuel_kg": 9.817,
+          "final_battery_pct": 88.58,
           "path_xyz": [
             [
               150.0,
               0.0,
-              -4.74
+              9.34
             ],
             [
               1567.72,
@@ -7031,13 +7031,13 @@
           "hopper_id": "h1",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.368,
-          "final_battery_pct": 92.48,
+          "final_fuel_kg": 12.367,
+          "final_battery_pct": 92.38,
           "path_xyz": [
             [
               0.0,
               150.0,
-              -4.5
+              9.2
             ],
             [
               501.83,
@@ -7070,13 +7070,13 @@
           "hopper_id": "h2",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.3,
-          "final_battery_pct": 92.44,
+          "final_fuel_kg": 12.299,
+          "final_battery_pct": 92.38,
           "path_xyz": [
             [
               -150.0,
               0.0,
-              -4.23
+              10.18
             ],
             [
               -1359.12,
@@ -7109,13 +7109,13 @@
           "hopper_id": "h3",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.848,
-          "final_battery_pct": 89.53,
+          "final_fuel_kg": 9.847,
+          "final_battery_pct": 89.38,
           "path_xyz": [
             [
               -0.0,
               -150.0,
-              -4.71
+              10.47
             ],
             [
               -1622.26,
@@ -7155,13 +7155,13 @@
           "hopper_id": "h0",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.811,
-          "final_battery_pct": 88.67,
+          "final_fuel_kg": 9.809,
+          "final_battery_pct": 88.55,
           "path_xyz": [
             [
               150.0,
               0.0,
-              -4.74
+              9.34
             ],
             [
               1456.39,
@@ -7194,13 +7194,13 @@
           "hopper_id": "h1",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.324,
-          "final_battery_pct": 92.51,
+          "final_fuel_kg": 12.323,
+          "final_battery_pct": 92.35,
           "path_xyz": [
             [
               0.0,
               150.0,
-              -4.5
+              9.2
             ],
             [
               592.81,
@@ -7233,13 +7233,13 @@
           "hopper_id": "h2",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.366,
-          "final_battery_pct": 92.38,
+          "final_fuel_kg": 12.365,
+          "final_battery_pct": 92.35,
           "path_xyz": [
             [
               -150.0,
               0.0,
-              -4.23
+              10.18
             ],
             [
               -1350.6,
@@ -7272,13 +7272,13 @@
           "hopper_id": "h3",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.764,
-          "final_battery_pct": 89.47,
+          "final_fuel_kg": 9.763,
+          "final_battery_pct": 89.35,
           "path_xyz": [
             [
               -0.0,
               -150.0,
-              -4.71
+              10.47
             ],
             [
               -1664.21,
@@ -7318,13 +7318,13 @@
           "hopper_id": "h0",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.839,
-          "final_battery_pct": 88.69,
+          "final_fuel_kg": 9.838,
+          "final_battery_pct": 88.57,
           "path_xyz": [
             [
               150.0,
               0.0,
-              -4.74
+              9.34
             ],
             [
               1539.8,
@@ -7357,13 +7357,13 @@
           "hopper_id": "h1",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.334,
-          "final_battery_pct": 92.52,
+          "final_fuel_kg": 12.333,
+          "final_battery_pct": 92.37,
           "path_xyz": [
             [
               0.0,
               150.0,
-              -4.5
+              9.2
             ],
             [
               499.38,
@@ -7396,13 +7396,13 @@
           "hopper_id": "h2",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.259,
-          "final_battery_pct": 92.39,
+          "final_fuel_kg": 12.258,
+          "final_battery_pct": 92.37,
           "path_xyz": [
             [
               -150.0,
               0.0,
-              -4.23
+              10.18
             ],
             [
               -1363.63,
@@ -7435,13 +7435,13 @@
           "hopper_id": "h3",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.838,
-          "final_battery_pct": 89.51,
+          "final_fuel_kg": 9.837,
+          "final_battery_pct": 89.37,
           "path_xyz": [
             [
               -0.0,
               -150.0,
-              -4.71
+              10.47
             ],
             [
               -1644.86,
@@ -7481,13 +7481,13 @@
           "hopper_id": "h0",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.762,
-          "final_battery_pct": 88.69,
+          "final_fuel_kg": 9.76,
+          "final_battery_pct": 88.57,
           "path_xyz": [
             [
               150.0,
               0.0,
-              -4.74
+              9.34
             ],
             [
               1563.58,
@@ -7520,13 +7520,13 @@
           "hopper_id": "h1",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.153,
-          "final_battery_pct": 92.47,
+          "final_fuel_kg": 12.152,
+          "final_battery_pct": 92.37,
           "path_xyz": [
             [
               0.0,
               150.0,
-              -4.5
+              9.2
             ],
             [
               571.55,
@@ -7559,13 +7559,13 @@
           "hopper_id": "h2",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.301,
-          "final_battery_pct": 92.39,
+          "final_fuel_kg": 12.299,
+          "final_battery_pct": 92.37,
           "path_xyz": [
             [
               -150.0,
               0.0,
-              -4.23
+              10.18
             ],
             [
               -1356.47,
@@ -7598,13 +7598,13 @@
           "hopper_id": "h3",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.73,
-          "final_battery_pct": 89.48,
+          "final_fuel_kg": 9.728,
+          "final_battery_pct": 89.37,
           "path_xyz": [
             [
               -0.0,
               -150.0,
-              -4.71
+              10.47
             ],
             [
               -1664.94,
@@ -7644,13 +7644,13 @@
           "hopper_id": "h0",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.824,
-          "final_battery_pct": 88.69,
+          "final_fuel_kg": 9.822,
+          "final_battery_pct": 88.57,
           "path_xyz": [
             [
               150.0,
               0.0,
-              -4.74
+              9.34
             ],
             [
               1601.85,
@@ -7683,13 +7683,13 @@
           "hopper_id": "h1",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.314,
-          "final_battery_pct": 92.47,
+          "final_fuel_kg": 12.313,
+          "final_battery_pct": 92.37,
           "path_xyz": [
             [
               0.0,
               150.0,
-              -4.5
+              9.2
             ],
             [
               533.12,
@@ -7722,13 +7722,13 @@
           "hopper_id": "h2",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.382,
-          "final_battery_pct": 92.4,
+          "final_fuel_kg": 12.381,
+          "final_battery_pct": 92.37,
           "path_xyz": [
             [
               -150.0,
               0.0,
-              -4.23
+              10.18
             ],
             [
               -1391.81,
@@ -7761,13 +7761,13 @@
           "hopper_id": "h3",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.781,
-          "final_battery_pct": 89.49,
+          "final_fuel_kg": 9.78,
+          "final_battery_pct": 89.37,
           "path_xyz": [
             [
               -0.0,
               -150.0,
-              -4.71
+              10.47
             ],
             [
               -1656.66,
@@ -7807,13 +7807,13 @@
           "hopper_id": "h0",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.804,
-          "final_battery_pct": 88.66,
+          "final_fuel_kg": 9.803,
+          "final_battery_pct": 88.56,
           "path_xyz": [
             [
               150.0,
               0.0,
-              -4.74
+              9.34
             ],
             [
               1541.73,
@@ -7846,13 +7846,13 @@
           "hopper_id": "h1",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.308,
-          "final_battery_pct": 92.52,
+          "final_fuel_kg": 12.307,
+          "final_battery_pct": 92.36,
           "path_xyz": [
             [
               0.0,
               150.0,
-              -4.5
+              9.2
             ],
             [
               532.13,
@@ -7885,13 +7885,13 @@
           "hopper_id": "h2",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.388,
-          "final_battery_pct": 92.43,
+          "final_fuel_kg": 12.387,
+          "final_battery_pct": 92.36,
           "path_xyz": [
             [
               -150.0,
               0.0,
-              -4.23
+              10.18
             ],
             [
               -1318.18,
@@ -7924,13 +7924,13 @@
           "hopper_id": "h3",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.798,
-          "final_battery_pct": 89.54,
+          "final_fuel_kg": 9.797,
+          "final_battery_pct": 89.4,
           "path_xyz": [
             [
               -0.0,
               -150.0,
-              -4.71
+              10.47
             ],
             [
               -1668.79,
@@ -7970,13 +7970,13 @@
           "hopper_id": "h0",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.759,
-          "final_battery_pct": 88.68,
+          "final_fuel_kg": 9.757,
+          "final_battery_pct": 88.55,
           "path_xyz": [
             [
               150.0,
               0.0,
-              -4.74
+              9.34
             ],
             [
               1533.42,
@@ -8009,13 +8009,13 @@
           "hopper_id": "h1",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.352,
-          "final_battery_pct": 92.45,
+          "final_fuel_kg": 12.351,
+          "final_battery_pct": 92.35,
           "path_xyz": [
             [
               0.0,
               150.0,
-              -4.5
+              9.2
             ],
             [
               545.38,
@@ -8048,13 +8048,13 @@
           "hopper_id": "h2",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.319,
-          "final_battery_pct": 92.42,
+          "final_fuel_kg": 12.318,
+          "final_battery_pct": 92.35,
           "path_xyz": [
             [
               -150.0,
               0.0,
-              -4.23
+              10.18
             ],
             [
               -1318.52,
@@ -8087,13 +8087,13 @@
           "hopper_id": "h3",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.775,
-          "final_battery_pct": 89.47,
+          "final_fuel_kg": 9.773,
+          "final_battery_pct": 89.35,
           "path_xyz": [
             [
               -0.0,
               -150.0,
-              -4.71
+              10.47
             ],
             [
               -1642.9,
@@ -8133,13 +8133,13 @@
           "hopper_id": "h0",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.675,
-          "final_battery_pct": 88.66,
+          "final_fuel_kg": 9.673,
+          "final_battery_pct": 88.57,
           "path_xyz": [
             [
               150.0,
               0.0,
-              -4.74
+              9.34
             ],
             [
               1517.54,
@@ -8172,13 +8172,13 @@
           "hopper_id": "h1",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.312,
-          "final_battery_pct": 92.47,
+          "final_fuel_kg": 12.311,
+          "final_battery_pct": 92.37,
           "path_xyz": [
             [
               0.0,
               150.0,
-              -4.5
+              9.2
             ],
             [
               573.43,
@@ -8211,13 +8211,13 @@
           "hopper_id": "h2",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.379,
-          "final_battery_pct": 92.39,
+          "final_fuel_kg": 12.378,
+          "final_battery_pct": 92.37,
           "path_xyz": [
             [
               -150.0,
               0.0,
-              -4.23
+              10.18
             ],
             [
               -1310.83,
@@ -8250,13 +8250,13 @@
           "hopper_id": "h3",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.837,
-          "final_battery_pct": 89.52,
+          "final_fuel_kg": 9.836,
+          "final_battery_pct": 89.37,
           "path_xyz": [
             [
               -0.0,
               -150.0,
-              -4.71
+              10.47
             ],
             [
               -1579.93,
@@ -8296,13 +8296,13 @@
           "hopper_id": "h0",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.95,
-          "final_battery_pct": 88.72,
+          "final_fuel_kg": 9.949,
+          "final_battery_pct": 88.58,
           "path_xyz": [
             [
               150.0,
               0.0,
-              -4.74
+              9.34
             ],
             [
               1631.2,
@@ -8335,13 +8335,13 @@
           "hopper_id": "h1",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.255,
-          "final_battery_pct": 92.48,
+          "final_fuel_kg": 12.254,
+          "final_battery_pct": 92.38,
           "path_xyz": [
             [
               0.0,
               150.0,
-              -4.5
+              9.2
             ],
             [
               529.65,
@@ -8374,13 +8374,13 @@
           "hopper_id": "h2",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 12.303,
-          "final_battery_pct": 92.44,
+          "final_fuel_kg": 12.302,
+          "final_battery_pct": 92.38,
           "path_xyz": [
             [
               -150.0,
               0.0,
-              -4.23
+              10.18
             ],
             [
               -1280.64,
@@ -8413,13 +8413,13 @@
           "hopper_id": "h3",
           "crashed": false,
           "crash_reason": "",
-          "final_fuel_kg": 9.805,
-          "final_battery_pct": 89.49,
+          "final_fuel_kg": 9.804,
+          "final_battery_pct": 89.38,
           "path_xyz": [
             [
               -0.0,
               -150.0,
-              -4.71
+              10.47
             ],
             [
               -1635.58,

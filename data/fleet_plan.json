@@ -1,0 +1,705 @@
+{
+  "plan_id": "nasa_daedalus_mission_4hopper_safe",
+  "revision": 1,
+  "rationale": "Four-hopper safe exploratory hop across Daedalus basin floor with zero relay conflict.",
+  "previous_verdict_pass_rate": null,
+  "summary": "Four-hopper safe exploratory hop across Daedalus basin floor with zero relay conflict.",
+  "hoppers": [
+    {
+      "id": "h0",
+      "start_pos_xy": [
+        1550.0,
+        550.0
+      ],
+      "craters_assigned": [
+        "site_0"
+      ],
+      "steps": [
+        {
+          "stage": 0,
+          "action": "hop",
+          "target_crater": null,
+          "target_xy": [
+            2350.0,
+            550.0
+          ],
+          "from_xy": null,
+          "to_xy": [
+            2350.0,
+            550.0
+          ],
+          "wait_s": 0.0,
+          "step_index": 0,
+          "target_crater_id": "site_0"
+        },
+        {
+          "stage": 0,
+          "action": "scan",
+          "target_crater": null,
+          "target_xy": [
+            2350.0,
+            550.0
+          ],
+          "from_xy": null,
+          "to_xy": [
+            2350.0,
+            550.0
+          ],
+          "wait_s": 0.0,
+          "step_index": 1,
+          "target_crater_id": "site_0"
+        },
+        {
+          "stage": 0,
+          "action": "send",
+          "target_crater": null,
+          "target_xy": [
+            2350.0,
+            550.0
+          ],
+          "from_xy": null,
+          "to_xy": [
+            2350.0,
+            550.0
+          ],
+          "wait_s": 0.0,
+          "step_index": 2,
+          "target_crater_id": "site_0"
+        }
+      ],
+      "hopper_id": "h0"
+    },
+    {
+      "id": "h1",
+      "start_pos_xy": [
+        1700.0,
+        550.0
+      ],
+      "craters_assigned": [
+        "site_1"
+      ],
+      "steps": [
+        {
+          "stage": 0,
+          "action": "hop",
+          "target_crater": null,
+          "target_xy": [
+            1550.0,
+            1350.0
+          ],
+          "from_xy": null,
+          "to_xy": [
+            1550.0,
+            1350.0
+          ],
+          "wait_s": 0.0,
+          "step_index": 0,
+          "target_crater_id": "site_1"
+        },
+        {
+          "stage": 0,
+          "action": "scan",
+          "target_crater": null,
+          "target_xy": [
+            1550.0,
+            1350.0
+          ],
+          "from_xy": null,
+          "to_xy": [
+            1550.0,
+            1350.0
+          ],
+          "wait_s": 0.0,
+          "step_index": 1,
+          "target_crater_id": "site_1"
+        },
+        {
+          "stage": 0,
+          "action": "wait",
+          "target_crater": null,
+          "target_xy": [
+            1550.0,
+            1350.0
+          ],
+          "from_xy": null,
+          "to_xy": [
+            1550.0,
+            1350.0
+          ],
+          "wait_s": 0.0,
+          "step_index": 2,
+          "target_crater_id": "site_1"
+        }
+      ],
+      "hopper_id": "h1"
+    },
+    {
+      "id": "h2",
+      "start_pos_xy": [
+        1850.0,
+        550.0
+      ],
+      "craters_assigned": [
+        "site_2"
+      ],
+      "steps": [
+        {
+          "stage": 0,
+          "action": "hop",
+          "target_crater": null,
+          "target_xy": [
+            750.0,
+            550.0
+          ],
+          "from_xy": null,
+          "to_xy": [
+            750.0,
+            550.0
+          ],
+          "wait_s": 0.0,
+          "step_index": 0,
+          "target_crater_id": "site_2"
+        },
+        {
+          "stage": 0,
+          "action": "scan",
+          "target_crater": null,
+          "target_xy": [
+            750.0,
+            550.0
+          ],
+          "from_xy": null,
+          "to_xy": [
+            750.0,
+            550.0
+          ],
+          "wait_s": 0.0,
+          "step_index": 1,
+          "target_crater_id": "site_2"
+        },
+        {
+          "stage": 0,
+          "action": "wait",
+          "target_crater": null,
+          "target_xy": [
+            750.0,
+            550.0
+          ],
+          "from_xy": null,
+          "to_xy": [
+            750.0,
+            550.0
+          ],
+          "wait_s": 0.0,
+          "step_index": 2,
+          "target_crater_id": "site_2"
+        }
+      ],
+      "hopper_id": "h2"
+    },
+    {
+      "id": "h3",
+      "start_pos_xy": [
+        2000.0,
+        550.0
+      ],
+      "craters_assigned": [
+        "site_3"
+      ],
+      "steps": [
+        {
+          "stage": 0,
+          "action": "hop",
+          "target_crater": null,
+          "target_xy": [
+            1550.0,
+            -250.0
+          ],
+          "from_xy": null,
+          "to_xy": [
+            1550.0,
+            -250.0
+          ],
+          "wait_s": 0.0,
+          "step_index": 0,
+          "target_crater_id": "site_3"
+        },
+        {
+          "stage": 0,
+          "action": "scan",
+          "target_crater": null,
+          "target_xy": [
+            1550.0,
+            -250.0
+          ],
+          "from_xy": null,
+          "to_xy": [
+            1550.0,
+            -250.0
+          ],
+          "wait_s": 0.0,
+          "step_index": 1,
+          "target_crater_id": "site_3"
+        },
+        {
+          "stage": 0,
+          "action": "wait",
+          "target_crater": null,
+          "target_xy": [
+            1550.0,
+            -250.0
+          ],
+          "from_xy": null,
+          "to_xy": [
+            1550.0,
+            -250.0
+          ],
+          "wait_s": 0.0,
+          "step_index": 2,
+          "target_crater_id": "site_3"
+        }
+      ],
+      "hopper_id": "h3"
+    }
+  ],
+  "num_hoppers": 4,
+  "start_positions_xy": [
+    [
+      1550.0,
+      550.0
+    ],
+    [
+      1700.0,
+      550.0
+    ],
+    [
+      1850.0,
+      550.0
+    ],
+    [
+      2000.0,
+      550.0
+    ]
+  ],
+  "stages": [
+    [
+      {
+        "hopper_id": 0,
+        "target_xy": [
+          2350.0,
+          550.0
+        ],
+        "action": "hop",
+        "target_crater_id": null,
+        "wait_s": 0.0
+      },
+      {
+        "hopper_id": 1,
+        "target_xy": [
+          1550.0,
+          1350.0
+        ],
+        "action": "hop",
+        "target_crater_id": null,
+        "wait_s": 0.0
+      },
+      {
+        "hopper_id": 2,
+        "target_xy": [
+          750.0,
+          550.0
+        ],
+        "action": "hop",
+        "target_crater_id": null,
+        "wait_s": 0.0
+      },
+      {
+        "hopper_id": 3,
+        "target_xy": [
+          1550.0,
+          -250.0
+        ],
+        "action": "hop",
+        "target_crater_id": null,
+        "wait_s": 0.0
+      }
+    ],
+    [
+      {
+        "hopper_id": 0,
+        "target_xy": [
+          2350.0,
+          550.0
+        ],
+        "action": "scan",
+        "target_crater_id": null,
+        "wait_s": 0.0
+      },
+      {
+        "hopper_id": 1,
+        "target_xy": [
+          1550.0,
+          1350.0
+        ],
+        "action": "scan",
+        "target_crater_id": null,
+        "wait_s": 0.0
+      },
+      {
+        "hopper_id": 2,
+        "target_xy": [
+          750.0,
+          550.0
+        ],
+        "action": "scan",
+        "target_crater_id": null,
+        "wait_s": 0.0
+      },
+      {
+        "hopper_id": 3,
+        "target_xy": [
+          1550.0,
+          -250.0
+        ],
+        "action": "scan",
+        "target_crater_id": null,
+        "wait_s": 0.0
+      }
+    ],
+    [
+      {
+        "hopper_id": 0,
+        "target_xy": [
+          2350.0,
+          550.0
+        ],
+        "action": "send",
+        "target_crater_id": null,
+        "wait_s": 0.0
+      },
+      {
+        "hopper_id": 1,
+        "target_xy": [
+          1550.0,
+          1350.0
+        ],
+        "action": "wait",
+        "target_crater_id": null,
+        "wait_s": 0.0
+      },
+      {
+        "hopper_id": 2,
+        "target_xy": [
+          750.0,
+          550.0
+        ],
+        "action": "wait",
+        "target_crater_id": null,
+        "wait_s": 0.0
+      },
+      {
+        "hopper_id": 3,
+        "target_xy": [
+          1550.0,
+          -250.0
+        ],
+        "action": "wait",
+        "target_crater_id": null,
+        "wait_s": 0.0
+      }
+    ]
+  ],
+  "routes": [
+    {
+      "hopper_id": "h0",
+      "craters": [
+        "site_0"
+      ],
+      "hops": [
+        {
+          "hop_index": 0,
+          "from_pos": [
+            1550.0,
+            550.0,
+            -120.0
+          ],
+          "to_pos": [
+            2350.0,
+            550.0,
+            -120.0
+          ],
+          "target_crater": null,
+          "t_start": 0.0,
+          "action_after": "hop",
+          "wait_s": 0.0,
+          "relay_window_index": null,
+          "estimated_fuel_used": null,
+          "estimated_battery_used": null,
+          "notes": ""
+        },
+        {
+          "hop_index": 1,
+          "from_pos": [
+            2350.0,
+            550.0,
+            -120.0
+          ],
+          "to_pos": [
+            2350.0,
+            550.0,
+            -120.0
+          ],
+          "target_crater": null,
+          "t_start": 0.0,
+          "action_after": "scan",
+          "wait_s": 0.0,
+          "relay_window_index": null,
+          "estimated_fuel_used": null,
+          "estimated_battery_used": null,
+          "notes": ""
+        },
+        {
+          "hop_index": 2,
+          "from_pos": [
+            2350.0,
+            550.0,
+            -120.0
+          ],
+          "to_pos": [
+            2350.0,
+            550.0,
+            -120.0
+          ],
+          "target_crater": null,
+          "t_start": 0.0,
+          "action_after": "send",
+          "wait_s": 0.0,
+          "relay_window_index": null,
+          "estimated_fuel_used": null,
+          "estimated_battery_used": null,
+          "notes": ""
+        }
+      ]
+    },
+    {
+      "hopper_id": "h1",
+      "craters": [
+        "site_1"
+      ],
+      "hops": [
+        {
+          "hop_index": 0,
+          "from_pos": [
+            1700.0,
+            550.0,
+            -120.0
+          ],
+          "to_pos": [
+            1550.0,
+            1350.0,
+            -120.0
+          ],
+          "target_crater": null,
+          "t_start": 0.0,
+          "action_after": "hop",
+          "wait_s": 0.0,
+          "relay_window_index": null,
+          "estimated_fuel_used": null,
+          "estimated_battery_used": null,
+          "notes": ""
+        },
+        {
+          "hop_index": 1,
+          "from_pos": [
+            1550.0,
+            1350.0,
+            -120.0
+          ],
+          "to_pos": [
+            1550.0,
+            1350.0,
+            -120.0
+          ],
+          "target_crater": null,
+          "t_start": 0.0,
+          "action_after": "scan",
+          "wait_s": 0.0,
+          "relay_window_index": null,
+          "estimated_fuel_used": null,
+          "estimated_battery_used": null,
+          "notes": ""
+        },
+        {
+          "hop_index": 2,
+          "from_pos": [
+            1550.0,
+            1350.0,
+            -120.0
+          ],
+          "to_pos": [
+            1550.0,
+            1350.0,
+            -120.0
+          ],
+          "target_crater": null,
+          "t_start": 0.0,
+          "action_after": "wait",
+          "wait_s": 0.0,
+          "relay_window_index": null,
+          "estimated_fuel_used": null,
+          "estimated_battery_used": null,
+          "notes": ""
+        }
+      ]
+    },
+    {
+      "hopper_id": "h2",
+      "craters": [
+        "site_2"
+      ],
+      "hops": [
+        {
+          "hop_index": 0,
+          "from_pos": [
+            1850.0,
+            550.0,
+            -120.0
+          ],
+          "to_pos": [
+            750.0,
+            550.0,
+            -120.0
+          ],
+          "target_crater": null,
+          "t_start": 0.0,
+          "action_after": "hop",
+          "wait_s": 0.0,
+          "relay_window_index": null,
+          "estimated_fuel_used": null,
+          "estimated_battery_used": null,
+          "notes": ""
+        },
+        {
+          "hop_index": 1,
+          "from_pos": [
+            750.0,
+            550.0,
+            -120.0
+          ],
+          "to_pos": [
+            750.0,
+            550.0,
+            -120.0
+          ],
+          "target_crater": null,
+          "t_start": 0.0,
+          "action_after": "scan",
+          "wait_s": 0.0,
+          "relay_window_index": null,
+          "estimated_fuel_used": null,
+          "estimated_battery_used": null,
+          "notes": ""
+        },
+        {
+          "hop_index": 2,
+          "from_pos": [
+            750.0,
+            550.0,
+            -120.0
+          ],
+          "to_pos": [
+            750.0,
+            550.0,
+            -120.0
+          ],
+          "target_crater": null,
+          "t_start": 0.0,
+          "action_after": "wait",
+          "wait_s": 0.0,
+          "relay_window_index": null,
+          "estimated_fuel_used": null,
+          "estimated_battery_used": null,
+          "notes": ""
+        }
+      ]
+    },
+    {
+      "hopper_id": "h3",
+      "craters": [
+        "site_3"
+      ],
+      "hops": [
+        {
+          "hop_index": 0,
+          "from_pos": [
+            2000.0,
+            550.0,
+            -120.0
+          ],
+          "to_pos": [
+            1550.0,
+            -250.0,
+            -120.0
+          ],
+          "target_crater": null,
+          "t_start": 0.0,
+          "action_after": "hop",
+          "wait_s": 0.0,
+          "relay_window_index": null,
+          "estimated_fuel_used": null,
+          "estimated_battery_used": null,
+          "notes": ""
+        },
+        {
+          "hop_index": 1,
+          "from_pos": [
+            1550.0,
+            -250.0,
+            -120.0
+          ],
+          "to_pos": [
+            1550.0,
+            -250.0,
+            -120.0
+          ],
+          "target_crater": null,
+          "t_start": 0.0,
+          "action_after": "scan",
+          "wait_s": 0.0,
+          "relay_window_index": null,
+          "estimated_fuel_used": null,
+          "estimated_battery_used": null,
+          "notes": ""
+        },
+        {
+          "hop_index": 2,
+          "from_pos": [
+            1550.0,
+            -250.0,
+            -120.0
+          ],
+          "to_pos": [
+            1550.0,
+            -250.0,
+            -120.0
+          ],
+          "target_crater": null,
+          "t_start": 0.0,
+          "action_after": "wait",
+          "wait_s": 0.0,
+          "relay_window_index": null,
+          "estimated_fuel_used": null,
+          "estimated_battery_used": null,
+          "notes": ""
+        }
+      ]
+    }
+  ],
+  "unassigned_craters": [],
+  "revision_summary": "",
+  "changes": [],
+  "missing_data": [],
+  "source": "cached",
+  "interaction_id": null,
+  "environment_id": null
+}
