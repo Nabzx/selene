@@ -1,0 +1,25 @@
+{
+  "summary": "Hopper fleet exploration telemetry and world model epistemic uncertainty analysis.",
+  "hopper_incidents": [],
+  "world_model_hotspots": [],
+  "recommendations": [],
+  "missing_data": [],
+  "source": "cached",
+  "interaction_id": null,
+  "environment_id": null,
+  "status": "nominal",
+  "wm_error_hotspots": [
+    {
+      "region": "crater_rim_daedalus_b",
+      "mean_error": 0.021,
+      "uncertainty": 0.034,
+      "actionable_recommendation": "Reduce hop speed on approach"
+    }
+  ],
+  "fleet_health": {
+    "hoppers_active": 4,
+    "crashes": 0,
+    "min_fuel_reserve_pct": 85.1,
+    "min_battery_reserve_pct": 95.9
+  }
+}
