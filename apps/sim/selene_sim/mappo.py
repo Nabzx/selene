@@ -1320,11 +1320,19 @@ def main(argv: list[str] | None = None) -> int:
         default="cosine",
         help="Learning rate schedule type (cosine or linear).",
     )
+    parser.add_argument(
+        "--time-budget",
+        type=float,
+        default=None,
+        help="Override training wall-time budget in seconds (e.g. 1800 for 30 mins).",
+    )
     args = parser.parse_args(argv)
 
     cfg = MAPPOConfig(quick=args.quick)
     if args.updates is not None:
         cfg.total_updates = int(args.updates)
+    if args.time_budget is not None:
+        cfg.time_budget_s = float(args.time_budget)
     if args.terrain is not None:
         cfg.terrain_path = args.terrain
     cfg.curriculum = args.curriculum
