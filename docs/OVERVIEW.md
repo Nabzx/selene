@@ -2,109 +2,127 @@
 
 One page that says what Selene is, who it's for, how it works and how it's demoed.
 
-**Tags:** `lunar` `space` `autonomous-systems` `verification` `reinforcement-learning` `monte-carlo` `human-in-the-loop` `digital-twin` `gemini-4-argon` `threejs` `webgpu` `fastapi` `hackathon`
+**Tags:** `lunar` `far-side` `space` `world-models` `reinforcement-learning` `autonomous-systems` `verification` `monte-carlo` `human-in-the-loop` `gemini-4-argon` `threejs` `fastapi` `hackathon` `halloween`
 
 **Track:** autonomous systems that reason and verify.
+
+**Theme:** Halloween, eerie but credible. Lunar night, orange and violet palette, drifting dust, glowing scan beams. The science stays real.
 
 ---
 
 ## In one line
 
-A lunar hopper drone that won't fly a plan until it has proved the plan safe, a thousand times over, on real NASA terrain.
+A hopper drone that learns to work alone on the far side of the Moon at night, and proves every route safe before it flies.
 
 ## The problem
 
-The water ice at the lunar south pole is inside permanently shadowed craters: below 40 K, no solar power, steep rims. Rovers can't safely get in and out. A hopper can, but nobody can fly it by hand across a communications link, so every plan must be right before it is sent.
+Nothing on the far side can be flown by hand. Earth is never in view, so every command waits for a relay orbiter. At night there is no solar power and the surface drops below -170 °C. A machine there has to plan, act and recover on its own, and a bad plan can't be corrected mid-flight.
 
-Today that checking is slow and manual: engineers assemble the constraints from long standards documents, then hand-check a plan against them.
+Training that autonomy is slow and risky, and checking a plan against mission rules is manual work spread across long standards documents.
 
 ## Who it's for
 
-A surface operations lead on a lunar prospecting mission, the person who signs off each command batch before uplink. The same problem exists underground on Earth, where Kessel's machines work offline: a plan has to be proven before the link drops.
+A surface operations lead on a far-side mission, the person who signs off each uplink. The same problem exists underground on Earth, where Kessel's machines work offline: learn the environment, plan inside a model of it, prove the plan before the link drops.
 
 ## How it works
 
 ```
-NASA docs + mission constraints ──► Argon ──► safety spec (rules + checks)
-LOLA DEM, PSR, illumination,    ──► grid + simulator
-Diviner temperature                    │
-                                       ▼
-                     Argon ──► reward function ──► RL policy trains (~30 s)
-                       ▲                                 │
-                       │                                 ▼
-                 failure stats ◄── verifier ◄── hop plan (Argon + policy)
-                       │          1000 noisy rollouts
-                       │          checked against the spec
-                       ▼
-             pass? ──► person approves ──► uplink ──► hopper flies it in 3D
+mission docs ──► Argon ──► safety spec ─────────────────────────┐
+                   │                                            │
+                   ├──► reward ──► RL training in the simulator │
+                   │        ▲              │                    │
+                   │        └── curves ────┤                    │
+                   │                       ▼                    │
+                   │              learned world model           │
+                   │                       │                    │
+                   │   prediction errors ◄─┘                    │
+                   ├──◄ (Argon explains them, proposes fixes)   │
+                   │                                            ▼
+                   └──► route ──► verifier: ~1000 noisy rollouts vs spec
+                          ▲               │
+                          └── failures ◄──┤ fail
+                                          │ pass
+                                          ▼
+                         person approves in a relay window ──► uplink
+
+training episodes ──► data/episodes.json ──► 3D view (replay)
 ```
 
-| Step | What happens | Model |
+| Job | What happens | Model |
 |---|---|---|
-| Read the mission | Argon turns standards and constraints into a safety spec: rule id, statement, check | `gemini-4-argon`, high |
-| Design the learning | Argon writes the reward, reads training curves, rewrites it | `gemini-4-argon`, medium |
-| Plan | Argon proposes a hop plan, using the policy's suggestions | `gemini-4-argon`, medium |
-| Verify | Simulator runs about 1000 rollouts with noise, checks each against the spec | none, deterministic code |
-| Explain | Short per-run summaries for the log | `gemini-3.8-flash` |
-| Guard | Every hop is screened for obviously unsafe actions | `gemini-3.5-flash-lite` |
-| Revise | Argon reads failure stats and fixes the plan | `gemini-4-argon`, medium |
-| Approve | A person presses approve. The button is locked until the verdict passes | none |
+| Safety spec | Mission documents become rules with executable checks | `gemini-4-argon`, high |
+| Reward design | Argon writes the reward, reads training curves, rewrites it | `gemini-4-argon`, medium |
+| Route planning | Argon picks craters and order, given battery, temperature and relay windows | `gemini-4-argon`, medium |
+| Verification | About 1000 noisy rollouts, each checked against the spec | none, deterministic code |
+| World-model review | Argon reads the error map and explains where the model is wrong and why | `gemini-4-argon`, medium |
+| Mission log | Short narrated log entries, eerie in tone | `gemini-3.8-flash` |
+| Guardrail | Every proposed hop screened for obviously unsafe actions | `gemini-3.5-flash-lite` |
+| Approval | A person presses approve. Locked until the verdict passes and a relay window is open | none |
 
-The verifier is plain code, not a model. A model proposes, code checks, a person decides.
+A model proposes, code checks, a person decides.
+
+## The world model
+
+The simulator is ground truth. The hopper learns a separate, small world model (a few-layer network) from simulator transitions: state and action in, next state out. The policy plans inside the world model, Dreamer-style, so it can try hops without spending fuel.
+
+The world model is wrong in places, especially on terrain it hasn't visited. Those errors are the interesting part: the 3D view can show predicted and actual landings side by side, and Argon reads the error map and says where the model is unreliable and why.
 
 ## Why it needs Argon
 
-- **Long documents in, precise rules out.** Safety standards and mission documents fit in the 1M-token context, and the rules have to be exact enough to execute.
-- **Writing and revising reward code** from training curves, the Eureka approach.
-- **Reasoning over failure statistics** to change the right hop, not just retry.
-- **Multi-file code generation** for the simulator and checks, verified against the test suite.
+- **Long documents in, exact rules out.** Mission and safety documents fit in the 1M-token context, and the rules must be precise enough to execute.
+- **Reward code written and rewritten from training curves** (the Eureka approach).
+- **Reasoning about a model's errors**, not just reporting them.
+- **Route planning** under several interacting constraints.
 
-Swap Argon for a small model and the spec gets vague, the revisions get random, and the demo breaks. That's the test.
+Swap Argon for a small model and the spec gets vague, the reward revisions get random, and the demo breaks.
 
 ## Data
 
 | Layer | Source | Real or simulated |
 |---|---|---|
-| Terrain, slopes | LOLA 20 m south pole DEM | Real |
-| Permanent shadow | LOLA PSR map | Real |
-| Sunlight | Mazarico polar illumination maps | Real |
-| Temperature | Diviner Polar Resource Product | Real |
-| Ice candidates | Lemelin et al. 2021 PSR ice database, LAMP | Real |
-| Ice abundance per cell | Sampled from the above plus noise | Simulated |
-| Hopper fuel and flight | Ballistic model, 1.62 m/s² | Simulated |
+| Terrain, slopes | LOLA global DEM, SLDEM2015 for higher resolution below 60° latitude | Real |
+| Night temperature | Diviner global temperature maps | Real |
+| Relay windows | Relay orbit model | Simulated |
+| Hopper flight, battery, thermal | Ballistic and simple energy models | Simulated |
+| Payload readings | Depends on the payload decision | Simulated |
 
-Details and links in [`data/DATASETS.md`](data/DATASETS.md).
+Details in [`data/DATASETS.md`](data/DATASETS.md).
 
-## The 3D view: verification you can see
+## The 3D view
 
-- Real Shackleton terrain under a sun a few degrees above the horizon, long shadows, PSRs pitch black, Earth low on the horizon with a line-of-sight indicator.
-- When a plan is checked, all of its rollouts appear as a trajectory cloud. Green passes, red fails.
-- Argon's revision re-runs the cloud. The approve button unlocks only on a full pass.
-- On uplink the hopper flies the plan, drops into the crater, and the scan fills in an ice heatmap. A comms delay countdown runs in the corner.
+Built by a teammate. It plays `data/episodes.json` and nothing else (schema in [`data/EPISODE_SCHEMA.md`](data/EPISODE_SCHEMA.md)).
+
+- Real far-side terrain at night. Starlight, the relay orbiter crossing the sky, no Earth.
+- Training replay: early episodes crash and wander, later ones hop cleanly crater to crater. An episode counter and reward curve show progress.
+- World-model ghost: a faint predicted hopper flies beside the real one. Where they diverge, the terrain glows.
+- Trajectory cloud for the verifier: green and red lines, then all green after Argon's revision.
+- Approval button that unlocks only on a pass inside a relay window.
 
 ## Demo, under 3 minutes
 
 | Time | Beat |
 |---|---|
-| 0:00 | The problem in one sentence, Shackleton on screen |
-| 0:20 | Argon has read NASA's standards. Show the safety spec it wrote |
-| 0:40 | Argon proposes a hop plan. The verifier runs: a red cluster at hop 3, a rim slope too steep |
-| 1:10 | Argon reads the failure stats and revises. The cloud re-runs, fully green |
-| 1:40 | Live input: a new constraint (a dust storm, a lower fuel reserve). Argon re-plans |
-| 2:20 | Approve. The hopper flies into the crater, the ice heatmap fills in |
-| 2:45 | Close: a model proposes, code checks, a person decides |
+| 0:00 | The far side at night. Why nothing here can be flown by hand |
+| 0:20 | Argon read the mission documents. Show the safety spec it wrote |
+| 0:35 | Training replay, episode 1 to 500. Reward curve, Argon's reward rewrite at the plateau |
+| 1:05 | World-model ghost diverges on a crater rim. Argon explains why |
+| 1:25 | Live: Argon plans a new route. The verifier runs, red cluster, Argon revises, all green |
+| 2:15 | Relay window opens. Approve. The hopper flies |
+| 2:45 | Close: learn the world, plan inside it, prove it, then act |
 
-Precomputed in the morning and labelled as cached: the safety spec, a baseline plan, a trained policy, a backup screen recording. Live on stage: the new constraint, Argon's re-plan, the verifier run, the approval.
+Precomputed and labelled: the training run and its episodes, a baseline spec. Live: route planning, verification, the revision, approval.
 
 ## Open decisions
 
-- Verifier depth: Monte Carlo with rule checks, or Monte Carlo plus Z3 proofs for the strict rules. See ADR-0003.
+- Payload: what the hopper collects at each crater. GitHub issue.
+- Verifier depth: Monte Carlo only, or with Z3 for strict rules (ADR-0003).
+- Which far-side region (candidates: Daedalus crater, Tsiolkovskiy, Apollo basin).
 
 ## Risks
 
 | Risk | Mitigation |
 |---|---|
-| Argon is slow on stage | Start the call in background mode at the top of the demo, cached fallback labelled as cached |
-| Venue wifi | All data and textures on disk before kickoff |
-| RL doesn't converge in time | Cut it, Argon plans directly (ROADMAP cut order) |
-| 3D view is slow on the demo laptop | Grid at 100 m for the sim, decimated mesh for the view |
+| World model doesn't learn in time | Small grid, small network, logged episodes from a morning run |
+| Argon slow on stage | Background mode started early, cached fallback labelled cached |
+| 3D and Python drift apart | One episode schema, validated by a test |
+| Venue wifi | All data on disk before kickoff |

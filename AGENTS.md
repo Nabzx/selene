@@ -33,15 +33,21 @@ no AI tool attribution of any kind.
 
 ### Argon does the hard part at runtime
 
-Gemini 4 Argon is in the runtime path, not a cameo. It writes the safety spec,
-the reward function, the hop plan and the revision after a failed check. If a
-change would let a smaller model do one of those jobs without the demo
-changing, that change needs an ADR. Only Gemini models run inside the app.
-See ADR-0002.
+Gemini 4 Argon is in the runtime path, not a cameo. It writes the safety spec
+and the reward, plans the route, revises it after a failed check, and reviews
+the world model's errors. If a change would let a smaller model do one of
+those jobs without the demo changing, that change needs an ADR. Only Gemini
+models run inside the app. See ADR-0002.
+
+### The simulator and the world model stay separate
+
+The simulator is ground truth. The world model is learned from it and is
+allowed to be wrong. Never read world-model output as truth, and never let the
+verifier use the world model. See ADR-0006.
 
 ### Nothing uplinks without a pass and a person
 
-A hop plan reaches the flight view only after the verifier passes it and a
+A route reaches the flight view only after the verifier passes it and a
 person presses approve. No code path skips either step, including in demo
 mode.
 
@@ -53,14 +59,18 @@ code. Live output is never faked.
 
 ### Real data, honest gaps
 
-Terrain, shadow, illumination and temperature come from the datasets in
-[`docs/data/DATASETS.md`](docs/data/DATASETS.md). Ice abundance and hopper
-physics are simulated, and the UI says so.
+Terrain and temperature come from the datasets in
+[`docs/data/DATASETS.md`](docs/data/DATASETS.md). Hopper physics, relay
+windows and payload readings are simulated, and the UI says so. The Halloween
+theme is styling only: it never changes a number.
 
 ### The front end is data-only and has no build step
 
 `apps/web` is plain HTML, CSS and JavaScript with Three.js from a CDN import
-map. It draws only what the backend sends. No bundler, no `node_modules`.
+map. It draws only what `data/episodes.json` and the backend send, in the
+schema in [`docs/data/EPISODE_SCHEMA.md`](docs/data/EPISODE_SCHEMA.md). If the
+view needs a field the schema lacks, change the schema first. No bundler, no
+`node_modules`.
 
 ## Phases
 
