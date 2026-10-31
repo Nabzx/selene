@@ -1,0 +1,83 @@
+{
+  "summary": "Scripted baseline safety spec matching SimConfig (6 rules).",
+  "rules": [
+    {
+      "id": "R1_fuel_reserve",
+      "name": "Fuel reserve >= 10% (1.5 kg)",
+      "scope": "step",
+      "severity": "hard",
+      "statement": "Every hopper must retain at least 10% (1.5 kg) of initial fuel at all times.",
+      "source_excerpt": "Every hopper must retain at least 10% (0.10, or 1.5 kg) of initial fuel.",
+      "parameters": {
+        "min_fuel": 0.1,
+        "min_fuel_kg": 1.5
+      },
+      "check_code": "import numpy as np\ndef check(trace: dict):\n    if 'steps' in trace:\n        return all(s.get('fuel', 1.0) >= 0.10 for s in trace.get('steps', []))\n    fuel = np.asarray(trace.get('fuel', 1.0))\n    ok = (fuel.min(axis=(1, 2)) >= 0.10) if fuel.ndim == 3 else np.array([bool(np.all(fuel >= 0.10))])\n    pr = float(ok.mean())\n    return (pr >= 0.99, f'min fuel {float(fuel.min()):.3f}', {'pass_rate': pr, 'per_rollout_ok': ok.tolist()})\n"
+    },
+    {
+      "id": "R2_battery_reserve",
+      "name": "Battery reserve >= 20%",
+      "scope": "step",
+      "severity": "hard",
+      "statement": "Battery charge must remain at or above 20% at every step.",
+      "source_excerpt": "Battery charge must remain at or above 20% (0.20) at every step.",
+      "parameters": {
+        "min_battery": 0.2,
+        "min_battery_pct": 20.0
+      },
+      "check_code": "import numpy as np\ndef check(trace: dict):\n    if 'steps' in trace:\n        return all(s.get('battery', 1.0) >= 0.20 for s in trace.get('steps', []))\n    bat = np.asarray(trace.get('battery', 1.0))\n    ok = (bat.min(axis=(1, 2)) >= 0.20) if bat.ndim == 3 else np.array([bool(np.all(bat >= 0.20))])\n    pr = float(ok.mean())\n    return (pr >= 0.99, f'min battery {float(bat.min()):.3f}', {'pass_rate': pr, 'per_rollout_ok': ok.tolist()})\n"
+    },
+    {
+      "id": "R3_landing_slope",
+      "name": "Landing slope <= 15 deg",
+      "scope": "hop",
+      "severity": "hard",
+      "statement": "Touchdown terrain slope must not exceed 15.0 degrees.",
+      "source_excerpt": "Touchdown terrain slope must not exceed 15.0 degrees.",
+      "parameters": {
+        "max_slope_deg": 15.0
+      },
+      "check_code": "import numpy as np\ndef check(trace: dict):\n    if 'steps' in trace:\n        return all(s.get('slope_deg', 0.0) <= 15.0 for s in trace.get('steps', []))\n    slope = np.asarray(trace.get('landing_slope_deg', 0.0))\n    ok = (slope.max(axis=(1, 2)) <= 15.0) if slope.ndim == 3 else np.array([bool(np.all(slope <= 15.0))])\n    pr = float(ok.mean())\n    return (pr >= 0.99, f'max slope {float(slope.max()):.2f} deg', {'pass_rate': pr, 'per_rollout_ok': ok.tolist()})\n"
+    },
+    {
+      "id": "R4_fleet_separation",
+      "name": "Fleet separation >= 100 m",
+      "scope": "fleet",
+      "severity": "hard",
+      "statement": "Minimum horizontal separation between any two hoppers must be at least 100.0 m.",
+      "source_excerpt": "Minimum horizontal separation between any two hoppers at the same timestep is 100.0 m.",
+      "parameters": {
+        "min_separation_m": 100.0
+      },
+      "check_code": "import numpy as np\ndef check(trace: dict):\n    if 'steps' in trace and 'min_separation_m' not in trace:\n        return True\n    sep = np.asarray(trace.get('min_separation_m', 9999.0))\n    ok = (sep.min(axis=1) >= 100.0) if sep.ndim == 2 else np.array([bool(np.all(sep >= 100.0))])\n    pr = float(ok.mean())\n    return (pr >= 0.99, f'min sep {float(sep.min()):.1f} m', {'pass_rate': pr, 'per_rollout_ok': ok.tolist()})\n"
+    },
+    {
+      "id": "R5_relay_uplink",
+      "name": "Single-hopper relay uplink",
+      "scope": "fleet",
+      "severity": "hard",
+      "statement": "At most one hopper may transmit during an active relay window.",
+      "source_excerpt": "At most one hopper may transmit during a relay window.",
+      "parameters": {
+        "max_transmitters": 1
+      },
+      "check_code": "import numpy as np\ndef check(trace: dict):\n    if 'steps' in trace and 'relay_conflict' not in trace:\n        return True\n    conflict = np.asarray(trace.get('relay_conflict', False), dtype=bool)\n    ok = (~conflict.any(axis=1)) if conflict.ndim == 2 else np.array([not bool(conflict.any())])\n    pr = float(ok.mean())\n    return (pr >= 0.99, 'relay conflict check', {'pass_rate': pr, 'per_rollout_ok': ok.tolist()})\n"
+    },
+    {
+      "id": "R6_max_hop_range",
+      "name": "Single-hop range <= 3000 m",
+      "scope": "hop",
+      "severity": "hard",
+      "statement": "No single ballistic hop may exceed 3000.0 m horizontal distance.",
+      "source_excerpt": "No single ballistic hop may exceed 3000.0 m horizontal distance.",
+      "parameters": {
+        "max_hop_m": 3000.0
+      },
+      "check_code": "import numpy as np\ndef check(trace: dict):\n    if 'steps' in trace and 'hop_distance_m' not in trace:\n        return True\n    dist = np.asarray(trace.get('hop_distance_m', 0.0))\n    ok = (dist.max(axis=(1, 2)) <= 3000.0) if dist.ndim == 3 else np.array([bool(np.all(dist <= 3000.0))])\n    pr = float(ok.mean())\n    return (pr >= 0.99, f'max hop {float(dist.max()):.1f} m', {'pass_rate': pr, 'per_rollout_ok': ok.tolist()})\n"
+    }
+  ],
+  "missing_data": [],
+  "source": "cached",
+  "interaction_id": null,
+  "environment_id": null
+}

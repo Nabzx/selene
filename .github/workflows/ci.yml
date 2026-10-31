@@ -20,3 +20,18 @@ jobs:
       - name: Run tests
         working-directory: apps/sim
         run: uv run pytest
+
+  agent:
+    name: apps/agent tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+        with:
+          working-directory: apps/agent
+      - name: Install dependencies
+        working-directory: apps/agent
+        run: uv sync --locked
+      - name: Run tests
+        working-directory: apps/agent
+        run: uv run pytest
