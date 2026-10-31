@@ -4,23 +4,24 @@ Three minutes, live, real inputs. Rehearse at least twice.
 
 ## Before going on
 
-- Backend running, view open, sound off.
-- Cached safety spec, baseline plan and trained policy loaded and labelled cached.
+- Backend running, view open, sound on low.
+- `data/episodes.json` from the morning training run loaded.
+- Cached safety spec loaded and labelled cached.
 - Backup screen recording open in another tab.
-- New-constraint input ready to paste.
 
 ## Script
 
 | Time | On screen | Say |
 |---|---|---|
-| 0:00 | Shackleton crater, low sun, black PSRs | "The ice on the Moon is in craters that never see sunlight. A hopper can reach it, but nobody can fly it by hand across a comms link." |
-| 0:20 | Safety spec panel | "Argon read NASA's safety standards and wrote these rules. Each one is code we can run." |
-| 0:40 | Trajectory cloud, red cluster at hop 3 | "Argon proposed a plan. We flew it a thousand times in simulation. 4% crash here: the rim is too steep." |
-| 1:10 | Argon's revision, cloud re-runs green | "Argon read the failure stats and moved hop 3. Every run passes." |
-| 1:40 | Paste the new constraint | "Live: a dust storm halves visibility. Argon re-plans." |
-| 2:20 | Approve, hopper flies, ice heatmap fills | "Only now can a person approve the uplink." |
-| 2:45 | Pipeline diagram | "A model proposes, code checks, a person decides." |
+| 0:00 | Far side at night, relay orbiter crossing, no Earth | "This is the far side of the Moon at night. Earth is never in view, it's minus 170, and nothing here can be flown by hand." |
+| 0:20 | Safety spec panel | "Argon read the mission documents and wrote these rules. Each one is code we run." |
+| 0:35 | Training replay, episode 1 crashing, episode 500 hopping cleanly | "The hopper learns the terrain from scratch. When it plateaued, Argon rewrote its reward." |
+| 1:05 | World-model ghost drifting from the real hopper on a rim | "This ghost is where the hopper's own model thinks it will land. Here it's wrong. Argon explains why." |
+| 1:25 | Argon plans a new route, trajectory cloud, red cluster | "Live: Argon plans tonight's route. We fly it a thousand times. Some runs crash here." |
+| 1:50 | Revision, cloud turns green | "Argon reads the failures and moves the hop. Every run passes." |
+| 2:15 | Relay window opens, approve, flight | "Only in a relay window, and only with a person's approval, does it go." |
+| 2:45 | Pipeline diagram | "Learn the world, plan inside it, prove it, then act." |
 
 ## If Argon is slow
 
-Start the re-plan in background mode at 1:40, talk through the spec while it runs, and fall back to the cached revision (labelled cached) at 2:10.
+Start the route call in background mode at 0:35 while the training replay plays. Fall back to the cached route, labelled cached, at 1:40.
