@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "meta": {
+    "region": "Daedalus",
+    "generated_at": "2026-10-31T00:00:00Z",
+    "source": "scripted",
+    "seed": 7
+  },
+  "craters": [
+    { "id": "c1", "name": "Hollow 1", "x": 0, "y": 0, "z": -120, "radius": 400 },
+    { "id": "c2", "name": "Hollow 2", "x": 1800, "y": 600, "z": -80, "radius": 300 }
+  ],
+  "relay_windows": [
+    { "start": 0, "end": 900 },
+    { "start": 5400, "end": 6300 }
+  ],
+  "training": {
+    "episode_rewards": [-40.0, -12.5, 8.0, 21.3],
+    "reward_versions": [
+      { "episode": 1, "summary": "Initial reward: crater visits, fuel penalty, crash penalty" },
+      { "episode": 200, "summary": "Added battery reserve term after the policy learned to strand itself" }
+    ]
+  },
+  "episodes": [
+    {
+      "index": 500,
+      "outcome": "completed",
+      "total_reward": 21.3,
+      "craters_visited": ["c1", "c2"],
+      "steps": [
+        {
+          "t": 0, "pos": [0, 0, -120], "yaw": 0.3, "phase": "ground",
+          "fuel": 1.0, "battery": 0.9, "temp_c": -20,
+          "action": { "type": "hop", "target": [1800, 600] },
+          "reward": 0, "wm_pos": null, "wm_error": null, "event": null
+        },
+        {
+          "t": 18, "pos": [1790, 610, -80], "yaw": 0.3, "phase": "ground",
+          "fuel": 0.82, "battery": 0.86, "temp_c": -24,
+          "action": { "type": "scan" },
+          "reward": 5, "wm_pos": [1760, 590, -78], "wm_error": 36.1, "event": "landed"
+        }
+      ]
+    }
+  ]
+}
