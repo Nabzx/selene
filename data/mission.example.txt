@@ -1,0 +1,30 @@
+# SELENE LUNAR FAR-SIDE AUTONOMOUS FLEET MISSION SPECIFICATION
+# TARGET: DAEDALUS CRATER BASIN (5.9 DEG S, 179.4 DEG E)
+# TERRAIN: NASA LRO LOLA + KAGUYA SLDEM2015 DEM & DIVINER NIGHT THERMAL
+REGION: Daedalus Crater
+CENTER_LAT: -5.9000
+CENTER_LON: 179.4000
+EXTENT_KM: 20.0
+FLEET_SIZE: 4
+GRAVITY_M_S2: 1.62
+AMBIENT_TEMP_C: -173.0
+COLD_TRAP_MIN_C: -225.0
+
+# FLEET LAUNCH COORDINATES (LOCAL ENU METRES)
+START_COORD h0: 150.0, 0.0, "Hopper 0 (NE Sector)"
+START_COORD h1: 0.0, 150.0, "Hopper 1 (SE Sector)"
+START_COORD h2: -150.0, 0.0, "Hopper 2 (NW Sector)"
+START_COORD h3: 0.0, -150.0, "Hopper 3 (SW Sector)"
+
+# MULTI-HOP WAYPOINT CHAINS (CONTINUOUS BALLISTIC HOPS)
+ROUTE h0: START -> daedalus_b (550, 1850) -> daedalus_a (1550, 550) -> daedalus_g (3750, 1150) [END_COORD]
+ROUTE h1: START -> daedalus_e (-350, -1850) -> daedalus_f (1450, -1450) -> daedalus_l (3250, -2750) [END_COORD]
+ROUTE h2: START -> daedalus_c (-1350, 1250) -> daedalus_i (-2850, 2750) -> daedalus_h (1550, 3650) [END_COORD]
+ROUTE h3: START -> daedalus_d (-1650, -650) -> daedalus_j (-3750, -1350) -> daedalus_k (-1050, -3650) [END_COORD]
+
+# GEMINI 4 ARGON SAFETY SPEC (1,000 MONTE CARLO ROLLOUT GATE >= 99.0%)
+RULE R1_FUEL_RESERVE: min_fuel_pct >= 15.0%
+RULE R2_BATTERY_RESERVE: min_battery_pct >= 20.0%
+RULE R3_LANDING_SLOPE: max_touchdown_slope_deg <= 15.0 deg
+RULE R4_FLEET_SEPARATION: min_inter_hopper_distance_m >= 100.0 m
+RULE R5_SINGLE_CHANNEL_RELAY: max_simultaneous_transmitters <= 1 per relay window
