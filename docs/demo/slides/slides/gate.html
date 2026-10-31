@@ -1,0 +1,19 @@
+<section id="gate" data-transition="fade" style="background:#0c0c0c;color:#f2f2ee;font-family:'Geist', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;justify-content:space-between">
+<p style="font-family:'Geist Mono', 'Courier New', monospace;font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#8c8c87">Monte Carlo safety gate</p>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:32px">
+<div style="display:flex;flex-direction:column;gap:16px;border-top:2px solid #f2f2ee;padding:32px 0 0 0">
+<p style="font-size:120px;font-weight:600;letter-spacing:-4px;line-height:1">1,000</p>
+<p style="font-size:32px;color:#bdbdb8">noisy rollouts per plan</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:16px;border-top:2px solid #f2f2ee;padding:32px 0 0 0">
+<p style="font-size:120px;font-weight:600;letter-spacing:-4px;line-height:1">&lt;2s</p>
+<p style="font-size:32px;color:#bdbdb8">to stress-test it</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:16px;border-top:2px solid #f2f2ee;padding:32px 0 0 0">
+<p style="font-size:120px;font-weight:600;letter-spacing:-4px;line-height:1">100%</p>
+<p style="font-size:32px;color:#bdbdb8">pass, then a human signs off</p>
+</div>
+</div>
+<p style="font-size:44px;font-weight:300;color:#bdbdb8">Fail once, and Argon rewrites the plan.</p>
+<aside>Before any plan uplinks, the simulator runs it 1,000 times in under 2 seconds against thruster misfires and sensor noise. If it fails even once, Argon rewrites the plan until it hits 100%, then halts for human sign-off.</aside>
+</section>
