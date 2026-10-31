@@ -2,29 +2,25 @@
 
 ## Core algorithm
 
-Multi-Agent PPO (MAPPO) applies standard Clipped Proximal Policy Optimization under Centralised Training with Decentralised Execution (CTDE):
+Multi-Agent PPO (MAPPO) applies Clipped Proximal Policy Optimization under Centralised Training with Decentralised Execution (CTDE):
 
-- **Shared policy (actor) $\pi_\theta(a_i \mid o_i)$:** One network shared across all $N$ hoppers (parameter sharing), with a one-hot hopper index appended to each observation $o_i$ so agents can specialise roles.
-- **Centralised value function (critic) $V_\phi(s)$:** Receives the global state $s$ (all hoppers' positions, fuel, battery, crater claim/done flags, and time to the next relay window) and outputs a scalar value estimate per hopper. At runtime (and during verification), only $\pi_\theta$ is needed.
-- **Per-agent GAE and clipped objective:** Generalized Advantage Estimation (GAE) runs over each hopper's trajectory using its own critic value $V_\phi(s_t^{(i)})$. Rollout batches flatten across environments and agents to $(B \cdot T \cdot N, \dots)$ for minibatch SGD.
+- **Shared policy (actor) $\pi_\theta(a_i \mid o_i)$:** One 2-layer MLP (64 to 128 hidden units, `Tanh` activations) shared across all $N$ hoppers (parameter sharing), with a one-hot hopper index included in each hopper's ~50-float observation $o_i$.
+- **Centralised value function (critic) $V_\phi(s_i)$:** A 2-layer MLP (64 to 128 hidden units) receiving the compact global fleet state $s$ plus hopper identity, outputting a scalar value estimate per hopper during training.
+- **Per-agent GAE and clipped objective:** Generalized Advantage Estimation (GAE) runs over `(E, T, N)` rollout buffers from the vectorised numpy environment ($E = 64\text{ to }256$ parallel environments, $T = 20\text{ to }40$ steps).
 
 ## Hyperparameters that matter (Yu et al., 2022)
 
-Yu et al. showed that tuned PPO matches or beats complex off-policy MARL methods when five practical details are handled properly:
+1. **Value normalisation:** Running mean/std normalisation on critic targets keeps value updates stable when reward scales change or when Argon rewrites `reward.py`.
+2. **Compact global state:** Concatenating fleet positions, fuel, battery, crater claimed/done flags, and relay window timer keeps the critic input under 80 floats.
+3. **Epoch count and clipping:** 4 update epochs per rollout, clipping $\epsilon = 0.2$, learning rate $5 \times 10^{-4}$, GAE $\gamma = 0.99, \lambda = 0.95$, entropy bonus $0.01$.
+4. **Action masking before softmax:** Set invalid action logits to $-10^8$ prior to the categorical distribution so out-of-range hops, unfunded hops, and invalid `scan`/`send` actions have zero probability.
+5. **CPU vs MPS auto-benchmark:** For 2-layer MLPs with 64 to 128 units, CPU often beats Apple Silicon `"mps"` due to kernel launch overhead. `mappo.py` benchmarks a forward/backward pass on `"cpu"` vs `"mps"` at startup and picks the faster device automatically.
 
-1. **Value normalisation (PopArt or running mean/std):** Reward scales shift during training (especially when the orchestrator rewrites `reward.py`). Normalising value targets by a running standard deviation keeps critic gradients stable.
-2. **Global state design:** Concatenating raw observations from all agents creates redundant dimensions. A compact global state $s$ containing fleet coordinates, resources, crater states, and agent-specific relative features trains faster.
-3. **Epoch count and clipping:** Fewer epochs than single-agent PPO (4 to 5 epochs instead of 10 to 15) prevent joint policy divergence when all agents update at once. Clipping coefficient $\epsilon = 0.2$, learning rate $5 \times 10^{-4}$ with linear annealing, GAE $\gamma = 0.99, \lambda = 0.95$.
-4. **Update batching:** Do not split minibatches into tiny slices; use 1 to 2 minibatches per epoch so advantage normalisation across $(B \cdot T \cdot N)$ stays low-variance.
-5. **Action masking before softmax:** Set invalid action logits to $-10^8$ prior to the categorical distribution so out-of-range hops have zero probability and zero gradient contribution.
+## Fast iteration workflow (`--quick`, CSV logging, checkpoints)
 
-## Minimal single-file implementation
-
-Heavy MARL libraries (RLlib, BenchMARL, EPyMARL) pull in Ray or Hydra and make hot-swapping `reward.py` awkward. A CleanRL-style single file (`mappo.py`, roughly 250 lines of PyTorch) needs only:
-
-- Two 2-layer MLPs with `Tanh` activations and orthogonal weight initialisation (`gain=sqrt(2)` on hidden layers, `0.01` on policy head, `1.0` on value head).
-- A vectorised rollout loop over $E = 8$ parallel simulator or world-model environments for $T = 128$ steps.
-- Device selection preferring `"mps"` on Apple Silicon (M1) for network passes, falling back to `"cpu"` if tensor transfer overhead dominates on small batch sizes.
+- **`--quick` mode:** Runs 2 hoppers, 6 craters, synthetic terrain, with a 2-minute wall-clock budget. Used for all debugging and rapid verification that mean reward rises and crash rate drops within 2 to 5 minutes.
+- **Full mode:** Scales to 4 to 5 hoppers, 12 to 15 craters, and the Daedalus terrain grid, reaching cooperative crater splitting and relay turn-taking within 20 to 40 minutes.
+- **CSV telemetry and summary CLI:** Every $K$ updates, `mappo.py` appends a row to a CSV log (`update`, `env_steps`, `elapsed_s`, `episode_reward`, `crashes`, `craters_visited`, `crater_overlap`, `relay_conflicts`, `entropy`, `value_loss`, `wm_error`) and saves model checkpoints at fixed intervals. A lightweight CLI helper (`scripts/training_summary.py`) prints a table summary of the CSV so long runs executed in a separate terminal can be inspected at any time.
 
 ## Sources
 
@@ -34,4 +30,4 @@ Heavy MARL libraries (RLlib, BenchMARL, EPyMARL) pull in Ray or Hydra and make h
 
 ## Recommendation
 
-Build `selene_sim/mappo.py` as a self-contained CleanRL-style PyTorch module with parameter sharing across hoppers, a compact global critic input, running value target normalisation, 4 update epochs per rollout, $\epsilon = 0.2$, and logit masking for invalid hops.
+Implement `selene_sim/mappo.py` with 2-layer 64-128 unit MLPs, automatic CPU vs MPS benchmarking, `--quick` mode (2 hoppers, 6 craters, 2-minute budget), periodic CSV logging and checkpointing, and a CLI summary reader.

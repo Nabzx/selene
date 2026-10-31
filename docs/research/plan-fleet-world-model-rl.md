@@ -1,8 +1,25 @@
 # Implementation Plan: Fleet Simulator, World Model, MAPPO, and Verifier Rollouts
 
-## 1. Module breakdown and data flow
+## 1. Design constraints for fast laptop training
 
-All simulation, learning, and verification modules live in `apps/sim/selene_sim/` with unit and performance tests in `apps/sim/tests/`. None of these modules call Gemini at runtime; Friend B's orchestrator imports and calls them.
+Everything is designed to train in minutes (5 to 15 minutes for clear reward gains, 20 to 40 minutes for full fleet cooperation, 1 to 3 minutes for the world model) on an Apple M1 laptop:
+
+- **Action space (crater graph, not grid cells):** Each hopper picks from $A = C + 3$ discrete actions (`wait`, `scan`, `send`, or `hop_to_crater[c]` for $c \in \{0, \dots, C-1\}$, with $C = 6$ in `--quick` mode and $C = 12\text{ to }15$ in full mode). Out-of-range hops, insufficient-fuel hops, already-scanned craters, and sends outside relay windows are masked out. Terrain height, landing slope, crash risk, and night temperature still come from the $200 \times 200$ `TerrainGrid` in `sim.py`.
+- **Observation space (~50 floats per hopper, no CNNs):** Flat `float32` vector containing own position, fuel, battery, temperature, unsent data, one-hot hopper id, other hoppers' positions, crater claimed/done flags and relative positions, and time to the next relay window. No image-like terrain patches.
+- **Episode horizon (20 to 40 decisions):** Each hop is computed once in closed form (ballistic range, rocket-equation fuel, landing slope check), not integrated step by step during training. $0.5\text{ s}$ flight-phase keyframes are generated only when exporting `data/episodes.json` for the 3D view.
+- **Environment throughput (> 10,000 env steps/s on CPU):** `VectorFleetEnv` steps $E = 64\text{ to }256$ environments in parallel as contiguous `(E, N, ...)` numpy arrays in one process, verified by a benchmark test.
+- **Networks and device selection:** 2-layer MLPs with 64 to 128 hidden units. At startup, benchmark `"cpu"` against `"mps"` and run on whichever is faster.
+- **Small runs first (`--quick` flag, CSV logs, checkpoints):**
+  - `--quick`: 2 hoppers, 6 craters, synthetic terrain, 2-minute time budget. Used for all debugging.
+  - Full mode: 4 to 5 hoppers, 12 to 15 craters, Daedalus terrain grid.
+  - Logs a CSV every $K$ updates (`update`, `env_steps`, `elapsed_s`, `episode_reward`, `crashes`, `craters_visited`, `crater_overlap`, `relay_conflicts`, `entropy`, `value_loss`, `wm_error`) and saves checkpoints at fixed intervals.
+  - `scripts/training_summary.py` prints a plain-text summary table from the CSV. Long runs happen in a separate terminal, never inside an agent tool call.
+
+---
+
+## 2. Module breakdown and data flow
+
+All simulation, learning, and verification modules live in `apps/sim/selene_sim/` with tests in `apps/sim/tests/`.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
@@ -17,30 +34,33 @@ All simulation, learning, and verification modules live in `apps/sim/selene_sim/
        ▼                       ▼                        ▼           │
 ┌──────────────┐        ┌──────────────┐         ┌──────────────────┴─┐
 │    env.py    │───────►│    sim.py    │◄────────│      mappo.py      │
-│  (FleetEnv)  │ steps  │ (GroundTruth)│ eval    │ (Shared Policy +   │
-└──────┬───────┘        └──────┬───────┘         │ Centralised Critic)│
+│(VectorFleet) │ >10k/s │ (GroundTruth)│ eval    │ (2-layer MLP 64-128│
+└──────┬───────┘        └──────┬───────┘         │  --quick / CSV log)│
        │ transitions           │ terrain         └──────┬──────────┬──┘
-       ▼                       ▼                        │ imagines │
-┌──────────────────┐    ┌──────────────┐                │          │ writes
-│  world_model.py  │    │   data/      │◄───────────────┘          ▼
-│ (5-MLP Ensemble) │◄───│  grid.npz    │                    data/episodes.json
-└──────────────────┘    └──────────────┘                   (Friend A: 3D View)
+       ▼                       ▼                        │          │ writes
+┌──────────────────┐    ┌──────────────┐                │          ▼
+│  world_model.py  │    │   data/      │◄───────────────┘   data/episodes.json
+│ (5-MLP Ensemble) │    │  grid.npz    │                    (Friend A: 3D View)
+└──────────────────┘    └──────────────┘
 ```
 
 | File | Responsibility |
 |---|---|
-| `selene_sim/sim.py` | `TerrainGrid` (synthetic seeded generator + `data/grid.npz` loader), `Crater`, `RelaySchedule`, `SimConfig`, `LunarSimulator`, and vectorised ballistic/fuel/battery/thermal functions. |
-| `selene_sim/env.py` | `FleetEnv`: PettingZoo `ParallelEnv`-compatible multi-agent environment for $N \in \{4, 5\}$ hoppers with action masking, crater claims/scans, separation tracking, and single-channel relay windows. |
-| `selene_sim/reward.py` | `RewardState`, default `compute_reward(state, actions, next_state)`, and `load_reward_code(code_str, summary)` for runtime reward hot-swapping by the orchestrator. |
-| `selene_sim/world_model.py` | `SharedWorldModel`: ensemble of $K=5$ PyTorch MLPs trained on pooled hopper transitions. Provides `predict()` with ensemble disagreement uncertainty and `error_map()` per grid cell. |
-| `selene_sim/mappo.py` | CleanRL-style single-file MAPPO (`SharedActor`, `CentralisedCritic`, `MAPPOTrainer`) on `"mps"` or `"cpu"`. Supports direct simulator training and short $k$-step MBPO imagination rollouts, plus `training_summary()` and `export_episodes_json()`. |
-| `selene_sim/verify.py` | `simulate_plan(fleet_plan, n=1000, seed=42)`: vectorised numpy Monte Carlo rollout engine over the real simulator physics (never the world model). |
+| `selene_sim/sim.py` | `TerrainGrid` (seeded synthetic Daedalus generator + `data/grid.npz` loader, 12 to 15 craters), `SimConfig`, `LunarSimulator`, closed-form vectorised hop physics, and $0.5\text{ s}$ arc interpolation helper for episode export. |
+| `selene_sim/env.py` | `VectorFleetEnv` (steps $E = 64\text{ to }256$ envs in parallel as numpy arrays at $> 10\,000$ steps/s) and `FleetEnv` (PettingZoo `ParallelEnv` wrapper) on the crater-graph action space with action masking. |
+| `selene_sim/reward.py` | `RewardState`, vectorised `compute_reward(state, actions, next_state)`, and `load_reward_code(code_str, summary, episode)` for runtime hot-swapping by Argon. |
+| `selene_sim/world_model.py` | `SharedWorldModel`: ensemble of 5 small 2-layer MLPs trained on `(obs, action) -> next_obs, reward, crash_prob` in 1 to 3 minutes, exposing ensemble disagreement uncertainty and per-crater/per-cell error maps. |
+| `selene_sim/mappo.py` | Single-file CleanRL-style MAPPO with `--quick` flag, CPU vs MPS benchmark selector, CSV logging, periodic checkpointing, `training_summary()`, and `export_episodes_json()`. |
+| `selene_sim/verify.py` | `simulate_plan(fleet_plan, n=1000, seed=42)`: vectorised numpy Monte Carlo rollout engine (< 10 s for 1000 runs) using only `sim.py`. |
+| `scripts/training_summary.py` | Reads the training CSV and prints progress metrics (`episode_reward`, `crashes`, `craters_visited`, `crater_overlap`, `relay_conflicts`, `wm_error`). |
 
 ---
 
-## 2. Exact interfaces and data shapes for Friend A and Friend B
+## 3. Exact interfaces and data shapes for Friend A and Friend B
 
-### 2.1 Interface to Friend B: `reward.py`
+### 3.1 Interface to Friend B: `reward.py`
+
+Supports both single-environment `(N, ...)` and vectorised `(E, N, ...)` shapes:
 
 ```python
 from dataclasses import dataclass
@@ -48,67 +68,45 @@ import numpy as np
 
 @dataclass(frozen=True)
 class RewardState:
-    pos: np.ndarray              # (N, 3) float32, metres in local ENU frame
-    fuel: np.ndarray             # (N,) float32 in [0.0, 1.0]
-    battery: np.ndarray          # (N,) float32 in [0.0, 1.0]
-    temp_c: np.ndarray           # (N,) float32, hopper internal temp in C
-    crashed: np.ndarray          # (N,) bool
-    unsent_data: np.ndarray      # (N,) int32, un-transmitted crater scans held
-    in_relay_window: bool        # True if orbiter is overhead at current step
+    pos: np.ndarray              # (..., N, 3) float32, metres in local ENU frame
+    fuel: np.ndarray             # (..., N) float32 in [0.0, 1.0]
+    battery: np.ndarray          # (..., N) float32 in [0.0, 1.0]
+    temp_c: np.ndarray           # (..., N) float32, hopper internal temp in C
+    crashed: np.ndarray          # (..., N) bool
+    at_crater: np.ndarray        # (..., N) int32, index of current crater (-1 if none)
+    unsent_data: np.ndarray      # (..., N) int32, un-transmitted crater scans held
+    in_relay_window: np.ndarray  # (...,) bool, True if orbiter is overhead
     crater_pos: np.ndarray       # (C, 3) float32, crater centres in metres
     crater_radii: np.ndarray     # (C,) float32, crater radii in metres
-    crater_scanned: np.ndarray   # (C,) bool, cumulative scanned flags
-    newly_scanned_by: np.ndarray # (N,) bool, True for hopper that completed a new scan this step
-    data_sent_by: np.ndarray     # (N,) int32, scans transmitted cleanly this step
-    relay_conflict: bool         # True if >=2 hoppers transmitted at once or outside a window
-    min_peer_distance: np.ndarray# (N,) float32, distance in metres to nearest other hopper
+    crater_claimed: np.ndarray   # (..., C) bool, claimed by a hopper in the fleet
+    crater_scanned: np.ndarray   # (..., C) bool, cumulative scanned flags
+    newly_claimed_by: np.ndarray # (..., N) bool, True if hopper reached an unclaimed crater this step
+    newly_scanned_by: np.ndarray # (..., N) bool, True if hopper completed a new scan this step
+    data_sent_by: np.ndarray     # (..., N) int32, scans transmitted cleanly this step
+    relay_conflict: np.ndarray   # (...,) bool, True if >=2 hoppers transmitted at once or outside window
+    min_peer_distance: np.ndarray# (..., N) float32, distance in metres to nearest other hopper
 
 def compute_reward(
     state: RewardState,
-    actions: np.ndarray,         # (N,) int32 discrete action indices
+    actions: np.ndarray,         # (..., N) int32 discrete action indices
     next_state: RewardState,
 ) -> tuple[np.ndarray, dict[str, float]]:
     """
     Returns:
-      rewards: (N,) float32 array of per-hopper scalar rewards
-      components: dict mapping term names (e.g. 'crater_scan', 'fuel_cost')
-                  to their fleet-mean float value for Argon reflection.
+      rewards: (..., N) float32 array of per-hopper scalar rewards
+      components: dict mapping term names to their mean float value for Argon reflection.
     """
 
 def load_reward_code(code_str: str, summary: str = "", episode: int = 0) -> None:
     """
     Compiles code_str in a restricted namespace, smoke-tests compute_reward on
-    dummy RewardState inputs, replaces the active reward function, and appends
+    dummy RewardState inputs, swaps the active reward function, and appends
     {'episode': episode, 'summary': summary} to reward_versions.
     """
 ```
 
-### 2.2 Interface to Friend B: `verify.py`
+### 3.2 Interface to Friend B: `verify.py`
 
-**Input `fleet_plan` dict:**
-```python
-{
-    "plan_id": "plan_001",
-    "seed": 42,
-    "hoppers": [
-        {
-            "id": "h0",
-            "start_pos": [0.0, 0.0, -120.0],
-            "initial_fuel": 1.0,
-            "initial_battery": 0.95,
-            "route": [
-                {"step": 0, "t": 0.0, "type": "hop", "target": [1800.0, 600.0], "crater_id": "c2"},
-                {"step": 1, "t": 60.0, "type": "scan", "crater_id": "c2"},
-                {"step": 2, "t": 120.0, "type": "send"},
-                {"step": 3, "t": 180.0, "type": "wait"},
-            ],
-        },
-        # ... h1 .. h_{N-1}
-    ],
-}
-```
-
-**Signature and output `traces` dict:**
 ```python
 def simulate_plan(
     fleet_plan: dict,
@@ -117,189 +115,74 @@ def simulate_plan(
     grid: TerrainGrid | None = None,
 ) -> dict[str, Any]:
 ```
-Returns a dictionary of numpy arrays across `n` rollouts, `H` route steps, and `N` hoppers:
+Returns a trace dictionary of numpy arrays across `n` rollouts, `H` route steps, and `N` hoppers:
 - `"n_rollouts"`: `int` (`1000`)
 - `"hopper_ids"`: `list[str]` (`["h0", "h1", ...]`)
-- `"step_times"`: `np.ndarray` of shape `(n, H)`, `float32`, simulated mission time in seconds
-- `"action_types"`: `np.ndarray` of shape `(H, N)`, `int32` (`0=wait, 1=scan, 2=send, 3=hop`)
-- `"pos"`: `np.ndarray` of shape `(n, H, N, 3)`, `float32`, `[x, y, z]` in metres
-- `"fuel"`: `np.ndarray` of shape `(n, H, N)`, `float32` in `[0.0, 1.0]`
-- `"battery"`: `np.ndarray` of shape `(n, H, N)`, `float32` in `[0.0, 1.0]`
-- `"temp_c"`: `np.ndarray` of shape `(n, H, N)`, `float32`, internal temperature in °C
-- `"landing_slope_deg"`: `np.ndarray` of shape `(n, H, N)`, `float32`, terrain slope in degrees at landing cell (`0.0` on non-hop steps)
-- `"crashed"`: `np.ndarray` of shape `(n, H, N)`, `bool` (slope exceeded limit or fuel exhausted mid-hop)
-- `"min_separation_m"`: `np.ndarray` of shape `(n, H)`, `float32`, minimum pairwise distance between any two hoppers at step `h`
-- `"pair_distances_m"`: `np.ndarray` of shape `(n, H, N, N)`, `float32`, full pairwise horizontal/3D distance matrix
-- `"relay_active_count"`: `np.ndarray` of shape `(n, H)`, `int32`, number of hoppers executing `send` at step `h`
-- `"in_relay_window"`: `np.ndarray` of shape `(n, H)`, `bool`
-- `"relay_conflict"`: `np.ndarray` of shape `(n, H)`, `bool` (`(relay_active_count > 1) | ((relay_active_count == 1) & ~in_relay_window)`)
-- `"cloud_samples"`: `list[dict]`, first 50 rollouts serialised as `[x, y, z]` arcs per hopper so the backend can pass them straight to the 3D trajectory cloud after Friend B marks each rollout pass/fail.
+- `"step_times"`: `np.ndarray` `(n, H)` `float32`
+- `"action_types"`: `np.ndarray` `(H, N)` `int32` (`0=wait, 1=scan, 2=send, 3=hop`)
+- `"pos"`: `np.ndarray` `(n, H, N, 3)` `float32`
+- `"fuel"`: `np.ndarray` `(n, H, N)` `float32`
+- `"battery"`: `np.ndarray` `(n, H, N)` `float32`
+- `"temp_c"`: `np.ndarray` `(n, H, N)` `float32`
+- `"landing_slope_deg"`: `np.ndarray` `(n, H, N)` `float32`
+- `"crashed"`: `np.ndarray` `(n, H, N)` `bool`
+- `"min_separation_m"`: `np.ndarray` `(n, H)` `float32`
+- `"pair_distances_m"`: `np.ndarray` `(n, H, N, N)` `float32`
+- `"relay_active_count"`: `np.ndarray` `(n, H)` `int32`
+- `"in_relay_window"`: `np.ndarray` `(n, H)` `bool`
+- `"relay_conflict"`: `np.ndarray` `(n, H)` `bool`
+- `"cloud_samples"`: `list[dict]`, 50 rollouts formatted as `[x, y, z]` arcs per hopper for the 3D trajectory cloud.
 
-### 2.3 Interface to Friend B: `training_summary()` and `world_model_error_map()`
+### 3.3 Interface to Friend B: `training_summary()` and `world_model_error_map()`
 
-```python
-def training_summary() -> dict[str, Any]:
-    """
-    Returns curves and sample episodes for Argon's reward reflection and planning:
-    {
-        "episodes_trained": int,
-        "episode_rewards": list[float],
-        "reward_components": dict[str, list[float]],
-        "craters_visited_mean": list[float],
-        "crash_rate": list[float],
-        "relay_conflict_rate": list[float],
-        "reward_versions": list[dict], # [{"episode": int, "summary": str}]
-        "sample_episodes": list[dict], # recent logged episodes
-        "policy_rollout_plan": dict,   # greedy fleet_plan generated by current MAPPO policy
-    }
-    """
-
-def world_model_error_map() -> dict[str, Any]:
-    """
-    Returns per-cell prediction error and ensemble uncertainty for Argon's log review:
-    {
-        "grid_shape": [200, 200],
-        "cell_size_m": 100.0,
-        "mean_error_m": list[list[float | None]],  # 200x200 logged L2 error vs simulator
-        "uncertainty_m": list[list[float]],        # 200x200 ensemble std dev in metres
-        "visit_count": list[list[int]],            # 200x200 transition counts per cell
-        "hotspots": [                              # Top 5 cells/craters with highest error
-            {
-                "cell": [ix, iy],
-                "pos": [x, y, z],
-                "nearest_crater_id": "c3",
-                "slope_deg": 18.4,
-                "visit_count": 2,
-                "mean_error_m": 44.2,
-                "uncertainty_m": 39.8,
-            }
-        ],
-    }
-    """
-```
+- `training_summary() -> dict[str, Any]`: reads the latest training CSV / trainer state and returns `episode_rewards`, `reward_components`, `craters_visited_mean`, `crater_overlap_rate`, `crash_rate`, `relay_conflict_rate`, `reward_versions`, `sample_episodes`, and `policy_rollout_plan`.
+- `world_model_error_map() -> dict[str, Any]`: returns per-crater and per-cell (`200 x 200`) prediction error (`mean_error_m`), ensemble disagreement (`uncertainty_m`), `visit_count`, and the top-5 high-uncertainty / high-error `hotspots`.
 
 ---
 
-## 3. Observation and action spaces with sizes
+## 4. Observation and action spaces with sizes
 
-Default configuration: $N = 4$ hoppers (supports $N = 5$), $C = 8$ craters in the $20 \times 20\text{ km}$ crop (`[-10000, 10000]` m in $x$ and $y$, $200 \times 200$ cells at $100\text{ m}$).
+Full mode defaults: $N = 4$ hoppers (configurable up to 5), $C = 12$ craters (configurable up to 15), $H = 30$ decisions per episode.
+`--quick` mode defaults: $N = 2$ hoppers, $C = 6$ craters, $H = 25$ decisions per episode.
 
-### 3.1 Action space per hopper: `Discrete(19)` (or `Discrete(3 + 8 + 8)`)
+### 4.1 Action space per hopper: `Discrete(C + 3)`
 
-| Index | Action | Target / meaning | Masked when |
+| Index | Action | Meaning | Masked when |
 |---|---|---|---|
-| `0` | `wait` | Hold position for $\Delta t = 30\text{ s}$ | Never (`always True`) |
-| `1` | `scan` | Scan current crater ($\Delta t = 30\text{ s}$) | Hopper crashed, or not inside an unscanned crater |
-| `2` | `send` | Transmit buffered scans to relay orbiter ($\Delta t = 30\text{ s}$) | Hopper crashed, `unsent_data == 0`, or no open relay window |
-| `3 .. 10` | `hop_dir_short` | Hop $1200\text{ m}$ in 8 compass directions ($0, \frac{\pi}{4}, \dots, \frac{7\pi}{4}$) | Out of grid bounds, insufficient fuel, or hopper crashed |
-| `11 .. 18` | `hop_crater[c]` | Hop directly to crater $c \in \{0..7\}$ (clamped to max single-hop range $3500\text{ m}$ along vector to $c$) | Crater $c$ already scanned, insufficient fuel for that hop, or hopper crashed |
+| `0` | `wait` | Hold position for $\Delta t = 60\text{ s}$ | Never (`always True`) |
+| `1` | `scan` | Scan current crater ($\Delta t = 60\text{ s}$) | Hopper crashed, not at a crater, or crater already scanned |
+| `2` | `send` | Send buffered scans in relay window ($\Delta t = 60\text{ s}$) | Hopper crashed, `unsent_data == 0`, or outside relay window |
+| `3 .. C+2` | `hop_to_crater[c]` | Ballistic hop to crater $c \in \{0..C-1\}$ | Hopper crashed, already at crater $c$, crater $c$ already scanned, distance $R > R_{\max}$ ($4500\text{ m}$), or required fuel $> \text{fuel}$ |
 
-Total discrete actions per hopper: $A = 3 + 8 + C = 19$ for $C = 8$.
+- Full mode ($C = 12$): `Discrete(15)` (or `Discrete(18)` for $C = 15$).
+- `--quick` mode ($C = 6$): `Discrete(9)`.
 
-### 3.2 Observation space per hopper: `Box(low=-5.0, high=5.0, shape=(104,), dtype=float32)`
+### 4.2 Observation space per hopper: flat vector of ~50 floats
 
-| Slice | Dim | Content |
-|---|---|---|
-| `0:7` | 7 | Own state: normalised `x/10000`, `y/10000`, `z/1000`, `fuel`, `battery`, `(temp_c + 180)/100`, `unsent_data/C` |
-| `7:7+N` | 4 | One-hot hopper index ($N=4$) |
-| `11:61` | 50 | Local $5 \times 5$ terrain patch centred on hopper: relative elevation $(z_{\text{cell}} - z)/200$ and slope in radians for each of the 25 cells |
-| `61:61+3(N-1)` | 9 | Other $N-1$ hoppers: relative $(\Delta x/10000, \Delta y/10000)$ and `active` flag (`1.0` if not crashed) |
-| `70:70+4C` | 32 | All $C=8$ craters: relative $(\Delta x/10000, \Delta y/10000)$, `radius/1000`, and `scanned` flag (`0.0` or `1.0`) |
-| `102:104` | 2 | Relay status: `in_relay_window` (`0.0` or `1.0`), normalised `time_to_next_window / 3600` |
-
-- **Actor input dimension:** `104` floats ($N=4, C=8$; formula `59 + 4*N + 4*C`).
-- **Centralised critic input dimension (`global_state`):** Concatenation of all $N$ hoppers' core states (`N * 7 = 28`), pairwise distances (`N*(N-1)/2 = 6`), all crater statuses (`C * 4 = 32`), and global time/relay features (`3`), giving `69` floats for $N=4, C=8$.
-
----
-
-## 4. Agreed `drones[]` extension to `docs/data/EPISODE_SCHEMA.md`
-
-To support a fleet of 4 to 5 hoppers in `data/episodes.json`, each episode entry in `episodes[]` uses `drones[]` as its primary per-hopper list:
-
-```json
-{
-  "schema_version": 1,
-  "meta": {
-    "region": "Daedalus",
-    "generated_at": "2026-10-31T14:00:00Z",
-    "source": "trained",
-    "seed": 7,
-    "fleet_size": 4
-  },
-  "craters": [ ... ],
-  "relay_windows": [ ... ],
-  "training": { ... },
-  "episodes": [
-    {
-      "index": 500,
-      "outcome": "completed",
-      "total_reward": 84.6,
-      "craters_visited": ["c1", "c2", "c4", "c6"],
-      "drones": [
-        {
-          "id": "h0",
-          "name": "Hopper 0",
-          "outcome": "completed",
-          "craters_visited": ["c1", "c2"],
-          "steps": [
-            {
-              "t": 0, "pos": [0, 0, -120], "yaw": 0.3, "phase": "ground",
-              "fuel": 1.0, "battery": 0.9, "temp_c": -20,
-              "action": { "type": "hop", "target": [1800, 600] },
-              "reward": 0, "wm_pos": null, "wm_error": null, "event": null
-            }
-          ]
-        }
-      ]
-    }
-  ]
-}
-```
-
-Additional schema extension:
-- Allow `"send"` in `step.action.type` (`{ "type": "send" }`) alongside `"hop"`, `"scan"`, and `"wait"`, since sending data in a relay window is one of the four hopper actions.
-
----
-
-## 5. Time estimates per issue and cut order
-
-Total build window for our scope: roughly **5.5 hours**, leaving buffer for integration with Friend A and Friend B.
-
-| Order | Issue | Est. time | Phase |
+| Slice | Dim ($N=4, C=12$) | Dim (`--quick`: $N=2, C=6$) | Content |
 |---|---|---|---|
-| 1 | Update episode schema and example file for fleet `drones[]` and `send` action | 20 min | `phase-1` |
-| 2 | Build physics simulator (`sim.py`) with synthetic terrain and `grid.npz` loader | 60 min | `phase-1` |
-| 3 | Build vectorised Monte Carlo rollout engine (`verify.py`) and benchmark (< 10 s for 1000 runs) | 45 min | `phase-1` |
-| 4 | Build hot-swappable reward module (`reward.py`) with Eureka reflection stats | 30 min | `phase-2` |
-| 5 | Build multi-hopper parallel environment (`env.py`) with action masking | 50 min | `phase-2` |
-| 6 | Build shared 5-MLP ensemble world model (`world_model.py`) and per-cell error map | 45 min | `phase-3` |
-| 7 | Build CleanRL-style MAPPO trainer (`mappo.py`) and `data/episodes.json` exporter | 60 min | `phase-3` |
-| 8 | Add short-horizon MBPO imagination rollouts inside `mappo.py` | 30 min | `phase-3` |
+| Own state | `7` | `7` | Normalised `x`, `y`, `z`, `fuel`, `battery`, `temp_c`, `unsent_data` |
+| One-hot agent id | `N = 4` | `N = 2` | One-hot hopper identity |
+| Other hoppers | `3(N - 1) = 9` | `3(N - 1) = 3` | Relative `dx`, `dy`, and `alive` flag for each other hopper |
+| Crater features | `3C = 36` | `3C = 18` | Per crater $c$: normalised distance to $c$, `claimed` flag, `scanned` flag |
+| Relay features | `2` | `2` | `in_relay_window` flag and normalised time to next relay window |
+| **Total `obs_dim`** | **58 floats** | **32 floats** | Flat `float32` vector, no image patches |
 
-### Cut order if time runs short (matching `ROADMAP.md` and Part 2)
-
-1. **First cut: Issue 8 (MBPO imagination training).** Train MAPPO directly on the fast vectorised numpy simulator (which runs thousands of steps per second on CPU), while still training `world_model.py` online on the collected transitions so the world-model ghost (`wm_pos`, `wm_error`) and Argon's error map work identically.
-2. **Second cut: Real SLDEM2015 / Diviner raster download processing.** Keep the seeded deterministic synthetic far-side crater terrain (or pre-baked `data/grid.npz`) if raw PDS GeoTIFF downloads are slow on venue Wi-Fi.
-3. **Third cut: Scale fleet size from 5 to 4 hoppers and 6 craters during live training.** Cuts episode horizon and speeds up MAPPO convergence.
+- **Centralised critic `state_dim`:** All $N$ hoppers' core states (`7 * N`), crater `claimed` and `scanned` flags (`2 * C`), and relay state (`2`), giving `54` floats in full mode ($N=4, C=12$) and `28` floats in `--quick` mode ($N=2, C=6$).
 
 ---
 
-## 6. Risks and mitigations
+## 5. Stage success checks and cut order
 
-| Risk | Impact | Mitigation |
-|---|---|---|
-| **PyTorch not yet in `apps/sim/pyproject.toml`** | `world_model.py` and `mappo.py` need PyTorch | Add `torch` via `uv add torch` in `apps/sim` at the start of the world-model/RL issues; keep `sim.py`, `env.py`, `reward.py`, and `verify.py` pure numpy so they have zero torch dependency. |
-| **Apple M1 MPS overhead on tiny MLP batches** | Small single-step forward passes can be slower on MPS than CPU due to kernel launch latency | Benchmark `"mps"` vs `"cpu"` in `mappo.py`; use `"cpu"` for inference during environment rollouts and `"mps"` (or `"cpu"` if faster) for minibatch SGD updates. |
-| **MAPPO learns to sit still (`wait`) to avoid fuel and crash penalties** | Flat reward curves, hoppers never leave spawn | Include potential-based distance shaping towards unclaimed craters in the baseline `reward.py`, and mask `scan`/`send` when invalid so random exploration must hop. |
-| **Policy exploits world-model hallucinations on unvisited crater rims** | High imagined reward, immediate crash in simulator | Restrict imagination rollouts to $k \le 2$ steps branched from real states, penalise high ensemble disagreement $\sigma_{\text{pos}}$, and always evaluate and log episodes in the real simulator. |
-| **Schema change breaks Friend A's existing 3D viewer** | Merge conflict or broken replay | Keep top-level `episodes[].steps` populated with `drones[0].steps` alongside the new `episodes[].drones[]` array. |
+### Success checks (enforced as issue acceptance criteria)
 
----
+1. **Stage 1 (Random policy & vectorised env):** `VectorFleetEnv` runs with a random masked policy with zero errors and passes the throughput benchmark at **over 10,000 env steps per second on CPU**.
+2. **Stage 2 (MAPPO `--quick`):** With `--quick` (2 hoppers, 6 craters, synthetic terrain, 2-minute budget), mean episode reward rises by a clear margin within 5 minutes and crash rate drops.
+3. **Stage 3 (MAPPO full):** With 4 hoppers and 12 craters, hoppers split craters (low crater overlap across the fleet) and relay conflicts fall across training.
+4. **Stage 4 (World model):** Ensemble of 5 small MLPs trains in 1 to 3 minutes; validation error falls across training epochs, and ensemble disagreement (uncertainty) is higher on less-visited craters than on frequently visited craters.
 
-## 7. Resolved design decisions with Nabil
+### Cut order if time runs short
 
-1. **PyTorch dependency in `apps/sim/pyproject.toml`:** Confirmed. Add `torch` via `uv add torch` for `world_model.py` and `mappo.py`, keeping `sim.py`, `env.py`, `reward.py`, and `verify.py` in pure numpy.
-2. **Default fleet size and crater count:** Confirmed $N = 4$ hoppers (configurable up to 5) and $C = 8$ craters.
-3. **Action space parameterisation:** Confirmed `Discrete(19)` (`wait`, `scan`, `send`, 8 compass hops of $1.2\text{ km}$, and 8 crater-targeted hops up to $3.5\text{ km}$) in `env.py`, while `verify.py` takes exact `[x, y]` coordinates from `fleet_plan`.
-4. **Multi-hopper `episodes.json` structure:** Confirmed everyone uses multi-agent `episodes[].drones[]` as the primary schema structure.
-5. **Phase-0 defaults:** Confirmed Daedalus crater (`region="Daedalus"`, $5.9^\circ\text{S}, 179.4^\circ\text{E}$), Option A (Monte Carlo rollouts without Z3) for `verify.py`, and integer scan counts (`unsent_data`) for payload tracking.
+1. **Issue #13 (MBPO short-horizon imagination rollouts):** Stretch goal, last in build order. Cut first if late; MAPPO already trains in minutes directly on the $>10\,000\text{ steps/s}$ vectorised simulator while `world_model.py` trains on the logged transitions.
+2. **Raw PDS GeoTIFF raster cropping:** Use the deterministic Daedalus-profile `TerrainGrid` (`data/grid.npz`) if raw SLDEM2015 downloads block.
+3. **Reward rewrite loop iterations:** Keep one Argon-written reward swap if time is short.
