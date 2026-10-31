@@ -5,6 +5,8 @@ description = "Gemini 4 Argon orchestrator for Selene"
 requires-python = ">=3.12"
 dependencies = [
     "google-genai>=2.30.1",
+    "numpy>=2.5.4",
+    "selene-sim",
 ]
 
 [dependency-groups]
@@ -16,3 +18,6 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["selene_agent"]
+
+[tool.uv.sources]
+selene-sim = { path = "../sim", editable = true }
