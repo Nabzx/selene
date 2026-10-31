@@ -13,7 +13,6 @@ Built in one hackathon day by two people: one on the 3D world, one on training a
 
 ## Cut order
 
-1. Flash-Lite guardrail
-2. Argon's world-model review (keep the ghost, drop the explanation)
-3. Dreamer-style planning (policy trains in the simulator directly, world model only predicts)
-4. Reward rewrite loop (keep one Argon-written reward)
+1. Argon's world-model review (keep the ghost, drop the explanation)
+2. Dreamer-style planning (policy trains in the simulator directly, world model only predicts)
+3. Reward rewrite loop (keep one Argon-written reward)
