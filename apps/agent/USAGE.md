@@ -18,6 +18,30 @@ markdown, text or JSON inputs in your call. Sandbox network access is disabled.
 Its calculations are estimates, never verifier verdicts. It cannot approve
 or uplink a route.
 
+## Verify, revise and sign off
+
+From `apps/agent`, check a fleet plan in the simulator and let Argon revise it
+until its pass rate reaches 0.99. It stops after `--max-revisions` (default 5)
+and exits non-zero if the plan still fails.
+
+```bash
+uv run --env-file .env python -m selene_agent.orchestrator verify-revise \
+  fleet_plan.json -o final_plan.json --verdict-output verdict.json
+```
+
+The verdict comes from `selene_sim.verify.simulate_plan` with 1,000 rollouts on
+the NASA terrain, computed outside the agent. Argon only receives the failure
+statistics. Results marked `"source": "sandbox_estimate"` are not verdicts.
+
+Then a person approves the plan. This needs no API key. It verifies the plan
+again, refuses unless it passes and a relay window is open at `--mission-time`,
+and writes the package only after the operator types `APPROVE`.
+
+```bash
+uv run python -m selene_agent.orchestrator signoff \
+  final_plan.json --mission-time 10 -o uplink.json
+```
+
 ## Load your API key
 
 Use a Gemini API key from the same Google Cloud project as the agent. An

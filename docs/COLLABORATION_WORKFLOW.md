@@ -111,8 +111,8 @@ selene-sim = { path = "../sim", editable = true }
 - [x] Set up Google managed agent `selene-orchestrator` with `gemini-4-argon`.
 - [x] Implement the 5 core CLI commands: `safety-spec`, `reward`, `plan`, `revise`, `review-logs`.
 - [x] Sandbox Python check & reward compilation with restricted builtins.
-- [ ] **Deliverable 1:** Ensure multi-turn revision loop passes verifier failures back to Argon until `pass_rate >= 0.99`.
-- [ ] **Deliverable 2:** Add human-in-the-loop signoff CLI prompt before outputting the final approved uplink package.
+- [x] **Deliverable 1:** Ensure multi-turn revision loop passes verifier failures back to Argon until `pass_rate >= 0.99`.
+- [x] **Deliverable 2:** Add human-in-the-loop signoff CLI prompt before outputting the final approved uplink package.
 
 ### Joint Deliverables (You + Argon Guy)
 - [ ] **Single End-to-End Demo Script (`scripts/run_demo_pipeline.sh`)**:
