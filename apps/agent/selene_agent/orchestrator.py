@@ -503,11 +503,18 @@ def _run_structured_job(
 def should_rewrite_reward(summary: dict[str, Any]) -> tuple[bool, list[str]]:
     """Evaluate training curves against the 5 trigger conditions in docs/interfaces.md §3.3."""
     reasons: list[str] = []
+    ep_rewards = summary.get("episode_rewards", []) if isinstance(summary, dict) else []
     curves = summary.get("curves", []) if isinstance(summary, dict) else []
-    if len(curves) >= 4:
-        q = max(1, len(curves) // 4)
-        last_q = [float(c.get("reward", 0.0)) for c in curves[-q:]]
-        prev_q = [float(c.get("reward", 0.0)) for c in curves[-2 * q : -q]]
+    reward_series: list[float] = []
+    if ep_rewards:
+        reward_series = [float(x) for x in ep_rewards]
+    elif curves:
+        reward_series = [float(c.get("reward", c.get("episode_reward", 0.0))) for c in curves]
+
+    if len(reward_series) >= 4:
+        q = max(1, len(reward_series) // 4)
+        last_q = reward_series[-q:]
+        prev_q = reward_series[-2 * q : -q]
         if prev_q and last_q:
             mean_last = sum(last_q) / len(last_q)
             mean_prev = sum(prev_q) / len(prev_q)

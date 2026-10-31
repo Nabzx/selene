@@ -368,8 +368,7 @@ def test_create_agent_mounts_mission_doc_and_toolset_reads_it(tmp_path):
 
 
 def test_safety_spec_evaluates_selene_sim_rollout_traces_and_interfaces_dict():
-    from selene_sim.sim import SimConfig
-    from selene_sim.terrain import TerrainGrid
+    from selene_sim.sim import SimConfig, TerrainGrid
     from selene_sim.verify import FleetPlan as SimFleetPlan, simulate_plan
 
     spec, plan = orchestrator.stub_argon_plan_and_spec(seed=42)
@@ -379,7 +378,7 @@ def test_safety_spec_evaluates_selene_sim_rollout_traces_and_interfaces_dict():
 
     terrain = TerrainGrid.synthetic(seed=42)
     sim_plan = SimFleetPlan.from_any(plan.to_sim_plan())
-    traces = simulate_plan(sim_plan, terrain=terrain, cfg=SimConfig(), num_rollouts=40, seed=42)
+    traces = simulate_plan(sim_plan, n=40, seed=42, terrain=terrain, config=SimConfig())
 
     verdict = spec.evaluate_traces(traces, plan_id=plan.plan_id, revision=plan.revision)
     assert verdict.approved_by_human is False

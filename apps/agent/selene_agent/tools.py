@@ -806,27 +806,33 @@ class AgentToolset:
         ep_rewards = list(training.get("episode_rewards", []))
         rew_versions = list(training.get("reward_versions", []))
 
+        csv_candidates = [self._csv_path] + [
+            Path(p) for p in self._extra_files if str(p).endswith(".csv")
+        ]
         csv_rows: list[dict[str, Any]] = []
-        if _safe_is_file(self._csv_path):
-            try:
-                with self._csv_path.open("r", encoding="utf-8") as f:
-                    reader = csv.DictReader(f)
-                    for row in reader:
-                        csv_rows.append(
-                            {
-                                "update": int(float(row["update"])),
-                                "env_steps": int(float(row["env_steps"])),
-                                "episode_reward": float(row["episode_reward"]),
-                                "crashes": float(row["crashes"]),
-                                "craters_visited": float(row["craters_visited"]),
-                                "crater_overlap": float(row["crater_overlap"]),
-                                "relay_conflicts": float(row["relay_conflicts"]),
-                            }
-                        )
-            except Exception:
-                csv_rows = []
+        for csv_cand in reversed(csv_candidates):
+            if _safe_is_file(csv_cand):
+                try:
+                    with csv_cand.open("r", encoding="utf-8") as f:
+                        reader = csv.DictReader(f)
+                        for row in reader:
+                            csv_rows.append(
+                                {
+                                    "update": int(float(row.get("update", row.get("episode", 0)))),
+                                    "env_steps": int(float(row.get("env_steps", 0))),
+                                    "episode_reward": float(row.get("episode_reward", row.get("mean_reward", 0.0))),
+                                    "crashes": float(row.get("crashes", row.get("crash_rate", 0.0))),
+                                    "craters_visited": float(row.get("craters_visited", 0.0)),
+                                    "crater_overlap": float(row.get("crater_overlap", row.get("crater_overlap_rate", 0.0))),
+                                    "relay_conflicts": float(row.get("relay_conflicts", row.get("relay_conflict_rate", 0.0))),
+                                }
+                            )
+                    if csv_rows:
+                        break
+                except Exception:
+                    csv_rows = []
 
-        if csv_rows and not ep_rewards:
+        if csv_rows:
             ep_rewards = [r["episode_reward"] for r in csv_rows]
 
         # Compute summary metrics from episodes or CSV rows
@@ -1347,6 +1353,7 @@ class AgentToolset:
             "passed": pass_rate >= 0.99,
             "pass_rate": pass_rate,
             "required_pass_rate": 0.99,
+            "rollout_count": n,
             "num_rollouts": n,
             "n_rollouts": n,
             "seed": seed,
@@ -1368,15 +1375,17 @@ class AgentToolset:
             "trajectory_cloud": cloud_candidates,
         }
 
-    def get_world_model_error_map(self) -> dict[str, Any]:
+    def get_world_model_error_map(self, min_wm_error: float | None = None) -> dict[str, Any]:
         """Compute per-crater and coarse grid world-model prediction error and epistemic uncertainty (`interfaces.md` §2.7)."""
         data = _load_episodes_data(self._episodes_source)
         craters = _enrich_craters(data.get("craters", []))
         episodes = data.get("episodes", [])
+        threshold = float(min_wm_error) if min_wm_error is not None else 5.0
 
         visit_counts: dict[str, int] = {c["id"]: 0 for c in craters}
         crater_errors: dict[str, list[float]] = {c["id"]: [] for c in craters}
         all_errors: list[float] = []
+        step_hotspots: list[dict[str, Any]] = []
 
         for ep in episodes:
             for d in self._extract_drone_streams(ep):
@@ -1387,13 +1396,27 @@ class AgentToolset:
                     err = s.get("wm_error")
                     pos = s.get("pos", [0.0, 0.0, 0.0])
                     if err is not None:
-                        all_errors.append(float(err))
+                        err_f = float(err)
+                        all_errors.append(err_f)
+                        if err_f >= threshold:
+                            step_hotspots.append(
+                                {
+                                    "episode": ep.get("index"),
+                                    "hopper_id": d.get("id", "h1"),
+                                    "t": s.get("t"),
+                                    "pos": pos,
+                                    "wm_pos": s.get("wm_pos"),
+                                    "error_m": round(err_f, 2),
+                                    "wm_error": round(err_f, 2),
+                                }
+                            )
                         for c in craters:
                             dist = math.hypot(float(pos[0]) - c["pos"][0], float(pos[1]) - c["pos"][1])
                             if dist <= max(1000.0, c["radius_m"] * 1.5):
-                                crater_errors[c["id"]].append(float(err))
+                                crater_errors[c["id"]].append(err_f)
                                 visit_counts[c["id"]] += 1
 
+        step_hotspots.sort(key=lambda x: x["error_m"], reverse=True)
         per_crater: list[dict[str, Any]] = []
         top_error_cells: list[dict[str, Any]] = []
         for idx, c in enumerate(craters):
@@ -1424,19 +1447,24 @@ class AgentToolset:
                         "centre_xy_m": [(col_x + 0.5) * 1000.0 - 10000.0, (row_y + 0.5) * 1000.0 - 10000.0],
                         "visit_count": visits,
                         "mean_error_m": mean_err,
+                        "error_m": mean_err,
                         "uncertainty_m": uncertainty,
                         "nearest_crater_id": cid,
                     }
                 )
 
         top_error_cells.sort(key=lambda x: x["mean_error_m"], reverse=True)
+        hotspots = step_hotspots if step_hotspots else top_error_cells[:10]
         overall_mse = round((sum(all_errors) / len(all_errors)) / 1000.0, 4) if all_errors else 0.021
         return {
             "frame": "local_enu_m",
             "bounds_xy_m": [-10000.0, 10000.0],
             "overall_val_mse": overall_mse,
             "per_crater": per_crater,
+            "craters": per_crater,
             "top_error_cells": top_error_cells[:10],
+            "hotspots": hotspots[:10],
+            "hotspot_count": len(hotspots),
         }
 
     def get_hopper_logs(
