@@ -180,10 +180,15 @@ def normalise_trace(trace: Any) -> dict[str, Any]:
 
         hopper_ids = list(raw.get("hopper_ids") or [f"h{i}" for i in range(n_hoppers)])
 
+        hop_distance = raw.get("hop_distance_m")
+        if hop_distance is None and _np is not None and isinstance(pos, _np.ndarray) and pos.ndim == 4:
+            hop_distance = _np.linalg.norm(_np.diff(pos[:, :, :, :2], axis=1), axis=-1)
+
         out = dict(raw)
         out.update(
             {
                 "_normalised_trace": True,
+                "hop_distance_m": hop_distance,
                 "_is_batch": True,
                 "n_rollouts": n_rollouts,
                 "num_runs": n_rollouts,
@@ -360,7 +365,19 @@ class SafetyRule(BaseModel):
             "n_rollouts" not in self.check_code and "hopper_ids" not in self.check_code
         )
 
+        # A rule with both a `steps` branch and a batch branch must run on the batch: its `steps`
+        # branch can't see fleet fields such as relay_conflict and would pass every rollout.
+        batch_out = None
         if norm.get("_is_batch") and uses_single_steps:
+            try:
+                batch_out = fn(norm)
+            except Exception:
+                batch_out = None
+        has_batch_result = (isinstance(batch_out, tuple) and len(batch_out) == 3) or (
+            _np is not None and isinstance(batch_out, _np.ndarray) and batch_out.ndim >= 1
+        )
+
+        if norm.get("_is_batch") and uses_single_steps and not has_batch_result:
             failed_rollouts: list[int] = []
             for r in range(n_rollouts):
                 single_r = _single_rollout_from_batch(norm, r)
@@ -387,7 +404,7 @@ class SafetyRule(BaseModel):
             }
             return passed, reason, stats
 
-        raw_out = fn(norm)
+        raw_out = batch_out if has_batch_result else fn(norm)
         if isinstance(raw_out, tuple) and len(raw_out) == 3:
             passed_val, reason_val, stats_val = raw_out
             stats_dict = dict(stats_val) if isinstance(stats_val, dict) else {}
@@ -395,6 +412,10 @@ class SafetyRule(BaseModel):
             passed = bool(passed_val) and (pass_rate >= required_pass_rate)
             stats_dict.setdefault("rule_id", self.id)
             stats_dict["pass_rate"] = round(pass_rate, 4)
+            if "failed_rollouts" not in stats_dict and "per_rollout_ok" in stats_dict:
+                stats_dict["failed_rollouts"] = [
+                    i for i, ok in enumerate(stats_dict.pop("per_rollout_ok")) if not ok
+                ]
             stats_dict.setdefault("failed_rollouts", [])
             stats_dict.setdefault("failures_by_hopper", {hid: 0 for hid in hopper_ids})
             stats_dict.setdefault("failures_by_stage", [0] * n_stages)
@@ -462,7 +483,11 @@ class SafetySpec(BaseModel):
         for rule in self.rules:
             if not rule.check_code:
                 continue
-            passed, reason, stats = rule.evaluate_trace(norm, required_pass_rate=required_pass_rate)
+            try:
+                passed, reason, stats = rule.evaluate_trace(norm, required_pass_rate=required_pass_rate)
+            except Exception as exc:
+                passed, reason = False, f"Check for rule {rule.id} raised: {exc}"
+                stats = {"pass_rate": 0.0, "failed_rollouts": list(range(n_rollouts))}
             failed_indices = [int(i) for i in stats.get("failed_rollouts", [])]
             all_failed_set.update(failed_indices)
             rule_results.append(
@@ -480,7 +505,13 @@ class SafetySpec(BaseModel):
 
         failed_sorted = sorted(all_failed_set)
         joint_pass_rate = round(float((n_rollouts - len(failed_sorted)) / max(1, n_rollouts)), 4)
-        overall_passed = (joint_pass_rate >= required_pass_rate) and all(r.passed for r in rule_results)
+        # A rule may report a rate without listing rollouts, so the joint rate can't exceed any rule's rate.
+        joint_pass_rate = min([joint_pass_rate, *(r.pass_rate for r in rule_results)])
+        overall_passed = (
+            bool(rule_results)
+            and joint_pass_rate >= required_pass_rate
+            and all(r.passed for r in rule_results)
+        )
         return Verdict(
             plan_id=plan_id,
             revision=revision,

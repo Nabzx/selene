@@ -1348,6 +1348,7 @@ class AgentToolset:
             )
 
         return {
+            "source": "sandbox_estimate",
             "plan_id": sim_plan["plan_id"],
             "revision": sim_plan["revision"],
             "passed": pass_rate >= 0.99,
