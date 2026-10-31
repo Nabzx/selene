@@ -4,41 +4,124 @@
     "region": "Daedalus",
     "generated_at": "2026-10-31T00:00:00Z",
     "source": "scripted",
-    "seed": 7
+    "seed": 7,
+    "fleet_size": 4
   },
   "craters": [
-    { "id": "c1", "name": "Hollow 1", "x": 0, "y": 0, "z": -120, "radius": 400 },
-    { "id": "c2", "name": "Hollow 2", "x": 1800, "y": 600, "z": -80, "radius": 300 }
+    { "id": "c1", "name": "Hollow 1", "x": -1400, "y": -800, "z": -140, "radius": 450 },
+    { "id": "c2", "name": "Hollow 2", "x": 1800, "y": 600, "z": -80, "radius": 350 },
+    { "id": "c3", "name": "Wraith Pit", "x": -600, "y": 2100, "z": -110, "radius": 500 },
+    { "id": "c4", "name": "Cinder Bowl", "x": 2200, "y": -1500, "z": -95, "radius": 400 }
   ],
   "relay_windows": [
     { "start": 0, "end": 900 },
     { "start": 5400, "end": 6300 }
   ],
   "training": {
-    "episode_rewards": [-40.0, -12.5, 8.0, 21.3],
+    "episode_rewards": [-40.0, -12.5, 8.0, 68.4],
     "reward_versions": [
       { "episode": 1, "summary": "Initial reward: crater visits, fuel penalty, crash penalty" },
-      { "episode": 200, "summary": "Added battery reserve term after the policy learned to strand itself" }
+      { "episode": 200, "summary": "Added battery reserve and separation terms so hoppers split craters cleanly" }
     ]
   },
   "episodes": [
     {
       "index": 500,
       "outcome": "completed",
-      "total_reward": 21.3,
-      "craters_visited": ["c1", "c2"],
-      "steps": [
+      "total_reward": 68.4,
+      "craters_visited": ["c1", "c2", "c3", "c4"],
+      "drones": [
         {
-          "t": 0, "pos": [0, 0, -120], "yaw": 0.3, "phase": "ground",
-          "fuel": 1.0, "battery": 0.9, "temp_c": -20,
-          "action": { "type": "hop", "target": [1800, 600] },
-          "reward": 0, "wm_pos": null, "wm_error": null, "event": null
+          "id": "h0",
+          "name": "Hopper 0",
+          "outcome": "completed",
+          "craters_visited": ["c1"],
+          "steps": [
+            {
+              "t": 0, "pos": [-200, -200, -120], "yaw": 3.7, "phase": "ground",
+              "fuel": 1.0, "battery": 0.95, "temp_c": -18,
+              "action": { "type": "hop", "target": [-1400, -800] },
+              "reward": 0.0, "wm_pos": null, "wm_error": null, "event": null
+            },
+            {
+              "t": 34, "pos": [-1390, -795, -140], "yaw": 3.7, "phase": "ground",
+              "fuel": 0.88, "battery": 0.91, "temp_c": -22,
+              "action": { "type": "scan" },
+              "reward": 12.5, "wm_pos": [-1410, -810, -138], "wm_error": 25.0, "event": "scan"
+            },
+            {
+              "t": 64, "pos": [-1390, -795, -140], "yaw": 3.7, "phase": "ground",
+              "fuel": 0.88, "battery": 0.89, "temp_c": -23,
+              "action": { "type": "send" },
+              "reward": 6.0, "wm_pos": [-1390, -795, -140], "wm_error": 0.0, "event": "relay_contact"
+            }
+          ]
         },
         {
-          "t": 18, "pos": [1790, 610, -80], "yaw": 0.3, "phase": "ground",
-          "fuel": 0.82, "battery": 0.86, "temp_c": -24,
-          "action": { "type": "scan" },
-          "reward": 5, "wm_pos": [1760, 590, -78], "wm_error": 36.1, "event": "landed"
+          "id": "h1",
+          "name": "Hopper 1",
+          "outcome": "completed",
+          "craters_visited": ["c2"],
+          "steps": [
+            {
+              "t": 0, "pos": [200, 100, -115], "yaw": 0.3, "phase": "ground",
+              "fuel": 1.0, "battery": 0.95, "temp_c": -18,
+              "action": { "type": "hop", "target": [1800, 600] },
+              "reward": 0.0, "wm_pos": null, "wm_error": null, "event": null
+            },
+            {
+              "t": 38, "pos": [1790, 610, -80], "yaw": 0.3, "phase": "ground",
+              "fuel": 0.86, "battery": 0.90, "temp_c": -21,
+              "action": { "type": "scan" },
+              "reward": 12.1, "wm_pos": [1760, 590, -78], "wm_error": 36.1, "event": "scan"
+            },
+            {
+              "t": 68, "pos": [1790, 610, -80], "yaw": 0.3, "phase": "ground",
+              "fuel": 0.86, "battery": 0.89, "temp_c": -22,
+              "action": { "type": "wait" },
+              "reward": 0.0, "wm_pos": [1790, 610, -80], "wm_error": 0.0, "event": null
+            }
+          ]
+        },
+        {
+          "id": "h2",
+          "name": "Hopper 2",
+          "outcome": "completed",
+          "craters_visited": ["c3"],
+          "steps": [
+            {
+              "t": 0, "pos": [-100, 300, -118], "yaw": 1.8, "phase": "ground",
+              "fuel": 1.0, "battery": 0.95, "temp_c": -18,
+              "action": { "type": "hop", "target": [-600, 2100] },
+              "reward": 0.0, "wm_pos": null, "wm_error": null, "event": null
+            },
+            {
+              "t": 41, "pos": [-595, 2090, -110], "yaw": 1.8, "phase": "ground",
+              "fuel": 0.85, "battery": 0.90, "temp_c": -22,
+              "action": { "type": "scan" },
+              "reward": 18.8, "wm_pos": [-615, 2110, -108], "wm_error": 28.4, "event": "scan"
+            }
+          ]
+        },
+        {
+          "id": "h3",
+          "name": "Hopper 3",
+          "outcome": "completed",
+          "craters_visited": ["c4"],
+          "steps": [
+            {
+              "t": 0, "pos": [300, -250, -116], "yaw": 5.7, "phase": "ground",
+              "fuel": 1.0, "battery": 0.95, "temp_c": -18,
+              "action": { "type": "hop", "target": [2200, -1500] },
+              "reward": 0.0, "wm_pos": null, "wm_error": null, "event": null
+            },
+            {
+              "t": 46, "pos": [2190, -1495, -95], "yaw": 5.7, "phase": "ground",
+              "fuel": 0.83, "battery": 0.89, "temp_c": -23,
+              "action": { "type": "scan" },
+              "reward": 19.0, "wm_pos": [2165, -1515, -92], "wm_error": 32.2, "event": "scan"
+            }
+          ]
         }
       ]
     }
